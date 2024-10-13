@@ -1,5 +1,6 @@
 1. 환경 검사(node 버전, MV/MZ 체크)
 1-A. (node 버전이 낮은 경우) 의사 확인 후 node 업데이트 
+1-B. (동일 함수를 수정하는 플러그인이 있을 경우) 의사 확인 후 진행
 2. jsdelivr에서 wasm-vips 리소스 다운로드
 3. 다운로드된 wasm-vips를 js/libs에 삽입
 4. github에서 sponge 스크립트 다운로드
