@@ -7,12 +7,13 @@
 'use strict';
 
 window.addEventListener("load", () => {
-
+    SPONGE.init();
+    SPONGE.inject();
 });
 
 var SPONGE = {
     init: () => {
-
+        
     },
     inject: () => {
 

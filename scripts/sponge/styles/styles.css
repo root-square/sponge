@@ -1,0 +1,127 @@
+/* noto-sans-100 - latin_latin-ext */
+@font-face {
+    font-display: swap;
+    /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+    font-family: 'Noto Sans';
+    font-style: normal;
+    font-weight: 100;
+    src: url('../fonts/noto-sans-v36-latin_latin-ext-100.woff2') format('woff2');
+    /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+
+/* noto-sans-200 - latin_latin-ext */
+@font-face {
+    font-display: swap;
+    /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+    font-family: 'Noto Sans';
+    font-style: normal;
+    font-weight: 200;
+    src: url('../fonts/noto-sans-v36-latin_latin-ext-200.woff2') format('woff2');
+    /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+
+/* noto-sans-300 - latin_latin-ext */
+@font-face {
+    font-display: swap;
+    /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+    font-family: 'Noto Sans';
+    font-style: normal;
+    font-weight: 300;
+    src: url('../fonts/noto-sans-v36-latin_latin-ext-300.woff2') format('woff2');
+    /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+
+/* noto-sans-regular - latin_latin-ext */
+@font-face {
+    font-display: swap;
+    /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+    font-family: 'Noto Sans';
+    font-style: normal;
+    font-weight: 400;
+    src: url('../fonts/noto-sans-v36-latin_latin-ext-regular.woff2') format('woff2');
+    /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+
+/* noto-sans-500 - latin_latin-ext */
+@font-face {
+    font-display: swap;
+    /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+    font-family: 'Noto Sans';
+    font-style: normal;
+    font-weight: 500;
+    src: url('../fonts/noto-sans-v36-latin_latin-ext-500.woff2') format('woff2');
+    /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+
+/* noto-sans-600 - latin_latin-ext */
+@font-face {
+    font-display: swap;
+    /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+    font-family: 'Noto Sans';
+    font-style: normal;
+    font-weight: 600;
+    src: url('../fonts/noto-sans-v36-latin_latin-ext-600.woff2') format('woff2');
+    /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+
+/* noto-sans-700 - latin_latin-ext */
+@font-face {
+    font-display: swap;
+    /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+    font-family: 'Noto Sans';
+    font-style: normal;
+    font-weight: 700;
+    src: url('../fonts/noto-sans-v36-latin_latin-ext-700.woff2') format('woff2');
+    /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+
+/* noto-sans-800 - latin_latin-ext */
+@font-face {
+    font-display: swap;
+    /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+    font-family: 'Noto Sans';
+    font-style: normal;
+    font-weight: 800;
+    src: url('../fonts/noto-sans-v36-latin_latin-ext-800.woff2') format('woff2');
+    /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+
+/* noto-sans-900 - latin_latin-ext */
+@font-face {
+    font-display: swap;
+    /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+    font-family: 'Noto Sans';
+    font-style: normal;
+    font-weight: 900;
+    src: url('../fonts/noto-sans-v36-latin_latin-ext-900.woff2') format('woff2');
+    /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+
+html, body {
+    width: calc(100vw - 6rem);
+    height: calc(100vh - 6rem);
+    margin: 0px;
+    padding: 0px;
+    font-family: "Noto Sans";
+    font-weight: 500;
+}
+
+.signature {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 0px;
+    padding: 0px;
+}
+
+.signature.subsection {
+    display: flex;
+    flex-direction: column;
+}
+
+.not-draggable {
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
