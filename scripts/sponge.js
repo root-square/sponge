@@ -13,7 +13,7 @@ window.addEventListener("load", () => {
 
 var SPONGE = {
     init: () => {
-        
+        window.location.href="./js/libs/sponge/about.html"
     },
     inject: () => {
 
