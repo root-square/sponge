@@ -1,36 +1,56 @@
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Sponge</title>
+    <title>Root Square™ Sponge</title>
     <link rel="icon" href="./assets/favicon.svg">
     <link href="./externs/bootstrap/bootstrap.min.css" rel="stylesheet">
     <link href="./externs/bootstrap-icons/bootstrap-icons.min.css" rel="stylesheet">
     <link href="./styles/styles.css" rel="stylesheet">
-  </head>
-  <body class="bg-dark-subtle" data-bs-theme="dark">
-    <div class="container-fluid m-5" >
-        <div class="row">
-          <div class="signature">
-            <img class="not-draggable m-0" width="80" height="80" src="./assets/logo.svg">
-            <div class="subsection">
-                <p class="not-draggable text-start text-body-primary fw-medium lh-1 m-0" style="font-size: 0.8em">Root Square™</p>
-                <p class="not-draggable text-start text-body-primary fw-light lh-1 m-0" style="font-size: 1.6em">Sponge System</p>
+</head>
+
+<body class="bg-dark-subtle" data-bs-theme="dark">
+    <div class="sponge-container">
+        <div class="section-head border-bottom border-tertiary border-2">
+            <div class="d-flex flex-row align-items-center m-0 p-0">
+                <img class="not-draggable m-0" width="80" height="80" src="./assets/logo.svg">
+                <div class="d-flex flex-column">
+                    <p class="not-draggable text-start text-body-primary fw-medium lh-1 m-0" style="font-size: 0.8em">
+                        Root Square™</p>
+                    <p class="not-draggable text-start text-body-primary fw-light lh-1 m-0" style="font-size: 1.6em">
+                        Sponge Workbench</p>
+                </div>
             </div>
-          </div>
         </div>
 
-        <hr class="row border border-secondary border-1 opacity-50">
+        <div class="section-content error-content-container mt-3 overflow-y-hidden">
+            <div class="error-content-a card p-0">
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <p id="text-error-type" class="text-start text-warning fw-semibold lh-base m-0" style="font-size: 0.9em">Type</p>
+                    <p id="text-error-desc" class="text-start text-body-secondary fw-light lh-base m-0" style="font-size: 0.8em">Description</p>
+                </div>
+            </div>
 
-        <div class="row">
-          <p id="text-code" class="text-start text-warning-emphasis fw-semibold lh-sm m-0" style="font-size: 1.0em;">&nbsp;</p>
-          <p id="text-message" class="text-start text-body-secondary fw-medium lh-sm m-0" style="font-size: 1.0em">&nbsp;</p>
-          <p id="text-message" class="text-start text-body-secondary fw-semibold lh-sm m-0 mt-4" style="font-size: 1.0em">Press F5 to restart the game.</p>
+            <div class="error-content-b card p-0 mt-3 scroll overflow-y-auto">
+                <div class="card-body d-flex flex-column">
+                    <p class="not-draggable text-start text-body-primary fw-medium lh-base m-0" style="font-size: 0.9em">Stack Trace</p>
+                    <p id="text-error-stacktrace" class="text-start text-body-secondary text-break fw-light lh-base m-0 mt-1" style="font-size: 0.8em"></p>
+                </div>
+            </div>
+
+            <div class="error-content-c card p-0 mt-3 mb-3">
+                <div class="card-body d-flex flex-row align-items-center">
+                    <i class="bi bi-arrow-clockwise" style="font-size: 1.0em"></i>
+                    <p class="not-draggable text-start text-body-secondary fw-light lh-base align-middle m-0 ms-2" style="font-size: 0.8em">Press F5 to restart the game.</p>
+                </div>
+            </div>
         </div>
     </div>
-    
+
     <script src="./externs/bootstrap/bootstrap.bundle.min.js"></script>
     <script src="./scripts/error.js"></script>
-  </body>
+</body>
+
 </html>

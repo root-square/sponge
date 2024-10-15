@@ -13,18 +13,19 @@ window.addEventListener("load", () => {
 
 var SPONGE = {
     init: () => {
-        var win = nw.Window.get();
-        win.resizeTo(1000, 750);
-        var x = (window.screen.width / 2) - (1000 / 2);
-        var y = (window.screen.height / 2) - (750 / 2);
-        win.moveTo(x, y);
-        window.location.href="./js/libs/sponge/error.html"
+        SPONGE.workbench();
     },
     inject: () => {
 
     },
     workbench: () => {
+        var win = nw.Window.get();
+        var x = (window.screen.width / 2) - (1000 / 2);
+        var y = (window.screen.height / 2) - (750 / 2);
+        win.moveTo(x, y);
+        win.resizeTo(1000, 750);
 
+        window.location.href="./js/libs/sponge/main.html"
     }
 };
 

@@ -50,7 +50,7 @@ function copyToClipboard(text) {
     toastCopyInstance.show();
 }
 
-function backToPreviousPage() {
+function backToReferer() {
     var url = new URL(window.location.href);
     var urlParams = url.searchParams;
     window.location.href = urlParams.get("referer");

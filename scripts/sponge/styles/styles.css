@@ -98,8 +98,8 @@
 }
 
 html, body {
-    width: calc(100vw - 6rem);
-    height: calc(100vh - 6rem);
+    width: 100vw;
+    height: 100vh;
     margin: 0px;
     padding: 0px;
     font-family: "Noto Sans";
@@ -107,17 +107,45 @@ html, body {
     box-sizing: border-box;
 }
 
-.signature {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    margin: 0px;
-    padding: 0px;
+body {
+    padding: 3rem;
 }
 
-.signature.subsection {
-    display: flex;
-    flex-direction: column;
+.sponge-container {
+    display: grid;
+    grid-template-rows: 82px auto;
+    width: 100%;
+    height: 100%;
+}
+
+.sponge-container.section-head {
+    grid-row: 1;
+}
+
+.sponge-container.section-content {
+    grid-row: 2;
+    justify-self: stretch;
+}
+
+.section-content.error-content-container {
+    display: grid;
+    grid-template-rows: 78px auto 90px;
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+}
+
+.section-content.error-content-a {
+    grid-row: 1;
+}
+
+.section-content.error-content-b {
+    grid-row: 2;
+    justify-self: stretch;
+}
+
+.section-content.error-content-b {
+    grid-row: 3;
 }
 
 .not-draggable {
@@ -125,6 +153,20 @@ html, body {
     -moz-user-select: none;
     -webkit-user-select: none;
     -ms-user-select: none;
+}
+
+.scroll::-webkit-scrollbar {
+    width: 6px;
+}
+   
+.scroll::-webkit-scrollbar-thumb {
+    background: #dddddd20;
+    border-radius: 20px;
+}
+  
+.scroll::-webkit-scrollbar-track {
+    background: #30303080;
+    border-radius: 20px;
 }
 
 @keyframes flickerAnimation {

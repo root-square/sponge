@@ -8,18 +8,25 @@ window.addEventListener("load", () => {
     var url = new URL(window.location.href);
     var urlParams = url.searchParams;
 
-    var codeElement = document.getElementById("text-code");
-    if (urlParams.has("code")) {
-        codeElement.innerText = urlParams.get("code");
+    var typeElement = document.getElementById("text-error-type");
+    if (urlParams.has("type")) {
+        typeElement.innerText = decodeURIComponent(urlParams.get("type"));
     } else {
-        codeElement.innerText = "NULL";
+        typeElement.innerText = "WB_ERR_NULL_REFERENCE";
     }
 
-    var messageElement = document.getElementById("text-message");
-    if (urlParams.has("message")) {
-        messageElement.innerText = urlParams.get("message");
+    var descElement = document.getElementById("text-error-desc");
+    if (urlParams.has("desc")) {
+        descElement.innerText = decodeURIComponent(urlParams.get("desc"));
     } else {
-        messageElement.innerText = "NULL"
+        descElement.innerText = "Unable to parse an error information."
+    }
+
+    var stacktraceElement = document.getElementById("text-error-stacktrace");
+    if (urlParams.has("stacktrace")) {
+        stacktraceElement.innerText = decodeURIComponent(urlParams.get("stacktrace"));
+    } else {
+        stacktraceElement.innerText = "NULL"
     }
 });
 
