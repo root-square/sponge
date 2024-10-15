@@ -13,11 +13,19 @@ window.addEventListener("load", () => {
 
 var SPONGE = {
     init: () => {
-        window.location.href="./js/libs/sponge/about.html"
+        var win = nw.Window.get();
+        win.resizeTo(1000, 750);
+        var x = (window.screen.width / 2) - (1000 / 2);
+        var y = (window.screen.height / 2) - (750 / 2);
+        win.moveTo(x, y);
+        window.location.href="./js/libs/sponge/error.html"
     },
     inject: () => {
 
     },
+    workbench: () => {
+
+    }
 };
 
 var SPONGE_OVERRIDES = {
