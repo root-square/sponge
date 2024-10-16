@@ -20,10 +20,10 @@ var SPONGE = {
     },
     workbench: () => {
         var win = nw.Window.get();
-        var x = (window.screen.width / 2) - (1000 / 2);
+        var x = (window.screen.width / 2) - (1100 / 2);
         var y = (window.screen.height / 2) - (750 / 2);
         win.moveTo(x, y);
-        win.resizeTo(1000, 750);
+        win.resizeTo(1100, 750);
 
         window.location.href="./js/libs/sponge/main.html"
     }

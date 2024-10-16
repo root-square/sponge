@@ -13,24 +13,210 @@
 
 <body class="bg-dark-subtle" data-bs-theme="dark">
     <div class="sponge-container">
-        <div class="section-head border-bottom border-tertiary border-2">
+        <div class="section-head border-bottom border-secondary-subtle border-2">
             <div class="d-flex flex-row align-items-center m-0 p-0">
                 <img class="not-draggable m-0" width="80" height="80" src="./assets/logo.svg">
                 <div class="d-flex flex-column">
-                    <p class="not-draggable text-start text-body-primary fw-medium lh-1 m-0" style="font-size: 0.8em">
+                    <p class="not-draggable text-start text-body-primary fw-medium lh-1 m-0" style="font-size: 0.8rem">
                         Root Square™</p>
-                    <p class="not-draggable text-start text-body-primary fw-light lh-1 m-0" style="font-size: 1.6em">
+                    <p class="not-draggable text-start text-body-primary fw-light lh-1 m-0" style="font-size: 1.6rem">
                         Sponge Workbench</p>
                 </div>
             </div>
         </div>
 
-        <div class="section-content mt-3">
+        <div class="section-content main-container pt-3">
+            <div class="main-a card p-0">
+                <div class="card-body leftside-container m-0 p-0">
+                    <div class="g-start-1 d-flex flex-row align-items-center border-bottom border-secondary-subtle border-1 p-1">
+                        <button type="button" class="btn btn-sm btn-dark" data-bs-toggle="tooltip" data-bs-title="Back to previous directory">
+                            <i class="bi bi-chevron-left" style="font-size: 0.8rem"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-dark" data-bs-toggle="tooltip" data-bs-title="Back to last directory">
+                            <i class="bi bi-chevron-right" style="font-size: 0.8rem"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-dark" data-bs-toggle="tooltip" data-bs-title="Refresh">
+                            <i class="bi bi-arrow-clockwise" style="font-size: 0.8rem"></i>
+                        </button>
+                        <input type="text" class="form-control form-control-sm border-0" style="font-size: 0.8rem" placeholder="Path">
+                    </div>
 
+                    <div id="list-file" class="g-start-2 bg-dark-subtle list-group list-group-flush overflow-y-auto" style="font-size: 0.8rem">
+
+                    </div>
+
+                    <div class="g-start-3 d-flex flex-row align-items-center justify-content-center border-top border-bottom border-secondary-subtle border-1 p-1">
+                        <button type="button" class="btn btn-sm btn-dark" data-bs-toggle="tooltip" data-bs-title="Add to the ignore list">
+                            <i class="bi bi-arrow-down" style="font-size: 0.8rem"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-dark" data-bs-toggle="tooltip" data-bs-title="Remove from the ignore list">
+                            <i class="bi bi-arrow-up" style="font-size: 0.8rem"></i>
+                        </button>
+                    </div>
+
+                    <div id="list-ignore" class="g-start-4 bg-dark-subtle rounded-bottom-1">
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-b card p-0">
+                <div class="card-body rightside-container m-0 p-0">
+                    <div class="g-start-1 d-flex flex-column border-end border-secondary-subtle border-1">
+                        <ul class="nav nav-underline px-3 pt-1 border-bottom border-secondary-subtle border-1" style="font-size: 0.8rem">
+                            <li class="not-draggable nav-item dropdown">
+                                <a id="tab-preview" class="nav-link active dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="true" href="#" role="button" aria-expanded="false">Preview(RAW)</a>
+                                <ul class="dropdown-menu" style="font-size: 0.8rem">
+                                    <li><a class="dropdown-item" href="#" onclick="WORKBENCH.changeViewerMode('preview-raw')">RAW</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="WORKBENCH.changeViewerMode('preview-processed')">PROCESSED</a></li>
+                                </ul>
+                            </li>
+                            <li class="not-draggable nav-item">
+                                <a id="tab-metadata" class="nav-link" href="#" onclick="WORKBENCH.changeViewerMode('metadata')">Metadata</a>
+                            </li>
+                        </ul>
+
+                        <div id="viewer" class="bg-dark-subtle rounded-bottom-1 grid-lines overflow-scroll">
+                            
+                        </div>
+                    </div>
+                    <div class="g-start-2 overflow-hidden">
+                        <div id="accordion-settings" class="accordion accordion-flush rounded-top-1 overflow-y-auto">
+                            <div class="accordion-item rounded-top-1">
+                                <h2 class="accordion-header rounded-top-1">
+                                    <button class="accordion-button rounded-top-1" style="font-size: 0.8rem" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-general" aria-expanded="true" aria-controls="collapse-general">General</button>
+                                </h2>
+                                <div id="collapse-general" class="accordion-collapse collapse rounded-top-1 show" data-bs-parent="#accordion-settings">
+                                    <div class="accordion-body d-flex flex-column align-items-start rounded-top-1">
+                                        <label class="not-draggable form-label" style="font-size: 0.8rem;">Conversion Format (for encoding)</label>
+                                        <div class="btn-group">
+                                            <button id="btn-format" class="btn btn-outline-secondary btn-sm text-body-secondary fw-medium dropdown-toggle" style="font-size: 0.8rem;" type="button" data-bs-toggle="dropdown" aria-expanded="false">AVIF</button>
+                                            <ul class="dropdown-menu" style="font-size: 0.8rem;">
+                                                <li><a class="dropdown-item" href="#" onclick="WORKBENCH.changeConversionFormat('avif')">AVIF</a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="WORKBENCH.changeConversionFormat('heif')">HEIF</a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="WORKBENCH.changeConversionFormat('jxl')">JPEG XL</a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="WORKBENCH.changeConversionFormat('webp')">WEBP</a></li>
+                                            </ul>
+                                        </div>
+
+                                        <label class="not-draggable form-label mt-2" style="font-size: 0.8rem;">Conversion Format (for decoding)</label>
+                                        <div class="btn-group">
+                                            <button class="btn btn-outline-secondary btn-sm text-body-secondary fw-medium dropdown-toggle disabled" style="font-size: 0.8rem;" type="button" data-bs-toggle="dropdown" aria-expanded="false">PNG</button>
+                                            <ul class="dropdown-menu" style="font-size: 0.8rem;">...</ul>
+                                        </div>
+
+                                        <label class="not-draggable form-label m-0 mt-2" style="font-size: 0.8rem;">Cryptography</label>
+                                        <div class="form-check form-switch d-flex flex-row">
+                                            <input id="switch-encrypt" class="form-check-input" type="checkbox" role="switch">
+                                            <label class="form-check-label text-body-secondary ms-2 align-self-center" style="font-size: 0.8rem;" for="switch-encrypt">Encrypt resources</label>
+                                          </div>
+                                        <button type="button" class="btn btn-primary btn-sm mt-2 align-self-end">Save</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" style="font-size: 0.8rem" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-avif" aria-expanded="false" aria-controls="collapse-avif">AVIF</button>
+                                </h2>
+                                <div id="collapse-avif" class="accordion-collapse collapse" data-bs-parent="#accordion-settings">
+                                    <div class="accordion-body d-flex flex-column">
+                                        <label class="not-draggable form-label" style="font-size: 0.8rem;" for="options-avif">Conversion Options (AVIF)</label>
+                                        <input type="text" class="form-control form-control-sm" style="font-size: 0.8rem;" id="options-avif" placeholder="Options">
+                                        <button type="button" class="btn btn-primary btn-sm mt-2 align-self-end">Save</button>
+                                        <p class="not-draggable text-start text-body-secondary fw-light lh-l m-0" style="font-size: 0.8rem">※ The option string is split by a semicomma.</p>
+                                        <p class="not-draggable text-start text-body-secondary fw-light lh-base m-0" style="font-size: 0.8rem">※ Available options : q(1~100), effort(1~10), speed(0,9), use_lossless(true/false), use_subsampling(true/false), keep_metadata(true/false)</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" style="font-size: 0.8rem" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-heif" aria-expanded="false" aria-controls="collapse-heif">HEIF</button>
+                                </h2>
+                                <div id="collapse-heif" class="accordion-collapse collapse" data-bs-parent="#accordion-settings">
+                                    <div class="accordion-body d-flex flex-column">
+                                        <label class="not-draggable form-label" style="font-size: 0.8rem;" for="options-heif">Conversion Options (HEIF)</label>
+                                        <input type="text" class="form-control form-control-sm" style="font-size: 0.8rem;" id="options-heif" placeholder="Options">
+                                        <button type="button" class="btn btn-primary btn-sm mt-2 align-self-end">Save</button>
+                                        <p class="not-draggable text-start text-body-secondary fw-light lh-l m-0" style="font-size: 0.8rem">※ The option string is split by a semicomma.</p>
+                                        <p class="not-draggable text-start text-body-secondary fw-light lh-base m-0" style="font-size: 0.8rem">※ Available options : q(1~100), effort(1~10), speed(0,9), use_lossless(true/false), use_subsampling(true/false), keep_metadata(true/false)</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" style="font-size: 0.8rem" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-jxl" aria-expanded="false" aria-controls="collapse-jxl">JPEG XL</button>
+                                </h2>
+                                <div id="collapse-jxl" class="accordion-collapse collapse" data-bs-parent="#accordion-settings">
+                                    <div class="accordion-body d-flex flex-column">
+                                        <label class="not-draggable form-label" style="font-size: 0.8rem;" for="options-jxl">Conversion Options (JPEG XL)</label>
+                                        <input type="text" class="form-control form-control-sm" style="font-size: 0.8rem;" id="options-jxl" placeholder="Options">
+                                        <button type="button" class="btn btn-primary btn-sm mt-2 align-self-end">Save</button>
+                                        <p class="not-draggable text-start text-body-secondary fw-light lh-l m-0" style="font-size: 0.8rem">※ The option string is split by a semicomma.</p>
+                                        <p class="not-draggable text-start text-body-secondary fw-light lh-base m-0" style="font-size: 0.8rem">※ Available options : q(1~100), effort(1~10), tier(0~4), distance(0.0~15.0), use_lossless(true/false), keep_metadata(true/false)</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" style="font-size: 0.8rem" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-png" aria-expanded="false" aria-controls="collapse-png">PNG</button>
+                                </h2>
+                                <div id="collapse-png" class="accordion-collapse collapse" data-bs-parent="#accordion-settings">
+                                    <div class="accordion-body d-flex flex-column">
+                                        <label class="not-draggable form-label" style="font-size: 0.8rem;" for="options-png">Conversion Options (PNG)</label>
+                                        <input type="text" class="form-control form-control-sm" style="font-size: 0.8rem;" id="options-png" placeholder="Options">
+                                        <button type="button" class="btn btn-primary btn-sm mt-2 align-self-end">Save</button>
+                                        <p class="not-draggable text-start text-body-secondary fw-light lh-l m-0" style="font-size: 0.8rem">※ The option string is split by a semicomma.</p>
+                                        <p class="not-draggable text-start text-body-secondary fw-light lh-base m-0" style="font-size: 0.8rem">※ Available options : q(1~100), effort(1~10), compression(0~9), keep_metadata(true/false)</p>
+                                    </div>
+                                </div>
+                              </div>
+                            <div class="accordion-item rounded-bottom-1">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" style="font-size: 0.8rem" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-webp" aria-expanded="false" aria-controls="collapse-webp">WEBP</button>
+                                </h2>
+                                <div id="collapse-webp" class="accordion-collapse collapse rounded-bottom-1" data-bs-parent="#accordion-settings">
+                                    <div class="accordion-body d-flex flex-column">
+                                        <label class="not-draggable form-label" style="font-size: 0.8rem;" for="options-webp">Conversion Options (WEBP)</label>
+                                        <input type="text" class="form-control form-control-sm" style="font-size: 0.8rem;" id="options-webp" placeholder="Options">
+                                        <button type="button" class="btn btn-primary btn-sm mt-2 align-self-end">Save</button>
+                                        <p class="not-draggable text-start text-body-secondary fw-light lh-l m-0" style="font-size: 0.8rem">※ The option string is split by a semicomma.</p>
+                                        <p class="not-draggable text-start text-body-secondary fw-light lh-base m-0" style="font-size: 0.8rem">※ Available options : q(1~100), effort(1~10), use_lossless(true/false), use_subsampling(true/false), keep_metadata(true/false)</p>
+                                    </div>
+                                </div>
+                            </div>
+                          </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-c card p-0">
+                <div class="card-body status-container align-items-center p-3">
+                    <div class="g-start-1 d-flex flex-column justify-content-center">
+                        <p id="text-status" class="not-draggable text-start text-body-primary fw-light lh-base m-0 mx-1" style="font-size: 0.8rem">Initializing...</p>
+                        <div class="progress mt-1" role="progressbar" style="height: 10px" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                            <div class="progress-bar" style="width: 25%"></div>
+                        </div>
+                    </div>
+
+                    <div class="g-start-2 btn-group ms-2" style="height:40px;">
+                        <button id="btn-start" type="button" class="btn btn-primary" style="font-size: 0.8rem" data-bs-toggle="tooltip" data-bs-title="Start operation">ENCODE</button>
+                        <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" style="font-size: 0.8rem" data-bs-toggle="dropdown" aria-expanded="false">
+                          <span class="visually-hidden">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu" style="font-size: 0.8rem">
+                          <li><a class="dropdown-item" href="#" onclick="WORKBENCH.changeOperationMode('encode')">ENCODE</a></li>
+                          <li><a class="dropdown-item" href="#" onclick="WORKBENCH.changeOperationMode('decode')">DECODE</a></li>
+                          <li><hr class="dropdown-divider"></li>
+                          <li><a class="dropdown-item" href="#" onclick="WORKBENCH.changeOperationMode('check')">CHECK</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script src="./externs/bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="./externs/virtualized-list/virtualized-list.min.js"></script>
     <script src="./scripts/main.js"></script>
 </body>
 

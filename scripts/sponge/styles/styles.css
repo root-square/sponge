@@ -97,14 +97,19 @@
     /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 
+* {
+    margin: 0px;
+    padding: 0px;
+    box-sizing: border-box;
+}
+
 html, body {
     width: 100vw;
     height: 100vh;
-    margin: 0px;
-    padding: 0px;
+    max-width: 100vw;
+    max-height: 100vh;
     font-family: "Noto Sans";
     font-weight: 500;
-    box-sizing: border-box;
 }
 
 body {
@@ -116,6 +121,8 @@ body {
     grid-template-rows: 82px auto;
     width: 100%;
     height: 100%;
+    max-width: 100%;
+    max-height: 100%;
 }
 
 .sponge-container.section-head {
@@ -125,9 +132,54 @@ body {
 .sponge-container.section-content {
     grid-row: 2;
     justify-self: stretch;
+    max-width: 100%;
+    max-height: 100%;
 }
 
-.section-content.error-content-container {
+.section-content.main-container {
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    grid-template-rows: minmax(1px,1fr) 80px;
+    gap: 16px;
+    width: 100%;
+    height: 100%;
+}
+
+.main-container > .main-a {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.main-a > .leftside-container {
+    display: grid;
+    grid-template-rows: 40px 1fr 40px 1fr;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.main-container > .main-b {
+    grid-column: 2;
+    grid-row: 1;
+}
+
+.main-b > .rightside-container {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+}
+
+.main-container > .main-c {
+    grid-column: 2;
+    grid-row: 2;
+}
+
+.main-c > .status-container {
+    display: grid;
+    grid-template-columns: 1fr auto;
+}
+
+.section-content.error-container {
     display: grid;
     grid-template-rows: 78px auto 90px;
     width: 100%;
@@ -135,17 +187,24 @@ body {
     max-height: 100%;
 }
 
-.section-content.error-content-a {
+.error-container > .error-a {
     grid-row: 1;
 }
 
-.section-content.error-content-b {
+.error-container > .error-b {
     grid-row: 2;
-    justify-self: stretch;
 }
 
-.section-content.error-content-b {
+.error-container > .error-c {
     grid-row: 3;
+}
+
+.grid-lines {
+    width: 100%;
+    height: 100%;
+    background-size: 10px 10px;
+    background-image: repeating-linear-gradient(0deg, transparent, transparent 9px, var(--bs-dark-border-subtle) 9px, var(--bs-dark-border-subtle) 10px), 
+    repeating-linear-gradient(-90deg, transparent, transparent 9px, var(--bs-dark-border-subtle) 9px, var(--bs-dark-border-subtle) 10px); 
 }
 
 .not-draggable {
@@ -155,18 +214,28 @@ body {
     -ms-user-select: none;
 }
 
-.scroll::-webkit-scrollbar {
-    width: 6px;
-}
-   
-.scroll::-webkit-scrollbar-thumb {
-    background: #dddddd20;
-    border-radius: 20px;
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
 }
   
-.scroll::-webkit-scrollbar-track {
-    background: #30303080;
+::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+::-webkit-scrollbar-corner {
+    background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #0000001a;
+    border: 1px solid #88888880;
     border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #0000004a;
+    transition: all 400ms ease-in-out;
 }
 
 @keyframes flickerAnimation {
