@@ -13,7 +13,7 @@ window.addEventListener("load", () => {
     (async () => {
         await new Promise(resolve => setTimeout(resolve, 1000));
 
-        //WORKBENCH_UI.initLists();
+        WORKBENCH_UI.initLists();
     })();
 });
 
