@@ -13,129 +13,122 @@ window.addEventListener("load", () => {
     (async () => {
         await new Promise(resolve => setTimeout(resolve, 1000));
 
-        WORKBENCH.fileListSize = document.getElementById("list-file").scrollHeight;
-        WORKBENCH.initLists();
+        //WORKBENCH_UI.initLists();
     })();
 });
 
 window.addEventListener("resize", () => {
-    WORKBENCH.resizeLists();
+    
 });
 
-var VirtualizedList = window.VirtualizedList.default;
+var start = 0;
+var end = 0;
 
-var WORKBENCH = {
-    fileObjects: [{"filename": "test2.png"},{"filename": "test2.png"},{"filename": "test2.png"},{"filename": "test2.png"},{"filename": "test2.png"},{"filename": "test2.png"},{"filename": "test2.png"},{"filename": "test2.png"},{"filename": "test2.png"},{"filename": "test2.png"},{"filename": "test2.png"},{"filename": "test2.png"},{"filename": "test2.png"},{"filename": "test2.png"},{"filename": "test2.png"},{"filename": "test2.png"},{"filename": "test2.png"}],
-    fileList: null,
-    fileListSize: 0,
-    ignoreObjects: [],
+var WORKBENCH_UI = {
+    fileList: Array.from({ length: 1000 }, (_, i) => ({
+        filename: `test${i}.png`,
+        fullpath: `./pictures/systems/test${i}.png`,
+    })),
+    fileListNodePool: Array.from({ length: 30}, (_, i) => {
+        const element = document.createElement("button");
+        element.type = "button";
+        element.className = "list-group-item list-group-item-action bg-dark-subtle d-flex align-items-center border-0 border-bottom-1";
+
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.className = "form-check-input m-0";
+
+        const icon = document.createElement("i");
+        icon.className = "bi bi-list-ul ms-2 me-1";
+        icon.style.fontSize = "1.0rem";
+
+        const text = document.createElement("span");
+        text.innerText = "NULL";
+
+        element.appendChild(input);
+        element.appendChild(icon);
+        element.appendChild(text);
+
+        document.getElementById("list-file").appendChild(element);
+        return element;
+    }),
     ignoreList: null,
     conversionFormat: "avif",
     viewerMode: "preview-raw",
     operationMode: "encode",
     initLists: () => {
-        var fileListContainer = document.getElementById("list-file");
-        WORKBENCH.fileList = new VirtualizedList(fileListContainer, {
-            height: WORKBENCH.fileListSize, // The height of the container
-            rowCount: WORKBENCH.fileObjects.length,
-            rowHeight: 1,
-            estimatedRowHeight: 40,
-            renderRow: (index) => {
-                const element = document.createElement("button");
-                element.type = "button";
-                element.className = "list-group-item list-group-item-action bg-dark-subtle d-flex align-items-center border-0 border-bottom-1";
-                element.ariaLabel = index;
+        var fileListElement = document.getElementById("list-file");
+        const placeholder = document.createElement("div");
+        placeholder.style.height = `${WORKBENCH_UI.fileList.length * 40}px`;
+        fileListElement.appendChild(placeholder);
 
-                var input = document.createElement("input");
-                input.type = "checkbox";
-                input.className = "form-check-input m-0";
-                input.ariaLabel = index;
-
-                var icon = document.createElement("i");
-                icon.className = "bi bi-file-earmark-image ms-2 me-1";
-                icon.style.fontSize = "1.0rem";
-
-                var text = document.createElement("span");
-                text.innerText = WORKBENCH.fileObjects[index].filename;
-
-                element.appendChild(input);
-                element.appendChild(icon);
-                element.appendChild(text);
-          
-                return element;
-            },
+        var fileListContainer = document.getElementById("container-file-list");
+        fileListContainer.addEventListener("scroll", () => {
+            const scrollTop = fileListContainer.scrollTop;
+            start = Math.floor(scrollTop / 40);
+            end = start + 30;
+            WORKBENCH_UI.renderLists();
         });
-
-        var ignoreListContainer = document.getElementById("list-ignore");
-        WORKBENCH.ignoreList = new VirtualizedList(ignoreListContainer, {
-            height: ignoreListContainer.scrollHeight, // The height of the container
-            rowCount: 0,
-            rowHeight: 40,
-            renderRow: (index) => {
-                const element = document.createElement('div');
-                element.innerHTML = WORKBENCH.ignoreObjects[index];
-          
-                return element;
-            },
-        });
-    },
-    resizeLists: () => {
-        var fileListContainer = document.getElementById("list-file");
-        WORKBENCH.fileList.resize(fileListContainer.scrollHeight, () => {
-            WORKBENCH.fileList.setRowCount(WORKBENCH.fileObjects.length);
-        });
-
-        var ignoreListContainer = document.getElementById("list-ignore");
-        WORKBENCH.ignoreList.resize(ignoreListContainer.scrollHeight, () => {
-            WORKBENCH.ignoreList.setRowCount(WORKBENCH.ignoreObjects.length);
-        });
+        
+        WORKBENCH_UI.renderLists();
     },
     renderLists: () => {
-        WORKBENCH.fileList.setRowCount(WORKBENCH.fileObjects.length);
-        WORKBENCH.ignoreList.setRowCount(WORKBENCH.ignoreObjects.length);
+        const visibleData = WORKBENCH_UI.fileList.slice(start, Math.min(end, WORKBENCH_UI.fileList.length));
+        for (let i = 0; i < WORKBENCH_UI.fileListNodePool.length; i++) {
+            const div = WORKBENCH_UI.fileListNodePool[i];
+            if (i < visibleData.length) {
+                const item = visibleData[i];
+                div.ariaLabel = item.fullpath;
+                div.querySelector("input").ariaLabel = item.fullpath;
+                div.querySelector("span").textContent = item.comment;
+                div.style.top = `${(start + i) * 40}px`; // Update the position of the node based on its index in the data array
+            } else {
+                div.style.display = "none"; // Hide the node if it's not in the visible range
+            }
+        }
     },
     changeConversionFormat: (format) => {
         switch (format) {
             case "avif":
-                WORKBENCH.conversionFormat = "avif";
+                WORKBENCH_UI.conversionFormat = "avif";
                 break;
             case "heif":
-                WORKBENCH.conversionFormat = "heif";
+                WORKBENCH_UI.conversionFormat = "heif";
                 break;
             case "jxl":
-                WORKBENCH.conversionFormat = "jxl";
+                WORKBENCH_UI.conversionFormat = "jxl";
                 break;
             case "webp":
-                WORKBENCH.conversionFormat = "webp";
+                WORKBENCH_UI.conversionFormat = "webp";
                 break;
             default:
-                WORKBENCH.conversionFormat = "avif";
+                WORKBENCH_UI.conversionFormat = "avif";
         }
 
-        document.getElementById("btn-format").innerText = WORKBENCH.conversionFormat.replace("jxl", "jpeg xl").toUpperCase();
+        document.getElementById("btn-format").innerText = WORKBENCH_UI.conversionFormat.replace("jxl", "jpeg xl").toUpperCase();
     },
     changeViewerMode: (mode) => {
         switch (mode) {
             case "preview-raw":
-                WORKBENCH.viewerMode = "preview-raw";
+                WORKBENCH_UI.viewerMode = "preview-raw";
                 document.getElementById("tab-preview").className = "nav-link active dropdown-toggle";
                 document.getElementById("tab-preview").innerText = "Preview(RAW)"
                 document.getElementById("tab-metadata").className = "nav-link";
                 break;
             case "preview-processed":
-                WORKBENCH.viewerMode = "preview-processed";
+                WORKBENCH_UI.viewerMode = "preview-processed";
                 document.getElementById("tab-preview").className = "nav-link active dropdown-toggle";
                 document.getElementById("tab-preview").innerText = "Preview(PROCESSED)"
                 document.getElementById("tab-metadata").className = "nav-link";
                 break;
             case "metadata":
-                WORKBENCH.viewerMode = "metadata";
+                WORKBENCH_UI.viewerMode = "metadata";
                 document.getElementById("tab-preview").className = "nav-link dropdown-toggle";
                 document.getElementById("tab-preview").innerText = "Preview"
                 document.getElementById("tab-metadata").className = "nav-link active";
                 break;
             default:
-                WORKBENCH.viewerMode = "preview-raw";
+                WORKBENCH_UI.viewerMode = "preview-raw";
                 document.getElementById("tab-preview").className = "nav-link active dropdown-toggle";
                 document.getElementById("tab-preview").innerText = "Preview(RAW)"
                 document.getElementById("tab-metadata").className = "nav-link";
@@ -144,19 +137,19 @@ var WORKBENCH = {
     changeOperationMode: (mode) => {
         switch (mode) {
             case "encode":
-                WORKBENCH.operationMode = "encode";
+                WORKBENCH_UI.operationMode = "encode";
                 break;
             case "decode":
-                WORKBENCH.operationMode = "decode";
+                WORKBENCH_UI.operationMode = "decode";
                 break;
             case "check":
-                WORKBENCH.operationMode = "check";
+                WORKBENCH_UI.operationMode = "check";
                 break;
             default:
-                WORKBENCH.operationMode = "encode";
+                WORKBENCH_UI.operationMode = "encode";
         }
 
-        document.getElementById("btn-start").innerText = WORKBENCH.operationMode.toUpperCase();
+        document.getElementById("btn-start").innerText = WORKBENCH_UI.operationMode.toUpperCase();
     },
     
 }
