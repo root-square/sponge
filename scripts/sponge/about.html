@@ -14,14 +14,20 @@
 <body class="bg-dark-subtle" data-bs-theme="dark">
     <div class="sponge-container">
         <div class="section-head border-bottom border-secondary-subtle border-2">
-            <div class="d-flex flex-row align-items-center m-0 p-0">
-                <img class="not-draggable m-0" width="80" height="80" src="./assets/logo.svg">
-                <div class="d-flex flex-column">
-                    <p class="not-draggable text-start text-body-primary fw-medium lh-1 m-0" style="font-size: 0.8rem">
-                        Root Square™</p>
-                    <p class="not-draggable text-start text-body-primary fw-light lh-1 m-0" style="font-size: 1.6rem">
-                        Sponge Workbench</p>
+            <div class="d-flex flex-row align-items-center justify-content-between m-0 p-0">
+                <div class="d-flex flex-row align-items-center">
+                    <img class="not-draggable m-0" width="80" height="80" src="./assets/logo.svg">
+                    <div class="d-flex flex-column">
+                        <p class="not-draggable text-start text-body-primary fw-medium lh-1 m-0" style="font-size: 0.8rem">
+                            Root Square™</p>
+                        <p class="not-draggable text-start text-body-primary fw-light lh-1 m-0" style="font-size: 1.6rem">
+                            Sponge Workbench</p>
+                    </div>
                 </div>
+
+                <button type="button" id="btn-prev" class="btn btn-dark rounded-circle shadow mt-2 me-3" onclick="backToReferer();">
+                    <i class="bi bi-chevron-left" style="font-size: 0.8rem;"></i>
+                </button>
             </div>
         </div>
 
@@ -68,10 +74,6 @@
             </div>
         </div>
     </div>
-
-    <button type="button" id="btn-prev" class="btn btn-dark rounded-circle shadow position-fixed bottom-0 start-0 m-5" onclick="backToReferer();">
-        <i class="bi bi-chevron-left" style="font-size: 0.8rem;"></i>
-    </button>
 
     <div id="toast-copy" class="toast align-items-center position-absolute bottom-0 end-0 m-5" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
