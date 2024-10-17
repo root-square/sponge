@@ -12,7 +12,7 @@ window.addEventListener("load", () => {
     WORKBENCH_UI.list.init();
 });
 
-var WORKBENCH_UI = {
+let WORKBENCH_UI = {
     list: {
         fileList: Array.from({ length: 100 }, (_, i) => ({
             filename: `test${i}.png`,
@@ -76,18 +76,18 @@ var WORKBENCH_UI = {
         ignoreListItemHeight: 40,
         init: () => {
             // To make scrolling area, add a placeholder to the list element.
-            var fileListElement = document.getElementById("file-list");
+            let fileListElement = document.getElementById("file-list");
             const filePlaceholder = document.createElement("div");
             filePlaceholder.style.height = `${WORKBENCH_UI.list.fileList.length * WORKBENCH_UI.list.fileListItemHeight}px`;
             fileListElement.appendChild(filePlaceholder);
 
-            var ignoreListElement = document.getElementById("ignore-list");
+            let ignoreListElement = document.getElementById("ignore-list");
             const ignorePlaceholder = document.createElement("div");
             ignorePlaceholder.style.height = `${WORKBENCH_UI.list.ignoreList.length * WORKBENCH_UI.list.ignoreListItemHeight}px`;
             ignoreListElement.appendChild(ignorePlaceholder);
 
             // Add event listener to re-render the list, when scrolling the list.
-            var fileListContainer = document.getElementById("file-list-container");
+            let fileListContainer = document.getElementById("file-list-container");
             fileListContainer.addEventListener("scroll", () => {
                 const scrollTop = fileListContainer.scrollTop;
                 WORKBENCH_UI.list.fileListStart = Math.floor(scrollTop / WORKBENCH_UI.list.fileListItemHeight);
@@ -95,7 +95,7 @@ var WORKBENCH_UI = {
                 WORKBENCH_UI.list.render("file-list");
             });
 
-            var ignoreListContainer = document.getElementById("ignore-list-container");
+            let ignoreListContainer = document.getElementById("ignore-list-container");
             ignoreListContainer.addEventListener("scroll", () => {
                 const scrollTop = ignoreListContainer.scrollTop;
                 WORKBENCH_UI.list.ignoreListStart = Math.floor(scrollTop / WORKBENCH_UI.list.ignoreListItemHeight);

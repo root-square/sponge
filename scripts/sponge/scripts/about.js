@@ -6,8 +6,8 @@
  *-----------------------------------------------------------------------------*/
 window.addEventListener("load", () => {
     // Note: If a referer exists, show the prev button.
-    var url = new URL(window.location.href);
-    var urlParams = url.searchParams;
+    let url = new URL(window.location.href);
+    let urlParams = url.searchParams;
 
     if (urlParams.has("referer")) {
         document.getElementById("btn-prev").style.display = "inline-block";
@@ -16,8 +16,8 @@ window.addEventListener("load", () => {
     }
 
     // Display the version information.
-    var mode = "release"
-    var version = "0.2.0";
+    let mode = "release"
+    let version = "0.2.0";
 
     switch (mode) {
         case "development":
@@ -42,16 +42,16 @@ function changeStatus(type, icon, desc, ver) {
 }
 
 function copyToClipboard(text) {
-    var clipboard = nw.Clipboard.get();
+    let clipboard = nw.Clipboard.get();
     clipboard.set(text, 'text');
 
-    var toastCopy = document.getElementById('toast-copy');
-    var toastCopyInstance = bootstrap.Toast.getOrCreateInstance(toastCopy);
+    let toastCopy = document.getElementById('toast-copy');
+    let toastCopyInstance = bootstrap.Toast.getOrCreateInstance(toastCopy);
     toastCopyInstance.show();
 }
 
 function backToReferer() {
-    var url = new URL(window.location.href);
-    var urlParams = url.searchParams;
+    let url = new URL(window.location.href);
+    let urlParams = url.searchParams;
     window.location.href = urlParams.get("referer");
 }

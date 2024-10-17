@@ -6,30 +6,105 @@
  *-----------------------------------------------------------------------------*/
 'use strict';
 
+const fs = require('fs');
+const gui = require('nw.gui');
+const path = require('path');
+const { URLSearchParams } = require('url');
+
 window.addEventListener("load", () => {
     SPONGE.init();
     SPONGE.inject();
 });
 
-var SPONGE = {
+window.addEventListener("keydown", (e) => {
+    if (e.key == "Pause") {
+        SPONGE_WORKBENCH.main();
+    }
+});
+
+let SPONGE = {
+    packageJson: "",
+    workDirectory: "",
     init: () => {
-        SPONGE.workbench();
+        // Parse the actual work directory.
+        let pkgPath = path.resolve(process.cwd(), "package.json");
+
+        if (fs.existsSync(pkgPath)) {
+            let pkgJson = JSON.parse(fs.readFileSync(pkgPath));
+            SPONGE.packageJson = pkgPath;
+            SPONGE.workDirectory = path.dirname(path.resolve(process.cwd(), pkgJson.main));
+        }
+
+        // Diagnose the current environment.
+        var result = SPONGE_TESTS.diagnoseEnvironment();
+        if (result[0] == false) {
+            SPONGE_WORKBENCH.error(result[1], result[2], null);
+        }
+
+        var result = SPONGE_TESTS.diagnoseEngine();
+        if (result[0] == false) {
+            SPONGE_WORKBENCH.error(result[1], result[2], null);
+        }
     },
     inject: () => {
 
-    },
-    workbench: () => {
-        var win = nw.Window.get();
-        var x = (window.screen.width / 2) - (1100 / 2);
-        var y = (window.screen.height / 2) - (750 / 2);
-        win.moveTo(x, y);
-        win.resizeTo(1100, 750);
-
-        window.location.href="./js/libs/sponge/main.html"
     }
 };
 
-var SPONGE_OVERRIDES = {
+let SPONGE_WORKBENCH = {
+    init: () => {
+        let win = nw.Window.get();
+        let x = (window.screen.width / 2) - (1100 / 2);
+        let y = (window.screen.height / 2) - (750 / 2);
+        win.moveTo(x, y);
+        win.resizeTo(1100, 750);
+
+        win.on('close', () => {
+            gui.App.quit();
+        });
+    },
+    main: () => {
+        SPONGE_WORKBENCH.init();
+
+        window.location.href="./js/libs/sponge/main.html";
+    },
+    about: (referer) => {
+        SPONGE_WORKBENCH.init();
+
+        let params = new URLSearchParams();
+
+        if (referer !== null && typeof referer === "string" && referer.length !== 0) {
+            params.append("referer", encodeURIComponent(referer));
+        }
+
+        window.location.href = `./js/libs/sponge/about.html?${params.toString()}`;
+    },
+    error: (type, desc, stacktrace) => {
+        SPONGE_WORKBENCH.init();
+
+        let params = new URLSearchParams();
+
+        if (type !== null && typeof type === "string" && type.length !== 0) {
+            params.append("type", encodeURIComponent(type));
+        }
+        if (desc !== null && typeof desc === "string" && desc.length !== 0) {
+            params.append("desc", encodeURIComponent(desc));
+        }
+        if (stacktrace !== null && typeof stacktrace === "string" && stacktrace.length !== 0) {
+            params.append("stacktrace", encodeURIComponent(stacktrace));
+        }
+
+        window.location.href = `./js/libs/sponge/error.html?${params.toString()}`;
+    }
+};
+
+let SPONGE_FUNCTIONS = {
+    convert: (format) => {
+
+    }
+};
+
+let SPONGE_OVERRIDES = {
     MV: {
         // Note: This function overrides 'Bitmap.prototype._requestImage'.
         load: (url) => {
@@ -48,8 +123,8 @@ var SPONGE_OVERRIDES = {
             this._loadingState = 'requesting';
         
             // Create an avif file path.
-            var avifUrl = url.substr(0, url.lastIndexOf(".")) + '.avif';
-            var avifPath = decodeURIComponent(path.resolve(Bitmap.prototype._mainDirectory, avifUrl)); // Decode the avif path to check its existence.
+            let avifUrl = url.substr(0, url.lastIndexOf(".")) + '.avif';
+            let avifPath = decodeURIComponent(path.resolve(Bitmap.prototype._mainDirectory, avifUrl)); // Decode the avif path to check its existence.
         
             if (IS_DEV_MODE) {
                 console.log('avifPath : ' + avifPath + ', isExist : ' + fs.existsSync(avifPath));
@@ -105,23 +180,39 @@ var SPONGE_OVERRIDES = {
     },
 };
 
-var SPONGE_TESTS = {
+let SPONGE_TESTS = {
     diagnoseEnvironment: () => {
         // Error: DIAG_ENV_NODE_NOT_FOUND
-        var isNode = typeof process !== 'undefined' && !!process.versions && !!process.versions.node;
-        if (!isNode) return [false, "DIAG_ENV_NODE_NOT_FOUND", "The JavaScript runtime environment does not appear to be node.js."];
+        let isNode = typeof process !== 'undefined' && !!process.versions && !!process.versions.node;
+        if (!isNode) return [false, "DIAG_ENV_NODE_NOT_FOUND", "The JavaScript runtime environment does not appear to be node.js.",];
 
         // Error: DIAG_ENV_WASM_NOT_SUPPORTED
-        var regex = /^v(\d+\.\d+)/;
-        var nodeVersion = parseFloat(regex.exec(process.version));
+        let regex = /^v(\d+\.\d+)/;
+        let nodeVersion = parseFloat(regex.exec(process.version));
         if (nodeVersion < 16.4) return [false, "DIAG_ENV_WASM_NOT_SUPPORTED", "At least version 16.4 of node.js is required to call the WASM final SIMD opcodes."];
 
         return [true, "DIAG_ENV_SUCCEEDED", "The operation successfully completed."];
     },
     diagnoseEngine: () => {
         // Error: DIAG_ENG_RPGMAKER_NOT_FOUND
-        var isNode = typeof Utils !== 'undefined' && !!Utils.RPGMAKER_NAME && !!process.RPGMAKER_VERSION;
-        if (!isNode) return [false, "DIAG_ENG_RPGMAKER_NOT_FOUND", "Unable to find an instance of RPG MAKER Engine."];
+        let isRMExists = true;
+
+        if (typeof Utils === 'undefined') {
+            isRMExists = false;
+        }
+
+        if (Utils.RPGMAKER_NAME === null || typeof Utils.RPGMAKER_NAME !== "string" || (typeof Utils.RPGMAKER_NAME === "string" && Utils.RPGMAKER_NAME.length === 0)) {
+            isRMExists = false;
+        }
+
+        if (Utils.RPGMAKER_VERSION === null || typeof Utils.RPGMAKER_VERSION !== "string" || (typeof Utils.RPGMAKER_VERSION === "string" && Utils.RPGMAKER_VERSION.length === 0)) {
+            isRMExists = false;
+        }
+
+        if (!isRMExists) return [false, "DIAG_ENG_RPGMAKER_NOT_FOUND", "Unable to find an instance of RPG MAKER Engine."];
+
+        // Error: DIAG_ENG_WASMVIPS_NOT_FOUND
+        if (typeof Vips === 'undefined') return [false, "DIAG_ENG_WASMVIPS_NOT_FOUND", "Unable to find an instance of wasm-vips."];
 
         return [true, "DIAG_ENG_SUCCEEDED", "The operation successfully completed."];
     },
