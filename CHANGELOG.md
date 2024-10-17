@@ -15,6 +15,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (desc)
 -->
 
+## [0.2.1] - 2024-10-17
+
+### Added
+- Implement Workbench UI(main, about, error).
+- Apply virtualized list to the file explorer.
+
+### Removed
+- Remove wunderbaum library(file explorer: treeview → listview).
+
 ## [0.2.0] - 2024-10-14
 
 ### Added

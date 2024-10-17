@@ -1,6 +1,6 @@
 /*!-----------------------------------------------------------------------------
  * Copyright (c) handbros(root-square). All rights reserved.
- * Version: 0.2.0(dev)
+ * Version: 0.2.1(dev)
  * Released under the MIT license
  * https://github.com/root-square/sponge/blob/main/LICENSE
  *-----------------------------------------------------------------------------*/
@@ -8,13 +8,8 @@ window.addEventListener("load", () => {
     // Enable tooltips.
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     const tooltipList = [...tooltipTriggerList].map(elem => new bootstrap.Tooltip(elem));
-
-    // Initialize components.
-    WORKBENCH_UI.list.init();
-});
-
-window.addEventListener("resize", () => {
     
+    WORKBENCH_UI.list.init();
 });
 
 var WORKBENCH_UI = {
@@ -220,5 +215,10 @@ var WORKBENCH_UI = {
     
             document.getElementById("btn-start").innerText = WORKBENCH_UI.form.operationMode.toUpperCase();
         },
-    },    
+    },
+    misc: {
+        about: () => {
+            window.location.href = "./about.html?referer=./main.html";
+        }
+    }
 }
