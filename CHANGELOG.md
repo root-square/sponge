@@ -15,6 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (desc)
 -->
 
+## [0.3.0] - 2024-10-17
+
+### Added
+- Apply diagnostics functions.
+
+### Removed
+- Remove a deprecated library: virtualized-list.
+
 ## [0.2.1] - 2024-10-17
 
 ### Added
