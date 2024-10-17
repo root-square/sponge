@@ -41,8 +41,8 @@
                         <input type="text" class="form-control form-control-sm border-0" style="font-size: 0.8rem" placeholder="Path">
                     </div>
 
-                    <div id="container-file-list" class="g-start-2 bg-dark-subtle position-relative overflow-y-auto" style="font-size: 0.8rem">
-                        <div id="list-file" class="list-group list-group-flush position-absolute w-100">
+                    <div id="file-list-container" class="g-start-2 bg-dark-subtle position-relative overflow-y-auto" style="font-size: 0.8rem">
+                        <div id="file-list" class="list-group list-group-flush position-absolute w-100">
 
                         </div>
                     </div>
@@ -56,9 +56,9 @@
                         </button>
                     </div>
 
-                    <div id="list-ignore-c" class="g-start-4 bg-dark-subtle rounded-bottom-1 position-relative overflow-y-auto">
-                        <div id="list-ignore" class="list-group list-group-flush position-absolute w-100">
-                            
+                    <div id="ignore-list-container" class="g-start-4 bg-dark-subtle rounded-bottom-1 position-relative overflow-y-auto" style="font-size: 0.8rem">
+                        <div id="ignore-list" class="list-group list-group-flush position-absolute w-100">
+
                         </div>
                     </div>
                 </div>
@@ -71,12 +71,12 @@
                             <li class="not-draggable nav-item dropdown">
                                 <a id="tab-preview" class="nav-link active dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="true" href="#" role="button" aria-expanded="false">Preview(RAW)</a>
                                 <ul class="dropdown-menu" style="font-size: 0.8rem">
-                                    <li><a class="dropdown-item" href="#" onclick="WORKBENCH.changeViewerMode('preview-raw')">RAW</a></li>
-                                    <li><a class="dropdown-item" href="#" onclick="WORKBENCH.changeViewerMode('preview-processed')">PROCESSED</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="WORKBENCH_UI.form.changeViewerMode('preview-raw')">RAW</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="WORKBENCH_UI.form.changeViewerMode('preview-processed')">PROCESSED</a></li>
                                 </ul>
                             </li>
                             <li class="not-draggable nav-item">
-                                <a id="tab-metadata" class="nav-link" href="#" onclick="WORKBENCH.changeViewerMode('metadata')">Metadata</a>
+                                <a id="tab-metadata" class="nav-link" href="#" onclick="WORKBENCH_UI.form.changeViewerMode('metadata')">Metadata</a>
                             </li>
                         </ul>
 
@@ -96,10 +96,10 @@
                                         <div class="btn-group">
                                             <button id="btn-format" class="btn btn-outline-secondary btn-sm text-body-secondary fw-medium dropdown-toggle" style="font-size: 0.8rem;" type="button" data-bs-toggle="dropdown" aria-expanded="false">AVIF</button>
                                             <ul class="dropdown-menu" style="font-size: 0.8rem;">
-                                                <li><a class="dropdown-item" href="#" onclick="WORKBENCH.changeConversionFormat('avif')">AVIF</a></li>
-                                                <li><a class="dropdown-item" href="#" onclick="WORKBENCH.changeConversionFormat('heif')">HEIF</a></li>
-                                                <li><a class="dropdown-item" href="#" onclick="WORKBENCH.changeConversionFormat('jxl')">JPEG XL</a></li>
-                                                <li><a class="dropdown-item" href="#" onclick="WORKBENCH.changeConversionFormat('webp')">WEBP</a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="WORKBENCH_UI.form.changeConversionFormat('avif')">AVIF</a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="WORKBENCH_UI.form.changeConversionFormat('heif')">HEIF</a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="WORKBENCH_UI.form.changeConversionFormat('jxl')">JPEG XL</a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="WORKBENCH_UI.form.changeConversionFormat('webp')">WEBP</a></li>
                                             </ul>
                                         </div>
 
@@ -208,10 +208,10 @@
                           <span class="visually-hidden">Toggle Dropdown</span>
                         </button>
                         <ul class="dropdown-menu" style="font-size: 0.8rem">
-                          <li><a class="dropdown-item" href="#" onclick="WORKBENCH.changeOperationMode('encode')">ENCODE</a></li>
-                          <li><a class="dropdown-item" href="#" onclick="WORKBENCH.changeOperationMode('decode')">DECODE</a></li>
+                          <li><a class="dropdown-item" href="#" onclick="WORKBENCH_UI.form.changeOperationMode('encode')">ENCODE</a></li>
+                          <li><a class="dropdown-item" href="#" onclick="WORKBENCH_UI.form.changeOperationMode('decode')">DECODE</a></li>
                           <li><hr class="dropdown-divider"></li>
-                          <li><a class="dropdown-item" href="#" onclick="WORKBENCH.changeOperationMode('check')">CHECK</a></li>
+                          <li><a class="dropdown-item" href="#" onclick="WORKBENCH_UI.form.changeOperationMode('check')">CHECK</a></li>
                         </ul>
                     </div>
                 </div>
