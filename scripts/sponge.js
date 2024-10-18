@@ -12,7 +12,13 @@ const gui = require('nw.gui');
 
 window.addEventListener("load", () => {
     SPONGE.init();
-    SPONGE.inject();
+
+    // Note: If the page is silent mode, do not inject overrides functions.
+    let url = new URL(window.location.href);
+    let urlParams = url.searchParams;
+    if (!urlParams.has("silent")) {
+        SPONGE.inject();
+    }
 });
 
 window.addEventListener("keydown", (e) => {
@@ -66,7 +72,7 @@ let SPONGE_WORKBENCH = {
     main: () => {
         SPONGE_WORKBENCH.init();
 
-        window.location.href="./js/libs/sponge/main.html";
+        window.location.href="./js/libs/sponge/main.html?silent=main";
     },
     about: (referer) => {
         SPONGE_WORKBENCH.init();
