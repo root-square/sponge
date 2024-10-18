@@ -73,6 +73,13 @@ let SPONGE_WORKBENCH = {
 
         let params = new URLSearchParams();
 
+        let settingsPath = path.resolve(workDirectory, "js/libs/sponge.json");
+        if (fs.existsSync(settingsPath)) {
+            let settingsJson = JSON.parse(fs.readFileSync(settingsPath));
+            params.append("mode", settingsJson.mode);
+            params.append("version", settingsJson.version);
+        }
+
         if (referer !== null && typeof referer === "string" && referer.length !== 0) {
             params.append("referer", encodeURIComponent(referer));
         }

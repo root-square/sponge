@@ -16,8 +16,16 @@ window.addEventListener("load", () => {
     }
 
     // Display the version information.
-    let mode = "release"
-    let version = "0.2.0";
+    let mode = "unknown"
+    let version = "1.0.0";
+
+    if (urlParams.has("mode")) {
+        mode = urlParams.get("mode");
+    }
+
+    if (urlParams.has("version")) {
+        mode = urlParams.get("version");
+    }
 
     switch (mode) {
         case "development":
