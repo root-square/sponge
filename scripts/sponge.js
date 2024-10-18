@@ -41,7 +41,7 @@ let SPONGE = {
     inject: () => {
         if (Utils.RPGMAKER_NAME === "MV") {
             Bitmap.prototype._requestImage = SPONGE_OVERRIDES.MV.requestImage;
-            Decrypter.decryptImg = SPONGE_OVERRIDES.MV.decryptImage;
+            Decrypter.prototype.decryptImg = SPONGE_OVERRIDES.MV.decryptImage;
         } else if (Utils.RPGMAKER_NAME === "MZ") {
             Bitmap.prototype._startLoading = SPONGE_OVERRIDES.MZ.startLoading;
             Bitmap.prototype._startDecrypting = SPONGE_OVERRIDES.MZ.startDecrypting;
@@ -342,7 +342,7 @@ let SPONGE_FUNCTIONS = {
 let SPONGE_OVERRIDES = {
     MV: {
         // Note: This function overrides 'Bitmap.prototype._requestImage'.
-        requestImage: (url) => {
+        requestImage: function (url) {
             if(Bitmap._reuseImages.length !== 0){
                 this._image = Bitmap._reuseImages.pop();
             }else{
@@ -369,7 +369,7 @@ let SPONGE_OVERRIDES = {
             }
         },
         // Note: This function overrides 'Decrypter.decryptImg'.
-        decryptImage: (url, bitmap) => {
+        decryptImage: function (url, bitmap) {
             url = this.extToEncryptExt(url);
 
             var requestFile = new XMLHttpRequest();
@@ -415,7 +415,7 @@ let SPONGE_OVERRIDES = {
     },
     MZ: {
         // Note: This function overrides 'Bitmap.prototype._startLoading'.
-        startLoading: () => {
+        startLoading: function () {
             this._image = new Image();
             this._image.onload = this._onLoad.bind(this);
             this._image.onerror = this._onError.bind(this);
@@ -426,7 +426,7 @@ let SPONGE_OVERRIDES = {
             this._startDecrypting();
         },
         // Note: This function overrides 'Bitmap.prototype._startDecrypting'.
-        startDecrypting: () => {
+        startDecrypting: function () {
             const xhr = new XMLHttpRequest();
             xhr.open("GET", this._url + "_");
             xhr.responseType = "arraybuffer";
@@ -434,7 +434,7 @@ let SPONGE_OVERRIDES = {
                 if (xhr.status < 400) {
                     let arrayBuffer = null; 
                     
-                    if (Decrypter.hasEncryptedImages) {
+                    if (Utils.hasEncryptedImages) {
                         arrayBuffer = Utils.decryptArrayBuffer(xhr.response);
                     } else {
                         arrayBuffer = requestFile.response;
