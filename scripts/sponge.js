@@ -203,8 +203,22 @@ let SPONGE_FUNCTIONS = {
                         }
                         break;
                     case "effort":
-                        if (!isNaN(valueInt) && valueInt >= 1 && valueInt <= 10) {
-                            options.effort = valueInt;
+                        if (format === "avif" || format === "heif") {
+                            if (!isNaN(valueInt) && valueInt >= 0 && valueInt <= 9) {
+                                options.effort = valueInt;
+                            }
+                        } else if (format === "jxl") {
+                            if (!isNaN(valueInt) && valueInt >= 3 && valueInt <= 9) {
+                                options.effort = valueInt;
+                            }
+                        } else if (format === "png") {
+                            if (!isNaN(valueInt) && valueInt >= 1 && valueInt <= 10) {
+                                options.effort = valueInt;
+                            }
+                        } else if (format === "webp") {
+                            if (!isNaN(valueInt) && valueInt >= 0 && valueInt <= 6) {
+                                options.effort = valueInt;
+                            }
                         }
                         break;
                     case "encoder":
@@ -273,6 +287,11 @@ let SPONGE_FUNCTIONS = {
                     case "smart_subsample":
                         if (valueBool !== null && format === "webp") {
                             options.smart_subsample = valueBool;
+                        }
+                        break;
+                    case "tier":
+                        if (!isNaN(valueInt) && valueInt >= 0 && valueInt <= 4 && format === "jxl") {
+                            options.tier = valueInt;
                         }
                         break;
                     case "min_size":
