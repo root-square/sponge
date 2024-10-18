@@ -206,7 +206,7 @@ let SPONGE_FUNCTIONS = {
                         }
                         break;
                     case "bitdepth":
-                        if (!isNaN(valueInt) && valueInt >= 1 && valueInt <= 16 && (format === "avif" || format === "heif" || format === "png")) {
+                        if (!isNaN(valueInt) && (valueInt === 1 || valueInt === 2 || valueInt === 4 || valueInt === 8 || valueInt === 16) && (format === "avif" || format === "heif" || format === "png")) {
                             options.bitdepth = valueInt;
                         }
                         break;
@@ -235,7 +235,7 @@ let SPONGE_FUNCTIONS = {
                         }
                         break;
                     case "encoder":
-                        if (format === "avif" || format === "heif") {
+                        if (format === "avif") {
                             if (valueLowerCase === "auto") {
                                 options.encoder = 0;
                             } else if (valueLowerCase === "aom") {
@@ -244,8 +244,6 @@ let SPONGE_FUNCTIONS = {
                                 options.encoder = 2;
                             } else if (valueLowerCase === "svt") {
                                 options.encoder = 3;
-                            } else if (valueLowerCase === "x265") {
-                                options.encoder = 4;
                             }
                         }
                         break;
@@ -284,6 +282,11 @@ let SPONGE_FUNCTIONS = {
                     case "q":
                         if (!isNaN(valueInt) && valueInt >= 1 && valueInt <= 100) {
                             options.Q = valueInt;
+                        }
+                        break;
+                    case "speed":
+                        if (!isNaN(valueInt) && valueInt >= 0 && valueInt <= 9 && (format === "avif" || format === "heif")) {
+                            options.speed = valueInt;
                         }
                         break;
                     case "subsample_mode":

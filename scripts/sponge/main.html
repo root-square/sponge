@@ -136,7 +136,7 @@
                                         <input type="text" class="form-control form-control-sm" style="font-size: 0.8rem;" id="options-avif" placeholder="Options">
                                         <button type="button" class="btn btn-primary btn-sm mt-2 align-self-end">Save</button>
                                         <p class="not-draggable text-start text-body-secondary fw-light lh-l m-0" style="font-size: 0.8rem">※ The option string is split by a semicomma.</p>
-                                        <p class="not-draggable text-start text-body-secondary fw-light lh-base m-0" style="font-size: 0.8rem">※ Available options : q(1~100), effort(1~10), speed(0,9), use_lossless(true/false), use_subsampling(true/false), keep_metadata(true/false)</p>
+                                        <p class="not-draggable text-start text-body-secondary fw-light lh-base m-0" style="font-size: 0.8rem">※ Available options : bitdepth(1/2/4/8/16), effort(0~9), encoder(auto/aom/rav1e/svt), keep(true/false), lossless(true/false), Q(1~100), speed(0,9), subsample_mode(auto/on/off)</p>
                                     </div>
                                 </div>
                             </div>
@@ -150,7 +150,7 @@
                                         <input type="text" class="form-control form-control-sm" style="font-size: 0.8rem;" id="options-heif" placeholder="Options">
                                         <button type="button" class="btn btn-primary btn-sm mt-2 align-self-end">Save</button>
                                         <p class="not-draggable text-start text-body-secondary fw-light lh-l m-0" style="font-size: 0.8rem">※ The option string is split by a semicomma.</p>
-                                        <p class="not-draggable text-start text-body-secondary fw-light lh-base m-0" style="font-size: 0.8rem">※ Available options : q(1~100), effort(1~10), speed(0,9), use_lossless(true/false), use_subsampling(true/false), keep_metadata(true/false)</p>
+                                        <p class="not-draggable text-start text-body-secondary fw-light lh-base m-0" style="font-size: 0.8rem">※ Available options : bitdepth(1/2/4/8/16), effort(0~9), keep(true/false), lossless(true/false), Q(1~100), speed(0,9), subsample_mode(auto/on/off)</p>
                                     </div>
                                 </div>
                             </div>
@@ -164,7 +164,7 @@
                                         <input type="text" class="form-control form-control-sm" style="font-size: 0.8rem;" id="options-jxl" placeholder="Options">
                                         <button type="button" class="btn btn-primary btn-sm mt-2 align-self-end">Save</button>
                                         <p class="not-draggable text-start text-body-secondary fw-light lh-l m-0" style="font-size: 0.8rem">※ The option string is split by a semicomma.</p>
-                                        <p class="not-draggable text-start text-body-secondary fw-light lh-base m-0" style="font-size: 0.8rem">※ Available options : q(1~100), effort(1~10), tier(0~4), distance(0.0~15.0), use_lossless(true/false), keep_metadata(true/false)</p>
+                                        <p class="not-draggable text-start text-body-secondary fw-light lh-base m-0" style="font-size: 0.8rem">※ Available options : effort(3~9), keep(true/false), lossless(true/false), Q(1~100), tier(0~4)</p>
                                     </div>
                                 </div>
                             </div>
@@ -178,7 +178,7 @@
                                         <input type="text" class="form-control form-control-sm" style="font-size: 0.8rem;" id="options-png" placeholder="Options">
                                         <button type="button" class="btn btn-primary btn-sm mt-2 align-self-end">Save</button>
                                         <p class="not-draggable text-start text-body-secondary fw-light lh-l m-0" style="font-size: 0.8rem">※ The option string is split by a semicomma.</p>
-                                        <p class="not-draggable text-start text-body-secondary fw-light lh-base m-0" style="font-size: 0.8rem">※ Available options : q(1~100), effort(1~10), compression(0~9), keep_metadata(true/false)</p>
+                                        <p class="not-draggable text-start text-body-secondary fw-light lh-base m-0" style="font-size: 0.8rem">※ Available options : bitdepth(1/2/4/8/16), compression(0~9), effort(1~10), interlace(true/false), keep(true/false), Q(1~100)</p>
                                     </div>
                                 </div>
                               </div>
@@ -192,7 +192,7 @@
                                         <input type="text" class="form-control form-control-sm" style="font-size: 0.8rem;" id="options-webp" placeholder="Options">
                                         <button type="button" class="btn btn-primary btn-sm mt-2 align-self-end">Save</button>
                                         <p class="not-draggable text-start text-body-secondary fw-light lh-l m-0" style="font-size: 0.8rem">※ The option string is split by a semicomma.</p>
-                                        <p class="not-draggable text-start text-body-secondary fw-light lh-base m-0" style="font-size: 0.8rem">※ Available options : q(1~100), effort(1~10), use_lossless(true/false), use_subsampling(true/false), keep_metadata(true/false)</p>
+                                        <p class="not-draggable text-start text-body-secondary fw-light lh-base m-0" style="font-size: 0.8rem">※ Available options : alpha_q(1~100), effort(0~6), keep(true/false), lossless(true/false), preset(default/picture/photo/drawing/icon/text), Q(1~100), smart_subsample(true/false), min_size(true/false), mixed(true/false), near_lossless(true/false)</p>
                                     </div>
                                 </div>
                             </div>
@@ -228,7 +228,7 @@
     </div>
 
     <script src="./externs/bootstrap/bootstrap.bundle.min.js"></script>
-    
+
     <script src="./../sponge.js"></script>
     <script src="./scripts/main.js"></script>
 </body>
