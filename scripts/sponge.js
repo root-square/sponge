@@ -8,15 +8,18 @@
 
 const fs = require('fs');
 const path = require('path');
-const gui = require('nw.gui');
 
 window.addEventListener("load", () => {
-    SPONGE.init();
-
-    // Note: If the page is silent mode, do not inject overrides functions.
     let url = new URL(window.location.href);
     let urlParams = url.searchParams;
-    if (!urlParams.has("silent")) {
+    if (urlParams.has("silent")) {
+        SPONGE.isSilentMode = true;
+    }
+
+    // Initialize components.
+    SPONGE.init();
+
+    if (!SPONGE.isSilentMode) {
         SPONGE.inject();
     }
 });
@@ -28,21 +31,30 @@ window.addEventListener("keydown", (e) => {
 });
 
 let SPONGE = {
-    packageJson: "",
-    workDirectory: "",
+    isNwjs: false,
+    isSilentMode: false,
+    workDirectory: null,
     init: () => {
+        try {
+            SPONGE.isNwjs = (typeof require('nw.gui') !== "undefined");
+        } catch (err) {
+            SPONGE.isNwjs = false;
+        }
+
         // Parse the actual work directory.
-        let pkgPath = path.resolve(process.cwd(), "package.json");
+        let baseDirectory = path.dirname(process.execPath);
+        let pkgPath = path.resolve(baseDirectory, "package.json");
 
         if (fs.existsSync(pkgPath)) {
             let pkgJson = JSON.parse(fs.readFileSync(pkgPath));
-            SPONGE.packageJson = pkgPath;
-            SPONGE.workDirectory = path.dirname(path.resolve(process.cwd(), pkgJson.main));
+            SPONGE.workDirectory = path.dirname(path.resolve(baseDirectory, pkgJson.main));
         }
 
         // Diagnose the current environment.
-        SPONGE_TESTS.diagnoseEnvironment();
-        SPONGE_TESTS.diagnoseEngine();
+        if (!SPONGE.isSilentMode) {
+            SPONGE_TESTS.diagnoseEnvironment();
+            SPONGE_TESTS.diagnoseEngine();
+        }
     },
     inject: () => {
         if (Utils.RPGMAKER_NAME === "MV") {
@@ -58,56 +70,75 @@ let SPONGE = {
 };
 
 let SPONGE_WORKBENCH = {
+    isInitialized: false,
     init: () => {
-        let win = nw.Window.get();
-        let x = (window.screen.width / 2) - (1100 / 2);
-        let y = (window.screen.height / 2) - (750 / 2);
-        win.moveTo(x, y);
-        win.resizeTo(1100, 750);
+        if (SPONGE.isNwjs) {
+            const gui = require('nw.gui');
 
-        win.on('close', () => {
-            gui.App.quit();
-        });
+            let win = nw.Window.get();
+            let x = (window.screen.width / 2) - (1100 / 2);
+            let y = (window.screen.height / 2) - (750 / 2);
+            win.moveTo(x, y);
+            win.resizeTo(1100, 750);
+    
+            win.on('close', () => {
+                gui.App.quit();
+            });
+
+            SPONGE_WORKBENCH.isInitialized = true;
+        }
     },
     main: () => {
         SPONGE_WORKBENCH.init();
 
-        window.location.href="./js/libs/sponge/main.html?silent=main";
+        if (SPONGE_WORKBENCH.isInitialized) { 
+            window.location.href = "./js/libs/sponge/main.html?silent=main";
+        } else {
+            alert("Cannot open the workbench in the current environment.");
+        }
     },
-    about: (referer) => {
+    about: (referer, modifier) => {
         SPONGE_WORKBENCH.init();
 
-        let params = new URLSearchParams();
+        if (SPONGE_WORKBENCH.isInitialized) {
+            let params = new URLSearchParams();
 
-        let settingsPath = path.resolve(workDirectory, "js/libs/sponge.json");
-        if (fs.existsSync(settingsPath)) {
-            let settingsJson = JSON.parse(fs.readFileSync(settingsPath));
-            params.append("mode", settingsJson.mode);
-            params.append("version", settingsJson.version);
+            let settingsPath = path.resolve(SPONGE.workDirectory, "js/libs/sponge.json");
+            if (fs.existsSync(settingsPath)) {
+                let settingsJson = JSON.parse(fs.readFileSync(settingsPath));
+                params.append("mode", settingsJson.mode);
+                params.append("version", settingsJson.version);
+            }
+    
+            if (referer !== null && typeof referer === "string" && referer.length !== 0) {
+                params.append("referer", encodeURIComponent(referer));
+            }
+    
+            window.location.href = path.resolve(modifier === null ? "" : modifier, `./js/libs/sponge/about.html?${params.toString()}`);
+        } else {
+            alert("Cannot open the workbench in the current environment.");
         }
-
-        if (referer !== null && typeof referer === "string" && referer.length !== 0) {
-            params.append("referer", encodeURIComponent(referer));
-        }
-
-        window.location.href = `./js/libs/sponge/about.html?${params.toString()}`;
     },
-    error: (type, desc, stacktrace) => {
+    error: (type, desc, stacktrace, modifier) => {
         SPONGE_WORKBENCH.init();
 
-        let params = new URLSearchParams();
+        if (SPONGE_WORKBENCH.isInitialized) {
+            let params = new URLSearchParams();
 
-        if (type !== null && typeof type === "string" && type.length !== 0) {
-            params.append("type", encodeURIComponent(type));
+            if (type !== null && typeof type === "string" && type.length !== 0) {
+                params.append("type", encodeURIComponent(type));
+            }
+            if (desc !== null && typeof desc === "string" && desc.length !== 0) {
+                params.append("desc", encodeURIComponent(desc));
+            }
+            if (stacktrace !== null && typeof stacktrace === "string" && stacktrace.length !== 0) {
+                params.append("stacktrace", encodeURIComponent(stacktrace));
+            }
+    
+            window.location.href = path.resolve(modifier === null ? "" : modifier, `./js/libs/sponge/error.html?${params.toString()}`);
+        } else {
+            alert(`${type}\n${desc}`);
         }
-        if (desc !== null && typeof desc === "string" && desc.length !== 0) {
-            params.append("desc", encodeURIComponent(desc));
-        }
-        if (stacktrace !== null && typeof stacktrace === "string" && stacktrace.length !== 0) {
-            params.append("stacktrace", encodeURIComponent(stacktrace));
-        }
-
-        window.location.href = `./js/libs/sponge/error.html?${params.toString()}`;
     }
 };
 
@@ -197,7 +228,7 @@ let SPONGE_FUNCTIONS = {
                     }
                 }
                 let valueLowerCase = value.toLowerCase();
-                let valueUpperCase = value.toLowerCase();
+                let valueUpperCase = value.toUpperCase();
 
                 switch (key.toLowerCase()) {
                     case "alpha_q":

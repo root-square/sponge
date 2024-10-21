@@ -61,5 +61,5 @@ function copyToClipboard(text) {
 function backToReferer() {
     let url = new URL(window.location.href);
     let urlParams = url.searchParams;
-    window.location.href = urlParams.get("referer");
+    window.location.href = decodeURIComponent(urlParams.get("referer"));
 }

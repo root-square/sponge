@@ -218,7 +218,7 @@ let WORKBENCH_UI = {
     },
     misc: {
         about: () => {
-            window.location.href = "./about.html?referer=./main.html";
+            SPONGE_WORKBENCH.about("./main.html?silent=main", "../../../");
         }
     }
 }
