@@ -25,7 +25,7 @@ window.addEventListener("load", () => {
 });
 
 window.addEventListener("keydown", (e) => {
-    if (e.key == "Pause") {
+    if (e.key === "Pause" || (e.ctrlKey && e.key === "F7")) {
         SPONGE_WORKBENCH.main();
     }
 });
@@ -97,29 +97,7 @@ let SPONGE_WORKBENCH = {
             alert("Cannot open the workbench in the current environment.");
         }
     },
-    about: (referer, modifier) => {
-        SPONGE_WORKBENCH.init();
-
-        if (SPONGE_WORKBENCH.isInitialized) {
-            let params = new URLSearchParams();
-
-            let settingsPath = path.resolve(SPONGE.workDirectory, "js/libs/sponge.json");
-            if (fs.existsSync(settingsPath)) {
-                let settingsJson = JSON.parse(fs.readFileSync(settingsPath));
-                params.append("mode", settingsJson.mode);
-                params.append("version", settingsJson.version);
-            }
-    
-            if (referer !== null && typeof referer === "string" && referer.length !== 0) {
-                params.append("referer", encodeURIComponent(referer));
-            }
-    
-            window.location.href = path.resolve(modifier === null ? "" : modifier, `./js/libs/sponge/about.html?${params.toString()}`);
-        } else {
-            alert("Cannot open the workbench in the current environment.");
-        }
-    },
-    error: (type, desc, stacktrace, modifier) => {
+    error: (type, desc, stacktrace, modifier = null) => {
         SPONGE_WORKBENCH.init();
 
         if (SPONGE_WORKBENCH.isInitialized) {

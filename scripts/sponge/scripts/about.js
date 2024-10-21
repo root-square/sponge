@@ -24,10 +24,10 @@ window.addEventListener("load", () => {
     }
 
     if (urlParams.has("version")) {
-        mode = urlParams.get("version");
+        version = urlParams.get("version");
     }
 
-    switch (mode) {
+    switch (mode.toLowerCase()) {
         case "development":
             changeStatus("danger", "activity animate-flicker", "Sponge System", `Version ${version} (Development Build)`);
             break;

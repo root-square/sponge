@@ -218,7 +218,18 @@ let WORKBENCH_UI = {
     },
     misc: {
         about: () => {
-            SPONGE_WORKBENCH.about("./main.html?silent=main", "../../../");
+            let params = new URLSearchParams();
+
+            let settingsPath = path.resolve(SPONGE.workDirectory, "js/libs/sponge.json");
+            if (fs.existsSync(settingsPath)) {
+                let settingsJson = JSON.parse(fs.readFileSync(settingsPath));
+                params.append("mode", settingsJson.mode);
+                params.append("version", settingsJson.version);
+            }
+
+            params.append("referer", "./main.html?silent=main");
+
+            window.location.href = `./about.html?${params.toString()}`;
         }
     }
 }
