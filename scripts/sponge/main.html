@@ -77,12 +77,12 @@
                             <li class="not-draggable nav-item dropdown">
                                 <a id="tab-preview" class="nav-link active dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="true" href="#" role="button" aria-expanded="false">Preview(RAW)</a>
                                 <ul class="dropdown-menu" style="font-size: 0.8rem">
-                                    <li><a class="dropdown-item" href="#" onclick="WORKBENCH_UI.form.changeViewerMode('preview-raw')">RAW</a></li>
-                                    <li><a class="dropdown-item" href="#" onclick="WORKBENCH_UI.form.changeViewerMode('preview-processed')">PROCESSED</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="WORKBENCH_UI.props.changeViewerMode('preview-raw')">RAW</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="WORKBENCH_UI.props.changeViewerMode('preview-processed')">PROCESSED</a></li>
                                 </ul>
                             </li>
                             <li class="not-draggable nav-item">
-                                <a id="tab-metadata" class="nav-link" href="#" onclick="WORKBENCH_UI.form.changeViewerMode('metadata')">Metadata</a>
+                                <a id="tab-metadata" class="nav-link" href="#" onclick="WORKBENCH_UI.props.changeViewerMode('metadata')">Metadata</a>
                             </li>
                         </ul>
 
@@ -104,10 +104,10 @@
                                         <div class="btn-group">
                                             <button id="btn-format" class="btn btn-outline-secondary btn-sm text-body-secondary fw-medium dropdown-toggle" style="font-size: 0.8rem;" type="button" data-bs-toggle="dropdown" aria-expanded="false">AVIF</button>
                                             <ul class="dropdown-menu" style="font-size: 0.8rem;">
-                                                <li><a class="dropdown-item" href="#" onclick="WORKBENCH_UI.form.changeConversionFormat('avif')">AVIF</a></li>
-                                                <li><a class="dropdown-item" href="#" onclick="WORKBENCH_UI.form.changeConversionFormat('heif')">HEIF</a></li>
-                                                <li><a class="dropdown-item" href="#" onclick="WORKBENCH_UI.form.changeConversionFormat('jxl')">JPEG XL</a></li>
-                                                <li><a class="dropdown-item" href="#" onclick="WORKBENCH_UI.form.changeConversionFormat('webp')">WEBP</a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="WORKBENCH_UI.props.changeConversionFormat('avif')">AVIF</a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="WORKBENCH_UI.props.changeConversionFormat('heif')">HEIF</a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="WORKBENCH_UI.props.changeConversionFormat('jxl')">JPEG XL</a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="WORKBENCH_UI.props.changeConversionFormat('webp')">WEBP</a></li>
                                             </ul>
                                         </div>
 
@@ -134,7 +134,7 @@
                                     <div class="accordion-body d-flex flex-column">
                                         <label class="not-draggable form-label" style="font-size: 0.8rem;" for="options-avif">Conversion Options (AVIF)</label>
                                         <input type="text" class="form-control form-control-sm" style="font-size: 0.8rem;" id="options-avif" placeholder="Options">
-                                        <button type="button" class="btn btn-primary btn-sm mt-2 align-self-end">Save</button>
+                                        <button type="button" class="btn btn-primary btn-sm mt-2 align-self-end" onclick="WORKBENCH_UI.props.writeOptions('avif')">Save</button>
                                         <p class="not-draggable text-start text-body-secondary fw-light lh-l m-0" style="font-size: 0.8rem">※ The option string is split by a semicomma.</p>
                                         <p class="not-draggable text-start text-body-secondary fw-light lh-base m-0" style="font-size: 0.8rem">※ Available options : bitdepth(1/2/4/8/16), effort(0~9), encoder(auto/aom/rav1e/svt), keep(true/false), lossless(true/false), Q(1~100), speed(0,9), subsample_mode(auto/on/off)</p>
                                     </div>
@@ -148,7 +148,7 @@
                                     <div class="accordion-body d-flex flex-column">
                                         <label class="not-draggable form-label" style="font-size: 0.8rem;" for="options-heif">Conversion Options (HEIF)</label>
                                         <input type="text" class="form-control form-control-sm" style="font-size: 0.8rem;" id="options-heif" placeholder="Options">
-                                        <button type="button" class="btn btn-primary btn-sm mt-2 align-self-end">Save</button>
+                                        <button type="button" class="btn btn-primary btn-sm mt-2 align-self-end" onclick="WORKBENCH_UI.props.writeOptions('heif')">Save</button>
                                         <p class="not-draggable text-start text-body-secondary fw-light lh-l m-0" style="font-size: 0.8rem">※ The option string is split by a semicomma.</p>
                                         <p class="not-draggable text-start text-body-secondary fw-light lh-base m-0" style="font-size: 0.8rem">※ Available options : bitdepth(1/2/4/8/16), effort(0~9), keep(true/false), lossless(true/false), Q(1~100), speed(0,9), subsample_mode(auto/on/off)</p>
                                     </div>
@@ -162,7 +162,7 @@
                                     <div class="accordion-body d-flex flex-column">
                                         <label class="not-draggable form-label" style="font-size: 0.8rem;" for="options-jxl">Conversion Options (JPEG XL)</label>
                                         <input type="text" class="form-control form-control-sm" style="font-size: 0.8rem;" id="options-jxl" placeholder="Options">
-                                        <button type="button" class="btn btn-primary btn-sm mt-2 align-self-end">Save</button>
+                                        <button type="button" class="btn btn-primary btn-sm mt-2 align-self-end" onclick="WORKBENCH_UI.props.writeOptions('jxl')">Save</button>
                                         <p class="not-draggable text-start text-body-secondary fw-light lh-l m-0" style="font-size: 0.8rem">※ The option string is split by a semicomma.</p>
                                         <p class="not-draggable text-start text-body-secondary fw-light lh-base m-0" style="font-size: 0.8rem">※ Available options : effort(3~9), keep(true/false), lossless(true/false), Q(1~100), tier(0~4)</p>
                                     </div>
@@ -176,7 +176,7 @@
                                     <div class="accordion-body d-flex flex-column">
                                         <label class="not-draggable form-label" style="font-size: 0.8rem;" for="options-png">Conversion Options (PNG)</label>
                                         <input type="text" class="form-control form-control-sm" style="font-size: 0.8rem;" id="options-png" placeholder="Options">
-                                        <button type="button" class="btn btn-primary btn-sm mt-2 align-self-end">Save</button>
+                                        <button type="button" class="btn btn-primary btn-sm mt-2 align-self-end" onclick="WORKBENCH_UI.props.writeOptions('png')">Save</button>
                                         <p class="not-draggable text-start text-body-secondary fw-light lh-l m-0" style="font-size: 0.8rem">※ The option string is split by a semicomma.</p>
                                         <p class="not-draggable text-start text-body-secondary fw-light lh-base m-0" style="font-size: 0.8rem">※ Available options : bitdepth(1/2/4/8/16), compression(0~9), effort(1~10), interlace(true/false), keep(true/false), Q(1~100)</p>
                                     </div>
@@ -190,7 +190,7 @@
                                     <div class="accordion-body d-flex flex-column">
                                         <label class="not-draggable form-label" style="font-size: 0.8rem;" for="options-webp">Conversion Options (WEBP)</label>
                                         <input type="text" class="form-control form-control-sm" style="font-size: 0.8rem;" id="options-webp" placeholder="Options">
-                                        <button type="button" class="btn btn-primary btn-sm mt-2 align-self-end">Save</button>
+                                        <button type="button" class="btn btn-primary btn-sm mt-2 align-self-end" onclick="WORKBENCH_UI.props.writeOptions('webp')">Save</button>
                                         <p class="not-draggable text-start text-body-secondary fw-light lh-l m-0" style="font-size: 0.8rem">※ The option string is split by a semicomma.</p>
                                         <p class="not-draggable text-start text-body-secondary fw-light lh-base m-0" style="font-size: 0.8rem">※ Available options : alpha_q(1~100), effort(0~6), keep(true/false), lossless(true/false), preset(default/picture/photo/drawing/icon/text), Q(1~100), smart_subsample(true/false), min_size(true/false), mixed(true/false), near_lossless(true/false)</p>
                                     </div>
@@ -204,9 +204,9 @@
             <div class="main-c card p-0">
                 <div class="card-body status-container align-items-center p-3">
                     <div class="g-start-1 d-flex flex-column justify-content-center">
-                        <p id="text-status" class="not-draggable text-start text-body-primary fw-light lh-base m-0 mx-1" style="font-size: 0.8rem">Initializing...</p>
-                        <div class="progress mt-1" role="progressbar" style="height: 10px" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
-                            <div class="progress-bar" style="width: 25%"></div>
+                        <p id="status-text" class="not-draggable text-start text-body-primary fw-light lh-base m-0 mx-1" style="font-size: 0.8rem">Idle</p>
+                        <div id="status-bar" class="progress mt-1" role="progressbar" style="height: 10px" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                            <div id="status-bar-inner" class="progress-bar"></div>
                         </div>
                     </div>
 
@@ -216,14 +216,24 @@
                           <span class="visually-hidden">Toggle Dropdown</span>
                         </button>
                         <ul class="dropdown-menu" style="font-size: 0.8rem">
-                          <li><a class="dropdown-item" href="#" onclick="WORKBENCH_UI.form.changeOperationMode('encode')">ENCODE</a></li>
-                          <li><a class="dropdown-item" href="#" onclick="WORKBENCH_UI.form.changeOperationMode('decode')">DECODE</a></li>
+                          <li><a class="dropdown-item" href="#" onclick="WORKBENCH_UI.props.changeOperationMode('encode')">ENCODE</a></li>
+                          <li><a class="dropdown-item" href="#" onclick="WORKBENCH_UI.props.changeOperationMode('decode')">DECODE</a></li>
                           <li><hr class="dropdown-divider"></li>
-                          <li><a class="dropdown-item" href="#" onclick="WORKBENCH_UI.form.changeOperationMode('check')">CHECK</a></li>
+                          <li><a class="dropdown-item" href="#" onclick="WORKBENCH_UI.props.changeOperationMode('check')">CHECK</a></li>
                         </ul>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div id="toast-notice" class="toast align-items-center position-absolute bottom-0 end-0 m-5" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-megaphone" style="font-size: 1.0rem"></i>
+                <span id="toast-notice-text" class="not-draggable text-start text-body-primary fw-medium lh-base m-0 ms-1" style="font-size: 0.9rem"></span>
+            </div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
     </div>
 

@@ -9,11 +9,12 @@ window.addEventListener("load", () => {
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     const tooltipList = [...tooltipTriggerList].map(elem => new bootstrap.Tooltip(elem));
     
-    WORKBENCH_UI.list.init();
+    WORKBENCH_UI.lists.init();
+    WORKBENCH_UI.props.init();
 });
 
 let WORKBENCH_UI = {
-    list: {
+    lists: {
         fileList: Array.from({ length: 100 }, (_, i) => ({
             filename: `test${i}.png`,
             fullpath: `./pictures/systems/test${i}.png`,
@@ -78,63 +79,63 @@ let WORKBENCH_UI = {
             // To make scrolling area, add a placeholder to the list element.
             let fileListElement = document.getElementById("file-list");
             const filePlaceholder = document.createElement("div");
-            filePlaceholder.style.height = `${WORKBENCH_UI.list.fileList.length * WORKBENCH_UI.list.fileListItemHeight}px`;
+            filePlaceholder.style.height = `${WORKBENCH_UI.lists.fileList.length * WORKBENCH_UI.lists.fileListItemHeight}px`;
             fileListElement.appendChild(filePlaceholder);
 
             let ignoreListElement = document.getElementById("ignore-list");
             const ignorePlaceholder = document.createElement("div");
-            ignorePlaceholder.style.height = `${WORKBENCH_UI.list.ignoreList.length * WORKBENCH_UI.list.ignoreListItemHeight}px`;
+            ignorePlaceholder.style.height = `${WORKBENCH_UI.lists.ignoreList.length * WORKBENCH_UI.lists.ignoreListItemHeight}px`;
             ignoreListElement.appendChild(ignorePlaceholder);
 
             // Add event listener to re-render the list, when scrolling the list.
             let fileListContainer = document.getElementById("file-list-container");
             fileListContainer.addEventListener("scroll", () => {
                 const scrollTop = fileListContainer.scrollTop;
-                WORKBENCH_UI.list.fileListStart = Math.floor(scrollTop / WORKBENCH_UI.list.fileListItemHeight);
-                WORKBENCH_UI.list.fileListEnd = WORKBENCH_UI.list.fileListStart + 30;
-                WORKBENCH_UI.list.render("file-list");
+                WORKBENCH_UI.lists.fileListStart = Math.floor(scrollTop / WORKBENCH_UI.lists.fileListItemHeight);
+                WORKBENCH_UI.lists.fileListEnd = WORKBENCH_UI.lists.fileListStart + 30;
+                WORKBENCH_UI.lists.render("file-list");
             });
 
             let ignoreListContainer = document.getElementById("ignore-list-container");
             ignoreListContainer.addEventListener("scroll", () => {
                 const scrollTop = ignoreListContainer.scrollTop;
-                WORKBENCH_UI.list.ignoreListStart = Math.floor(scrollTop / WORKBENCH_UI.list.ignoreListItemHeight);
-                WORKBENCH_UI.list.ignoreListEnd = WORKBENCH_UI.list.ignoreListStart + 30;
-                WORKBENCH_UI.list.render("ignore-list");
+                WORKBENCH_UI.lists.ignoreListStart = Math.floor(scrollTop / WORKBENCH_UI.lists.ignoreListItemHeight);
+                WORKBENCH_UI.lists.ignoreListEnd = WORKBENCH_UI.lists.ignoreListStart + 30;
+                WORKBENCH_UI.lists.render("ignore-list");
             });
             
-            WORKBENCH_UI.list.renderAll();
+            WORKBENCH_UI.lists.renderAll();
         },
         render: (target) => {
             if (target == "file-list") {
-                const visibleData = WORKBENCH_UI.list.fileList.slice(WORKBENCH_UI.list.fileListStart, Math.min(WORKBENCH_UI.list.fileListEnd, WORKBENCH_UI.list.fileList.length));
+                const visibleData = WORKBENCH_UI.lists.fileList.slice(WORKBENCH_UI.lists.fileListStart, Math.min(WORKBENCH_UI.lists.fileListEnd, WORKBENCH_UI.lists.fileList.length));
     
-                for (let i = 0; i < WORKBENCH_UI.list.fileListNodePool.length; i++) {
-                    const item = WORKBENCH_UI.list.fileListNodePool[i];
+                for (let i = 0; i < WORKBENCH_UI.lists.fileListNodePool.length; i++) {
+                    const item = WORKBENCH_UI.lists.fileListNodePool[i];
     
                     if (i < visibleData.length) {
                         const data = visibleData[i];
                         item.ariaLabel = data.fullpath;
                         item.querySelector("input").ariaLabel = data.fullpath;
                         item.querySelector("span").textContent = data.filename;
-                        item.style.top = `${(WORKBENCH_UI.list.fileListStart + i) * WORKBENCH_UI.list.fileListItemHeight}px`; // Update the position of the node based on its index in the data array
+                        item.style.top = `${(WORKBENCH_UI.lists.fileListStart + i) * WORKBENCH_UI.lists.fileListItemHeight}px`; // Update the position of the node based on its index in the data array
                         item.classList.replace("d-none", "d-flex");
                     } else {
                         item.classList.replace("d-flex", "d-none"); // Hide the node if it's not in the visible range
                     }
                 }
             } else if (target == "ignore-list") {
-                const visibleData = WORKBENCH_UI.list.ignoreList.slice(WORKBENCH_UI.list.ignoreListStart, Math.min(WORKBENCH_UI.list.ignoreListEnd, WORKBENCH_UI.list.ignoreList.length));
+                const visibleData = WORKBENCH_UI.lists.ignoreList.slice(WORKBENCH_UI.lists.ignoreListStart, Math.min(WORKBENCH_UI.lists.ignoreListEnd, WORKBENCH_UI.lists.ignoreList.length));
     
-                for (let i = 0; i < WORKBENCH_UI.list.ignoreListNodePool.length; i++) {
-                    const item = WORKBENCH_UI.list.ignoreListNodePool[i];
+                for (let i = 0; i < WORKBENCH_UI.lists.ignoreListNodePool.length; i++) {
+                    const item = WORKBENCH_UI.lists.ignoreListNodePool[i];
     
                     if (i < visibleData.length) {
                         const data = visibleData[i];
                         item.ariaLabel = data.fullpath;
                         item.querySelector("input").ariaLabel = data.fullpath;
                         item.querySelector("span").textContent = data.filename;
-                        item.style.top = `${(WORKBENCH_UI.list.ignoreListStart + i) * WORKBENCH_UI.list.ignoreListItemHeight}px`; // Update the position of the node based on its index in the data array
+                        item.style.top = `${(WORKBENCH_UI.lists.ignoreListStart + i) * WORKBENCH_UI.lists.ignoreListItemHeight}px`; // Update the position of the node based on its index in the data array
                         item.classList.replace("d-none", "d-flex");
                     } else {
                         item.classList.replace("d-flex", "d-none"); // Hide the node if it's not in the visible range
@@ -143,56 +144,59 @@ let WORKBENCH_UI = {
             }
         },
         renderAll: () => {
-            WORKBENCH_UI.list.render("file-list");
-            WORKBENCH_UI.list.render("ignore-list");
+            WORKBENCH_UI.lists.render("file-list");
+            WORKBENCH_UI.lists.render("ignore-list");
         },
     },
-    form: {
+    props: {
         conversionFormat: "avif",
         viewerMode: "preview-raw",
         operationMode: "encode",
+        init: () => {
+            WORKBENCH_UI.props.readOptions();
+        },
         changeConversionFormat: (format) => {
             switch (format) {
                 case "avif":
-                    WORKBENCH_UI.form.conversionFormat = "avif";
+                    WORKBENCH_UI.props.conversionFormat = "avif";
                     break;
                 case "heif":
-                    WORKBENCH_UI.form.conversionFormat = "heif";
+                    WORKBENCH_UI.props.conversionFormat = "heif";
                     break;
                 case "jxl":
-                    WORKBENCH_UI.form.conversionFormat = "jxl";
+                    WORKBENCH_UI.props.conversionFormat = "jxl";
                     break;
                 case "webp":
-                    WORKBENCH_UI.form.conversionFormat = "webp";
+                    WORKBENCH_UI.props.conversionFormat = "webp";
                     break;
                 default:
-                    WORKBENCH_UI.form.conversionFormat = "avif";
+                    WORKBENCH_UI.props.conversionFormat = "avif";
             }
     
-            document.getElementById("btn-format").innerText = WORKBENCH_UI.form.conversionFormat.replace("jxl", "jpeg xl").toUpperCase();
+            document.getElementById("btn-format").innerText = WORKBENCH_UI.props.conversionFormat.replace("jxl", "jpeg xl").toUpperCase();
         },
         changeViewerMode: (mode) => {
             switch (mode) {
                 case "preview-raw":
-                    WORKBENCH_UI.form.viewerMode = "preview-raw";
+                    WORKBENCH_UI.props.viewerMode = "preview-raw";
                     document.getElementById("tab-preview").className = "nav-link active dropdown-toggle";
                     document.getElementById("tab-preview").innerText = "Preview(RAW)"
                     document.getElementById("tab-metadata").className = "nav-link";
                     break;
                 case "preview-processed":
-                    WORKBENCH_UI.form.viewerMode = "preview-processed";
+                    WORKBENCH_UI.props.viewerMode = "preview-processed";
                     document.getElementById("tab-preview").className = "nav-link active dropdown-toggle";
                     document.getElementById("tab-preview").innerText = "Preview(PROCESSED)"
                     document.getElementById("tab-metadata").className = "nav-link";
                     break;
                 case "metadata":
-                    WORKBENCH_UI.form.viewerMode = "metadata";
+                    WORKBENCH_UI.props.viewerMode = "metadata";
                     document.getElementById("tab-preview").className = "nav-link dropdown-toggle";
                     document.getElementById("tab-preview").innerText = "Preview"
                     document.getElementById("tab-metadata").className = "nav-link active";
                     break;
                 default:
-                    WORKBENCH_UI.form.viewerMode = "preview-raw";
+                    WORKBENCH_UI.props.viewerMode = "preview-raw";
                     document.getElementById("tab-preview").className = "nav-link active dropdown-toggle";
                     document.getElementById("tab-preview").innerText = "Preview(RAW)"
                     document.getElementById("tab-metadata").className = "nav-link";
@@ -201,20 +205,82 @@ let WORKBENCH_UI = {
         changeOperationMode: (mode) => {
             switch (mode) {
                 case "encode":
-                    WORKBENCH_UI.form.operationMode = "encode";
+                    WORKBENCH_UI.props.operationMode = "encode";
                     break;
                 case "decode":
-                    WORKBENCH_UI.form.operationMode = "decode";
+                    WORKBENCH_UI.props.operationMode = "decode";
                     break;
                 case "check":
-                    WORKBENCH_UI.form.operationMode = "check";
+                    WORKBENCH_UI.props.operationMode = "check";
                     break;
                 default:
-                    WORKBENCH_UI.form.operationMode = "encode";
+                    WORKBENCH_UI.props.operationMode = "encode";
             }
     
-            document.getElementById("btn-start").innerText = WORKBENCH_UI.form.operationMode.toUpperCase();
+            document.getElementById("btn-start").innerText = WORKBENCH_UI.props.operationMode.toUpperCase();
         },
+        readOptions: () => {
+            let settingsPath = path.resolve(SPONGE.workDirectory, "js/libs/sponge.json");
+            let settingsJson = null;
+            if (fs.existsSync(settingsPath)) {
+                settingsJson = JSON.parse(fs.readFileSync(settingsPath));
+            } else {
+                try {
+                    settingsJson = { mode: "unknown", version: "0.1.0", options: { avif: "", heif: "", jxl: "", png: "", webp: "" } };
+                    fs.writeFileSync(settingsPath, JSON.stringify(settingsJson));
+                } catch (err) {
+                    SPONGE_WORKBENCH.error("WB_IO_SETTINGS_NOT_AVAILABLE", "Cannot read the settings data and write a new data.", err.stack);
+                }
+            }
+            
+            let formats = ["avif", "heif", "jxl", "png", "webp"];
+
+            for (let format of formats) {
+                if (Object.hasOwn(settingsJson.options, format)) {
+                    document.getElementById(`options-${format}`).value = settingsJson.options[format];
+                }
+            }
+        },
+        writeOptions: (format) => {
+            let settingsPath = path.resolve(SPONGE.workDirectory, "js/libs/sponge.json");
+            let settingsJson = null;
+            if (fs.existsSync(settingsPath)) {
+                settingsJson = JSON.parse(fs.readFileSync(settingsPath));
+            } else {
+                try {
+                    settingsJson = { mode: "unknown", version: "0.1.0", options: { avif: "", heif: "", jxl: "", png: "", webp: "" } };
+                    fs.writeFileSync(settingsPath, JSON.stringify(settingsJson));
+                } catch (err) {
+                    SPONGE_WORKBENCH.error("WB_IO_SETTINGS_NOT_AVAILABLE", "Cannot read the settings data and write a new data.", err.stack);
+                }
+            }
+
+            settingsJson.options[format] = document.getElementById(`options-${format}`).value;
+
+            try {
+                fs.writeFileSync(settingsPath, JSON.stringify(settingsJson));
+
+                WORKBENCH_UI.status.setToast("Saved successfully!");
+            } catch (err) {
+                SPONGE_WORKBENCH.error("WB_IO_SETTINGS_NOT_WRITABLE", "Cannot write a new settings data.", err.stack);
+            }
+        }
+    },
+    status: {
+        setToast: (text) => {
+            document.getElementById('toast-notice-text').innerText = text;
+
+            let toast = document.getElementById('toast-notice');
+            let toastInstance = bootstrap.Toast.getOrCreateInstance(toast);
+            toastInstance.show();
+        },
+        setText: (text) => {
+            document.getElementById('status-text').innerText = text;
+        },
+        setProgress: (progress) => {
+            document.getElementById('status-bar').ariaValueNow = progress;
+            document.getElementById('status-bar-inner').style.width = `${progress}%`;
+        }
     },
     misc: {
         about: () => {
