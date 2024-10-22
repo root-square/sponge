@@ -11,14 +11,14 @@ window.addEventListener("load", () => {
     
     WORKBENCH_UI.lists.init();
     WORKBENCH_UI.props.init();
+
+    WORKBENCH_UI.lists.open("./");
 });
 
 let WORKBENCH_UI = {
     lists: {
-        fileList: Array.from({ length: 100 }, (_, i) => ({
-            filename: `test${i}.png`,
-            fullpath: `./pictures/systems/test${i}.png`,
-        })),
+        // Note: data structure -> isSelected(bool), isDirectory(bool), filename(str), fullname(str)
+        fileList: [],
         fileListNodePool: Array.from({ length: 30 }, (_, i) => {
             const element = document.createElement("button");
             element.type = "button";
@@ -45,10 +45,7 @@ let WORKBENCH_UI = {
         fileListStart: 0,
         fileListEnd: 30,
         fileListItemHeight: 40,
-        ignoreList: Array.from({ length: 50 }, (_, i) => ({
-            filename: `test${i}.png`,
-            fullpath: `./pictures/systems/test${i}.png`,
-        })),
+        ignoreList: [],
         ignoreListNodePool: Array.from({ length: 30 }, (_, i) => {
             const element = document.createElement("button");
             element.type = "button";
@@ -59,7 +56,7 @@ let WORKBENCH_UI = {
             input.className = "form-check-input m-0";
     
             const icon = document.createElement("i");
-            icon.className = "bi bi-list-ul ms-2 me-1";
+            icon.className = "bi bi-image-ul ms-2 me-1";
             icon.style.fontSize = "1.0rem";
     
             const text = document.createElement("span");
@@ -107,7 +104,7 @@ let WORKBENCH_UI = {
             WORKBENCH_UI.lists.renderAll();
         },
         render: (target) => {
-            if (target == "file-list") {
+            if (target === "file-list") {
                 const visibleData = WORKBENCH_UI.lists.fileList.slice(WORKBENCH_UI.lists.fileListStart, Math.min(WORKBENCH_UI.lists.fileListEnd, WORKBENCH_UI.lists.fileList.length));
     
                 for (let i = 0; i < WORKBENCH_UI.lists.fileListNodePool.length; i++) {
@@ -124,7 +121,7 @@ let WORKBENCH_UI = {
                         item.classList.replace("d-flex", "d-none"); // Hide the node if it's not in the visible range
                     }
                 }
-            } else if (target == "ignore-list") {
+            } else if (target === "ignore-list") {
                 const visibleData = WORKBENCH_UI.lists.ignoreList.slice(WORKBENCH_UI.lists.ignoreListStart, Math.min(WORKBENCH_UI.lists.ignoreListEnd, WORKBENCH_UI.lists.ignoreList.length));
     
                 for (let i = 0; i < WORKBENCH_UI.lists.ignoreListNodePool.length; i++) {
@@ -147,6 +144,54 @@ let WORKBENCH_UI = {
             WORKBENCH_UI.lists.render("file-list");
             WORKBENCH_UI.lists.render("ignore-list");
         },
+        reset: (target) => {
+            if (target === "file-list") {
+                document.getElementById("file-list-container").scrollTop = 0;
+                WORKBENCH_UI.lists.fileListStart = 0;
+                WORKBENCH_UI.lists.fileListEnd = 30;
+            } else if (target === "ignore-list") {
+                document.getElementById("ignore-list-container").scrollTop = 0;
+                WORKBENCH_UI.lists.ignoreListStart = 0;
+                WORKBENCH_UI.lists.ignoreListEnd = 30;
+            }
+        },
+        select: (fullname) => [
+
+        ],
+        transfer: (direction) => {
+            if (direction.toLowerCase() === "up") {
+
+            } else if (direction.toLowerCase() === "down") {
+
+            }
+        },
+        view: (fullname) => {
+            
+        },
+        open: (path) => {
+            if (!fs.existsSync(path)) {
+                return;
+            }
+            if (!fs.statSync(path).isDirectory()) {
+                return;
+            }
+
+            let items = [];
+            
+            // Note: fs.readdir() uses process.cwd().
+            let targetPath = path.resolve(path.relative(process.cwd(), SPONGE.workDirectory), path);
+
+            fs.readdir(targetPath, { encoding: "utf-8", withFileTypes: true }, function(err, entries) {
+                for (let entry of entries) {
+                    let parentPath = typeof entry.parentPath === "undefined" || entry.parentPath === null ? entry.path : entry.parentPath;
+                    let item = { isSelected: false, isDirectory: entry.isDirectory(), filename: entry.name, fullname: path.resolve(parentPath, entry.name) };
+                    items.append(item);
+                }
+            })
+
+            WORKBENCH_UI.lists.reset("file-list");
+            WORKBENCH_UI.lists.render("file-list");
+        }
     },
     props: {
         conversionFormat: "avif",
