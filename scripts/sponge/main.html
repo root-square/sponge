@@ -35,29 +35,29 @@
             <div class="main-a card p-0">
                 <div class="card-body leftside-container m-0 p-0">
                     <div class="g-start-1 d-flex flex-row align-items-center border-bottom border-secondary-subtle border-1 p-1">
-                        <button type="button" class="btn btn-sm btn-dark" data-bs-toggle="tooltip" data-bs-title="Back to previous directory">
+                        <button id="btn-nav-to-back" type="button" class="btn btn-sm btn-dark" onclick="WORKBENCH_UI.files.navigateToBack()" data-bs-toggle="tooltip" data-bs-title="Back to previous directory">
                             <i class="bi bi-chevron-left" style="font-size: 0.8rem"></i>
                         </button>
-                        <button type="button" class="btn btn-sm btn-dark" data-bs-toggle="tooltip" data-bs-title="Back to last directory">
+                        <button id="btn-nav-to-forward" type="button" class="btn btn-sm btn-dark" onclick="WORKBENCH_UI.files.navigateToForward()" data-bs-toggle="tooltip" data-bs-title="Back to last directory">
                             <i class="bi bi-chevron-right" style="font-size: 0.8rem"></i>
                         </button>
-                        <button type="button" class="btn btn-sm btn-dark" data-bs-toggle="tooltip" data-bs-title="Refresh">
+                        <button type="button" class="btn btn-sm btn-dark" onclick="WORKBENCH_UI.files.navigateWithPath(WORKBENCH_UI.files.historyList[WORKBENCH_UI.files.historyPointer])" data-bs-toggle="tooltip" data-bs-title="Refresh">
                             <i class="bi bi-arrow-clockwise" style="font-size: 0.8rem"></i>
                         </button>
-                        <input type="text" class="form-control form-control-sm border-0" style="font-size: 0.8rem" placeholder="Path">
+                        <input id="input-nav-path" type="text" class="form-control form-control-sm border-0" style="font-size: 0.8rem" placeholder="Path">
                     </div>
 
-                    <div id="file-list-container" class="g-start-2 bg-dark-subtle position-relative overflow-y-auto" style="font-size: 0.8rem">
-                        <div id="file-list" class="list-group list-group-flush position-absolute w-100">
+                    <div id="nav-list-container" class="g-start-2 bg-dark-subtle position-relative overflow-y-auto" style="font-size: 0.8rem">
+                        <div id="nav-list" class="list-group list-group-flush position-absolute w-100">
 
                         </div>
                     </div>
 
                     <div class="g-start-3 d-flex flex-row align-items-center justify-content-center border-top border-bottom border-secondary-subtle border-1 p-1">
-                        <button type="button" class="btn btn-sm btn-dark" data-bs-toggle="tooltip" data-bs-title="Add to the ignore list">
+                        <button type="button" class="btn btn-sm btn-dark" onclick="WORKBENCH_UI.files.transfer('down')" data-bs-toggle="tooltip" data-bs-title="Add to the ignore list">
                             <i class="bi bi-arrow-down" style="font-size: 0.8rem"></i>
                         </button>
-                        <button type="button" class="btn btn-sm btn-dark" data-bs-toggle="tooltip" data-bs-title="Remove from the ignore list">
+                        <button type="button" class="btn btn-sm btn-dark" onclick="WORKBENCH_UI.files.transfer('up')" data-bs-toggle="tooltip" data-bs-title="Remove from the ignore list">
                             <i class="bi bi-arrow-up" style="font-size: 0.8rem"></i>
                         </button>
                     </div>

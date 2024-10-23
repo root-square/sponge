@@ -9,17 +9,19 @@ window.addEventListener("load", () => {
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     const tooltipList = [...tooltipTriggerList].map(elem => new bootstrap.Tooltip(elem));
     
-    WORKBENCH_UI.lists.init();
+    WORKBENCH_UI.files.init();
     WORKBENCH_UI.props.init();
 
-    WORKBENCH_UI.lists.open("./");
+    WORKBENCH_UI.files.open("./");
 });
 
 let WORKBENCH_UI = {
-    lists: {
-        // Note: data structure -> isSelected(bool), isDirectory(bool), filename(str), fullname(str)
-        fileList: [],
-        fileListNodePool: Array.from({ length: 30 }, (_, i) => {
+    files: {
+        historyList: [],
+        historyPointer: 0,
+        // Note: data structure -> isSelected(bool), isDirectory(bool), name(str), fullname(str)
+        navList: [],
+        navListNodePool: Array.from({ length: 30 }, (_, i) => {
             const element = document.createElement("button");
             element.type = "button";
             element.className = "list-group-item list-group-item-action bg-dark-subtle d-flex align-items-center position-absolute border-0 border-bottom-1";
@@ -39,12 +41,12 @@ let WORKBENCH_UI = {
             element.appendChild(icon);
             element.appendChild(text);
     
-            document.getElementById("file-list").appendChild(element);
+            document.getElementById("nav-list").appendChild(element);
             return element;
         }),
-        fileListStart: 0,
-        fileListEnd: 30,
-        fileListItemHeight: 40,
+        navListStart: 0,
+        navListEnd: 30,
+        navListItemHeight: 40,
         ignoreList: [],
         ignoreListNodePool: Array.from({ length: 30 }, (_, i) => {
             const element = document.createElement("button");
@@ -74,65 +76,65 @@ let WORKBENCH_UI = {
         ignoreListItemHeight: 40,
         init: () => {
             // To make scrolling area, add a placeholder to the list element.
-            let fileListElement = document.getElementById("file-list");
+            let navListElement = document.getElementById("nav-list");
             const filePlaceholder = document.createElement("div");
-            filePlaceholder.style.height = `${WORKBENCH_UI.lists.fileList.length * WORKBENCH_UI.lists.fileListItemHeight}px`;
-            fileListElement.appendChild(filePlaceholder);
+            filePlaceholder.style.height = `${WORKBENCH_UI.files.navList.length * WORKBENCH_UI.files.navListItemHeight}px`;
+            navListElement.appendChild(filePlaceholder);
 
             let ignoreListElement = document.getElementById("ignore-list");
             const ignorePlaceholder = document.createElement("div");
-            ignorePlaceholder.style.height = `${WORKBENCH_UI.lists.ignoreList.length * WORKBENCH_UI.lists.ignoreListItemHeight}px`;
+            ignorePlaceholder.style.height = `${WORKBENCH_UI.files.ignoreList.length * WORKBENCH_UI.files.ignoreListItemHeight}px`;
             ignoreListElement.appendChild(ignorePlaceholder);
 
             // Add event listener to re-render the list, when scrolling the list.
-            let fileListContainer = document.getElementById("file-list-container");
-            fileListContainer.addEventListener("scroll", () => {
-                const scrollTop = fileListContainer.scrollTop;
-                WORKBENCH_UI.lists.fileListStart = Math.floor(scrollTop / WORKBENCH_UI.lists.fileListItemHeight);
-                WORKBENCH_UI.lists.fileListEnd = WORKBENCH_UI.lists.fileListStart + 30;
-                WORKBENCH_UI.lists.render("file-list");
+            let navListContainer = document.getElementById("nav-list-container");
+            navListContainer.addEventListener("scroll", () => {
+                const scrollTop = navListContainer.scrollTop;
+                WORKBENCH_UI.files.navListStart = Math.floor(scrollTop / WORKBENCH_UI.files.navListItemHeight);
+                WORKBENCH_UI.files.navListEnd = WORKBENCH_UI.files.navListStart + 30;
+                WORKBENCH_UI.files.render("nav-list");
             });
 
             let ignoreListContainer = document.getElementById("ignore-list-container");
             ignoreListContainer.addEventListener("scroll", () => {
                 const scrollTop = ignoreListContainer.scrollTop;
-                WORKBENCH_UI.lists.ignoreListStart = Math.floor(scrollTop / WORKBENCH_UI.lists.ignoreListItemHeight);
-                WORKBENCH_UI.lists.ignoreListEnd = WORKBENCH_UI.lists.ignoreListStart + 30;
-                WORKBENCH_UI.lists.render("ignore-list");
+                WORKBENCH_UI.files.ignoreListStart = Math.floor(scrollTop / WORKBENCH_UI.files.ignoreListItemHeight);
+                WORKBENCH_UI.files.ignoreListEnd = WORKBENCH_UI.files.ignoreListStart + 30;
+                WORKBENCH_UI.files.render("ignore-list");
             });
             
-            WORKBENCH_UI.lists.renderAll();
+            WORKBENCH_UI.files.renderAll();
         },
         render: (target) => {
-            if (target === "file-list") {
-                const visibleData = WORKBENCH_UI.lists.fileList.slice(WORKBENCH_UI.lists.fileListStart, Math.min(WORKBENCH_UI.lists.fileListEnd, WORKBENCH_UI.lists.fileList.length));
+            if (target === "nav-list") {
+                const visibleData = WORKBENCH_UI.files.navList.slice(WORKBENCH_UI.files.navListStart, Math.min(WORKBENCH_UI.files.navListEnd, WORKBENCH_UI.files.navList.length));
     
-                for (let i = 0; i < WORKBENCH_UI.lists.fileListNodePool.length; i++) {
-                    const item = WORKBENCH_UI.lists.fileListNodePool[i];
+                for (let i = 0; i < WORKBENCH_UI.files.navListNodePool.length; i++) {
+                    const item = WORKBENCH_UI.files.navListNodePool[i];
     
                     if (i < visibleData.length) {
                         const data = visibleData[i];
-                        item.ariaLabel = data.fullpath;
-                        item.querySelector("input").ariaLabel = data.fullpath;
-                        item.querySelector("span").textContent = data.filename;
-                        item.style.top = `${(WORKBENCH_UI.lists.fileListStart + i) * WORKBENCH_UI.lists.fileListItemHeight}px`; // Update the position of the node based on its index in the data array
+                        item.ariaLabel = data.fullname;
+                        item.querySelector("input").ariaLabel = data.fullname;
+                        item.querySelector("span").textContent = data.name;
+                        item.style.top = `${(WORKBENCH_UI.files.navListStart + i) * WORKBENCH_UI.files.navListItemHeight}px`; // Update the position of the node based on its index in the data array
                         item.classList.replace("d-none", "d-flex");
                     } else {
                         item.classList.replace("d-flex", "d-none"); // Hide the node if it's not in the visible range
                     }
                 }
             } else if (target === "ignore-list") {
-                const visibleData = WORKBENCH_UI.lists.ignoreList.slice(WORKBENCH_UI.lists.ignoreListStart, Math.min(WORKBENCH_UI.lists.ignoreListEnd, WORKBENCH_UI.lists.ignoreList.length));
+                const visibleData = WORKBENCH_UI.files.ignoreList.slice(WORKBENCH_UI.files.ignoreListStart, Math.min(WORKBENCH_UI.files.ignoreListEnd, WORKBENCH_UI.files.ignoreList.length));
     
-                for (let i = 0; i < WORKBENCH_UI.lists.ignoreListNodePool.length; i++) {
-                    const item = WORKBENCH_UI.lists.ignoreListNodePool[i];
+                for (let i = 0; i < WORKBENCH_UI.files.ignoreListNodePool.length; i++) {
+                    const item = WORKBENCH_UI.files.ignoreListNodePool[i];
     
                     if (i < visibleData.length) {
                         const data = visibleData[i];
-                        item.ariaLabel = data.fullpath;
-                        item.querySelector("input").ariaLabel = data.fullpath;
-                        item.querySelector("span").textContent = data.filename;
-                        item.style.top = `${(WORKBENCH_UI.lists.ignoreListStart + i) * WORKBENCH_UI.lists.ignoreListItemHeight}px`; // Update the position of the node based on its index in the data array
+                        item.ariaLabel = data.fullname;
+                        item.querySelector("input").ariaLabel = data.fullname;
+                        item.querySelector("span").textContent = data.name;
+                        item.style.top = `${(WORKBENCH_UI.files.ignoreListStart + i) * WORKBENCH_UI.files.ignoreListItemHeight}px`; // Update the position of the node based on its index in the data array
                         item.classList.replace("d-none", "d-flex");
                     } else {
                         item.classList.replace("d-flex", "d-none"); // Hide the node if it's not in the visible range
@@ -141,57 +143,164 @@ let WORKBENCH_UI = {
             }
         },
         renderAll: () => {
-            WORKBENCH_UI.lists.render("file-list");
-            WORKBENCH_UI.lists.render("ignore-list");
+            WORKBENCH_UI.files.render("nav-list");
+            WORKBENCH_UI.files.render("ignore-list");
         },
         reset: (target) => {
-            if (target === "file-list") {
-                document.getElementById("file-list-container").scrollTop = 0;
-                WORKBENCH_UI.lists.fileListStart = 0;
-                WORKBENCH_UI.lists.fileListEnd = 30;
+            if (target === "nav-list") {
+                document.getElementById("nav-list-container").scrollTop = 0;
+                WORKBENCH_UI.files.navListStart = 0;
+                WORKBENCH_UI.files.navListEnd = 30;
             } else if (target === "ignore-list") {
                 document.getElementById("ignore-list-container").scrollTop = 0;
-                WORKBENCH_UI.lists.ignoreListStart = 0;
-                WORKBENCH_UI.lists.ignoreListEnd = 30;
+                WORKBENCH_UI.files.ignoreListStart = 0;
+                WORKBENCH_UI.files.ignoreListEnd = 30;
             }
         },
-        select: (fullname) => [
+        history: (newPath, direction) => {
+            function updateAvailability() {
+                let navToBackButton = document.getElementById("btn-nav-to-back");
+                let navToForwardButton = document.getElementById("btn-nav-to-forward");
+                
+                if (WORKBENCH_UI.files.historyPointer > 0) {
+                    navToBackButton.classList.remove("disabled");
+                } else {
+                    navToBackButton.classList.add("disabled");
+                }
 
-        ],
-        transfer: (direction) => {
-            if (direction.toLowerCase() === "up") {
-
-            } else if (direction.toLowerCase() === "down") {
-
+                if (WORKBENCH_UI.files.historyPointer < WORKBENCH_UI.files.historyList.length - 1) {
+                    navToForwardButton.classList.remove("disabled");
+                } else {
+                    navToForwardButton.classList.add("disabled");
+                }
             }
-        },
-        view: (fullname) => {
             
+            if (direction === null || direction === "none") {
+                // Remove the right portion of the pointer, and append a new path.
+                if (WORKBENCH_UI.files.historyPointer >= 0 && WORKBENCH_UI.files.historyPointer < WORKBENCH_UI.files.historyList.length) {
+                    WORKBENCH_UI.files.historyForward.splice(WORKBENCH_UI.files.historyPointer, WORKBENCH_UI.files.historyList.length - WORKBENCH_UI.files.historyPointer);
+                }
+                WORKBENCH_UI.files.historyList.append(newPath);
+                WORKBENCH_UI.files.historyPointer = WORKBENCH_UI.files.historyList.length - 1;
+                
+                updateAvailability();
+
+                return newPath;
+            } else if (direction === "back") {
+                // Move the pointer to leftside(-1).
+                if (WORKBENCH_UI.files.historyPointer - 1 >= 0) {
+                    WORKBENCH_UI.files.historyPointer -= 1;
+                }
+                
+                updateAvailability();
+
+                return WORKBENCH_UI.files.historyList[WORKBENCH_UI.files.historyPointer];
+            } else if (direction === "forward") {
+                // Move the pointer to rightside(+1).
+                if (WORKBENCH_UI.files.historyPointer + 1 < WORKBENCH_UI.files.historyList.length) {
+                    WORKBENCH_UI.files.historyPointer += 1;
+                }
+
+                updateAvailability();
+
+                return WORKBENCH_UI.files.historyList[WORKBENCH_UI.files.historyPointer];
+            }
         },
-        open: (path) => {
-            if (!fs.existsSync(path)) {
+        navigateToBack: () => {
+            let targetPath = WORKBENCH_UI.files.history(null, "back");
+            WORKBENCH_UI.files.navigateWithPath(targetPath, false);
+        },
+        navigateToForward: () => {
+            let targetPath = WORKBENCH_UI.files.history(null, "forward");
+            WORKBENCH_UI.files.navigateWithPath(targetPath, false);
+        },
+        navigateWithIndex: (index, setHistory) => {
+            if (!isNaN(index) && index >= 0 && index <= WORKBENCH_UI.files.navList.length) {
+                WORKBENCH_UI.files.navigateWithPath(WORKBENCH_UI.files.navList[index].fullname, setHistory);
+            }
+        },
+        navigateWithPath: (targetPath, setHistory) => {
+            if (!fs.existsSync(targetPath)) {
                 return;
             }
-            if (!fs.statSync(path).isDirectory()) {
+            if (!fs.statSync(targetPath).isDirectory()) {
                 return;
             }
 
             let items = [];
             
             // Note: fs.readdir() uses process.cwd().
-            let targetPath = path.resolve(path.relative(process.cwd(), SPONGE.workDirectory), path);
+            // Read the directory and append it to the navigation list.
+            let fullPath = path.resolve(path.relative(process.cwd(), SPONGE.workDirectory), targetPath);
 
-            fs.readdir(targetPath, { encoding: "utf-8", withFileTypes: true }, function(err, entries) {
+            fs.readdir(fullPath, { encoding: "utf-8", withFileTypes: true }, function(err, entries) {
                 for (let entry of entries) {
                     let parentPath = typeof entry.parentPath === "undefined" || entry.parentPath === null ? entry.path : entry.parentPath;
-                    let item = { isSelected: false, isDirectory: entry.isDirectory(), filename: entry.name, fullname: path.resolve(parentPath, entry.name) };
+                    let item = { isSelected: false, isDirectory: entry.isDirectory(), name: entry.name, fullname: path.resolve(parentPath, entry.name) };
                     items.append(item);
                 }
             })
 
-            WORKBENCH_UI.lists.reset("file-list");
-            WORKBENCH_UI.lists.render("file-list");
-        }
+            // Set the history.
+            if (setHistory !== null && setHistory) {
+                WORKBENCH_UI.files.history(fullPath, "none");
+            }
+
+            WORKBENCH_UI.files.navList = items;
+            WORKBENCH_UI.files.reset("nav-list");
+            WORKBENCH_UI.files.render("nav-list");
+        },
+        switch: (target, index) => {
+            if (target === "nav-list" && !isNaN(index) && index >= 0 && index <= WORKBENCH_UI.files.navList.length) {
+                let item = WORKBENCH_UI.files.navList[index];
+
+                if (typeof item.isSelected === "boolean") {
+                    item.isSelected = !item.isSelected;
+                }
+
+                WORKBENCH_UI.files.render("nav-list");
+            } else if (target === "ignore-list" && !isNaN(index) && index >= 0 && index <= WORKBENCH_UI.files.ignoreList.length) {
+                let item = WORKBENCH_UI.files.ignoreList[index];
+
+                if (typeof item.isSelected === "boolean") {
+                    item.isSelected = !item.isSelected;
+                }
+
+                WORKBENCH_UI.files.render("ignore-list");
+            }
+        },
+        transfer: (direction) => {
+            if (direction.toLowerCase() === "up") {
+                for (let i = WORKBENCH_UI.files.ignoreList.length-1; i >= 0; i--) {
+                    let item = WORKBENCH_UI.files.ignoreList[i];
+
+                    if (item.isSelected) {
+                        WORKBENCH_UI.files.ignoreList.splice(i, 1);
+                    }
+                } 
+
+                WORKBENCH_UI.files.reset("ignore-list");
+                WORKBENCH_UI.files.render("ignore-list");
+            } else if (direction.toLowerCase() === "down") {
+                for (let i = 0; i < WORKBENCH_UI.files.fileList.length; i++) {
+                    let item = WORKBENCH_UI.files.fileList[i];
+
+                    if (item.isSelected && !item.isDirectory) {
+                        item.isSelected = false;
+                        WORKBENCH_UI.files.ignoreList.append(item);
+                    }
+                }
+                
+                WORKBENCH_UI.files.ignoreList.sort((a, b) => b.name.localeCompare(a.name));
+
+                WORKBENCH_UI.files.reset("ignore-list");
+                WORKBENCH_UI.files.render("nav-list");
+                WORKBENCH_UI.files.render("ignore-list");
+            }
+        },
+        view: (index) => {
+            
+        },
     },
     props: {
         conversionFormat: "avif",
