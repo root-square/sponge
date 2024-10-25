@@ -1,6 +1,6 @@
 /*!-----------------------------------------------------------------------------
  * Copyright (c) handbros(root-square). All rights reserved.
- * Version: 0.2.1(dev)
+ * Version: 0.3.1(dev)
  * Released under the MIT license
  * https://github.com/root-square/sponge/blob/main/LICENSE
  *-----------------------------------------------------------------------------*/
@@ -28,7 +28,7 @@ window.addEventListener("keydown", (e) => {
     if (SPONGE.isSilentMode) {
         return;
     }
-    
+
     if (e.key === "Pause" || (e.ctrlKey && e.key === "F7")) {
         SPONGE_WORKBENCH.main();
     }

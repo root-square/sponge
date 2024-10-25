@@ -15,6 +15,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (desc)
 -->
 
+## [0.3.1] - 2024-10-25
+
+### Added
+- Add file I/O functions.
+- Add Sponge Exchange Format(SX) I/O functions.
+- Add image format converter, and validator.
+- Add override function injector.
+- Add default settings to 'sponge.json'.
+- (WORKBENCH) Add options reader/writer.
+- (WORKBENCH) Add file navigation system(linear history based).
+
+### Changed
+- Make the 'sponge.js' interoperable.
+- Change override methods to function.
+
+### Fixed
+- Fix the data transfer logic between Workbench UIs.
+
 ## [0.3.0] - 2024-10-17
 
 ### Added
