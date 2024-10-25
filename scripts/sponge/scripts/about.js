@@ -5,10 +5,11 @@
  * https://github.com/root-square/sponge/blob/main/LICENSE
  *-----------------------------------------------------------------------------*/
 window.addEventListener("load", () => {
-    // Note: If a referer exists, show the prev button.
+    // Get queries from the URL and display it.
     let url = new URL(window.location.href);
     let urlParams = url.searchParams;
 
+    // Note: If a referer exists, show the prev button.
     if (urlParams.has("referer")) {
         document.getElementById("btn-prev").style.display = "inline-block";
     } else {

@@ -9,6 +9,7 @@ window.addEventListener("load", () => {
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     const tooltipList = [...tooltipTriggerList].map(elem => new bootstrap.Tooltip(elem));
     
+    // Initialize components.
     WORKBENCH.files.init();
     WORKBENCH.props.init();
 
@@ -107,7 +108,7 @@ let WORKBENCH = {
                 WORKBENCH.files.render("ignore-list");
             });
 
-            // Add event listeners to the path input.
+            // Add event listeners to provide keyboard interactions.
             let navPathInput = document.getElementById("input-nav-path");
             navPathInput.addEventListener("keydown", (e) => {
                 if (e.key === "Enter") {
@@ -257,10 +258,14 @@ let WORKBENCH = {
             }
         },
         navigateToBack: () => {
+            // Get a back history and navigate to it.
+            // In the process, we trust the path from the history list.
             let targetPath = WORKBENCH.files.history(null, "back");
             WORKBENCH.files.navigateWithPath(targetPath, false);
         },
         navigateToForward: () => {
+            // Get a forward history and navigate to it.
+            // In the process, we trust the path from the history list.
             let targetPath = WORKBENCH.files.history(null, "forward");
             WORKBENCH.files.navigateWithPath(targetPath, false);
         },
@@ -290,16 +295,18 @@ let WORKBENCH = {
                 items.push(item);
             }
 
-            // Set the history.
             if (typeof setHistory !== "undefined" && setHistory) {
                 WORKBENCH.files.history(fullPath, "none");
             }
             
-            // Show the current path.
-            document.getElementById("input-nav-path").value = fullPath;
+            // Display the current path.
+            document.getElementById("input-nav-path").value = WORKBENCH.files.historyList[WORKBENCH.files.historyPointer];
 
+            // Clear the nav list and append items.
             WORKBENCH.files.navList.splice(0, WORKBENCH.files.navList.length);
             WORKBENCH.files.navList.push(...items);
+
+            // Sort the nav list by the 'isDirectory' flag.
             WORKBENCH.files.navList.sort((a, b) => (a.isDirectory === b.isDirectory)? 0 : a.isDirectory ? -1 : 1); // Sort the nav list by 'isDirectory'.
 
             WORKBENCH.files.reset("nav-list");
@@ -342,10 +349,15 @@ let WORKBENCH = {
 
                     if (item.isSelected && !item.isDirectory) {
                         item.isSelected = false;
-                        WORKBENCH.files.ignoreList.push(item);
+
+                        // If the ignore list does not contain the item, add it.
+                        if (!WORKBENCH.files.ignoreList.some((obj) => obj.fullname === item.fullname)) {
+                            WORKBENCH.files.ignoreList.push(item);
+                        }
                     }
                 }
                 
+                // Sort by filename.
                 WORKBENCH.files.ignoreList.sort((a, b) => b.name.localeCompare(a.name));
 
                 WORKBENCH.files.reset("ignore-list");

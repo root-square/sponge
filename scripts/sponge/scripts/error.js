@@ -5,6 +5,7 @@
  * https://github.com/root-square/sponge/blob/main/LICENSE
  *-----------------------------------------------------------------------------*/
 window.addEventListener("load", () => {
+    // Get queries from the URL and display it.
     let url = new URL(window.location.href);
     let urlParams = url.searchParams;
 

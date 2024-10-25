@@ -18,10 +18,7 @@ window.addEventListener("load", () => {
 
     // Initialize components.
     SPONGE.init();
-
-    if (!SPONGE.isSilentMode) {
-        SPONGE.inject();
-    }
+    SPONGE.inject();
 });
 
 window.addEventListener("keydown", (e) => {
@@ -61,6 +58,10 @@ let SPONGE = {
         }
     },
     inject: () => {
+        if (SPONGE.isSilentMode) {
+            return;
+        }
+        
         if (Utils.RPGMAKER_NAME === "MV") {
             Bitmap.prototype._requestImage = SPONGE_OVERRIDES.MV.requestImage;
             Decrypter.prototype.decryptImg = SPONGE_OVERRIDES.MV.decryptImage;
@@ -135,7 +136,7 @@ let SPONGE_FUNCTIONS = {
     isSponge: (arrayBuffer) => {
         if (!arrayBuffer) return null;
 
-        const signature = "53.58.20.0a";
+        const signature = "53.58.20.0a"; // SX<SP><LF>
 
         let header = new Uint8Array(arrayBuffer, 0, 4);
         return (Array.from(header, x => x.toString(16)).join(".") !== signature);
@@ -191,6 +192,7 @@ let SPONGE_FUNCTIONS = {
 
         let options = {};
 
+        // Split the options string by ';'.
         const partRegex = /(\w+\=)([^\s]+)/;
         let parts = optionsString.split(';');
 
@@ -200,6 +202,7 @@ let SPONGE_FUNCTIONS = {
                 let key = part.slice(0, dividerIndex);
                 let value = part.slice(dividerIndex + 1, part.length - 1);
 
+                // Convert the value to each type.
                 let valueInt = parseInt(value, 10);
                 let valueBool = null;
                 if (/^(true|false)$/i.test(value)) {
@@ -212,6 +215,7 @@ let SPONGE_FUNCTIONS = {
                 let valueLowerCase = value.toLowerCase();
                 let valueUpperCase = value.toUpperCase();
 
+                // Parse options.
                 switch (key.toLowerCase()) {
                     case "alpha_q":
                         if (!isNaN(valueInt) && valueInt >= 0 && valueInt <= 100 && format === "webp") {
