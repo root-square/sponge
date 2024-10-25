@@ -25,6 +25,10 @@ window.addEventListener("load", () => {
 });
 
 window.addEventListener("keydown", (e) => {
+    if (SPONGE.isSilentMode) {
+        return;
+    }
+    
     if (e.key === "Pause" || (e.ctrlKey && e.key === "F7")) {
         SPONGE_WORKBENCH.main();
     }
