@@ -90,7 +90,7 @@ let WORKBENCH = {
             ignorePlaceholder.style.height = `${WORKBENCH.files.ignoreList.length * WORKBENCH.files.ignoreListItemHeight}px`;
             ignoreListElement.appendChild(ignorePlaceholder);
 
-            // Add event listener to re-render the list, when scrolling the list.
+            // Add event listeners to re-render the list, when scrolling the list.
             let navListContainer = document.getElementById("nav-list-container");
             navListContainer.addEventListener("scroll", () => {
                 const scrollTop = navListContainer.scrollTop;
@@ -106,7 +106,20 @@ let WORKBENCH = {
                 WORKBENCH.files.ignoreListEnd = WORKBENCH.files.ignoreListStart + 30;
                 WORKBENCH.files.render("ignore-list");
             });
-            
+
+            // Add event listeners to the path input.
+            let navPathInput = document.getElementById("input-nav-path");
+            navPathInput.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                    
+                    WORKBENCH.files.navigateWithPath(navPathInput.value, true);
+                    navPathInput.blur();
+                }
+            });
+            navPathInput.addEventListener("focusout", () => {
+                navPathInput.value = WORKBENCH.files.historyList[WORKBENCH.files.historyPointer];
+            })
+
             WORKBENCH.files.renderAll();
         },
         render: (target) => {
@@ -257,10 +270,8 @@ let WORKBENCH = {
             }
         },
         navigateWithPath: (targetPath, setHistory = false) => {
-            if (!fs.existsSync(targetPath)) {
-                return;
-            }
-            if (!fs.statSync(targetPath).isDirectory()) {
+            if (!fs.existsSync(targetPath) || !fs.statSync(targetPath).isDirectory()) {
+                WORKBENCH.status.setToast("Cannot find the directory.");
                 return;
             }
             
@@ -343,7 +354,7 @@ let WORKBENCH = {
             }
         },
         view: (index) => {
-            alert(`view test: ${WORKBENCH.files.navList[index].name}`);
+            
         },
         onSwitched: function (target, index) {
             if (target !== "nav-list" && target !== "ignore-list") {
