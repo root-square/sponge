@@ -35,6 +35,9 @@ let SPONGE = {
     isNwjs: false,
     isSilentMode: false,
     workDirectory: null,
+    rpgMakerName: null,
+    rpgMakerVersion: null,
+    encryptionKey: null,
     init: () => {
         try {
             SPONGE.isNwjs = (typeof require('nw.gui') !== "undefined");
@@ -42,13 +45,48 @@ let SPONGE = {
             SPONGE.isNwjs = false;
         }
 
-        // Parse the actual work directory.
         let baseDirectory = path.dirname(process.execPath);
-        let pkgPath = path.resolve(baseDirectory, "package.json");
 
+        // Parse the actual work directory.
+        let pkgPath = path.resolve(baseDirectory, "package.json");
         if (fs.existsSync(pkgPath)) {
-            let pkgJson = JSON.parse(fs.readFileSync(pkgPath));
+            let pkgJson = JSON.parse(fs.readFileSync(pkgPath, { encoding: "utf8", flag: "r" }));
             SPONGE.workDirectory = path.dirname(path.resolve(baseDirectory, pkgJson.main));
+        }
+
+        // Parse the RPG Maker information.
+        const nameRegex = /(?<=RPGMAKER_NAME\s=\s[\'\"]).+(?=[\'\"])/;
+        const versionRegex = /(?<=RPGMAKER_VERSION\s=\s[\'\"]).+(?=[\'\"])/;
+        let mvCorePath = path.resolve(SPONGE.workDirectory, "js/rpg_core.js");
+        let mzCorePath = path.resolve(SPONGE.workDirectory, "js/rmmz_core.js");
+
+        let code = "";
+        if (fs.existsSync(mvCorePath)) {
+            code = fs.readFileSync(mvCorePath, { encoding: "utf8", flag: "r" });
+        } else if (fs.existsSync(mzCorePath)) {
+            code = fs.readFileSync(mzCorePath, { encoding: "utf8", flag: "r" });
+        }
+
+        let nameMatches = code.match(nameRegex);
+        if (nameMatches !== null) {
+            SPONGE.rpgMakerName = nameMatches[0];
+        }
+
+        let versionMatches = code.match(versionRegex);
+        if (versionMatches !== null) {
+            SPONGE.rpgMakerVersion = versionMatches[0];
+        }
+
+        // Parse the encryption key.
+        const encryptionKeyRegex = /(?<=[\'\"]encryptionKey[\'\"]\s?:\s?[\'\"]).+(?=[\'\"])/;
+        let systemPath = path.resolve(SPONGE.workDirectory, "data/System.json");
+        if (fs.existsSync(systemPath)) {
+            let systemJson = fs.readFileSync(systemPath, { encoding: "utf8", flag: "r" });
+            let keyMatches = systemJson.match(encryptionKeyRegex);
+
+            if (keyMatches !== null) {
+                SPONGE.encryptionKey = keyMatches[0];
+            }
         }
 
         // Diagnose the current environment.
@@ -496,9 +534,9 @@ let SPONGE_TESTS = {
             SPONGE_WORKBENCH.error("DIAG_ENV_NODE_NOT_FOUND", "The JavaScript runtime environment does not appear to be node.js.", null);
 
         // Error: DIAG_ENV_WASM_NOT_SUPPORTED
-        let regex = /^v(\d+\.\d+)/;
+        let regex = /(?<=[vV])(\d+\.\d+)/;
         let nodeVersion = parseFloat(regex.exec(process.version));
-        if (nodeVersion < 16.4)
+        if (!isNaN(nodeVersion) && nodeVersion < 16.4)
             SPONGE_WORKBENCH.error("DIAG_ENV_WASM_NOT_SUPPORTED", "At least version 16.4 of node.js is required to call the WASM final SIMD opcodes.", null);
     },
     diagnoseEngine: () => {
