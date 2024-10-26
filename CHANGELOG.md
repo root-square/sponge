@@ -15,6 +15,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (desc)
 -->
 
+## [0.3.2] - 2024-10-26
+
+### Added
+- Add input-nav-path interactions.
+- Add engine data getter functions.
+- Add detailed summaries.
+
+### Changed
+- Change 'isSilentMode' to 'isWorkbench'.
+
 ## [0.3.1] - 2024-10-25
 
 ### Added
