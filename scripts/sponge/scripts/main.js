@@ -536,7 +536,7 @@ let WORKBENCH = {
                 params.append("version", settingsJson.version);
             }
 
-            params.append("referer", "./main.html?silent=main");
+            params.append("referer", "./main.html?workbench=true");
 
             window.location.href = `./about.html?${params.toString()}`;
         }

@@ -12,8 +12,8 @@ const path = require('path');
 window.addEventListener("load", () => {
     let url = new URL(window.location.href);
     let urlParams = url.searchParams;
-    if (urlParams.has("silent")) {
-        SPONGE.isSilentMode = true;
+    if (urlParams.has("workbench")) {
+        SPONGE.isWorkbench = true;
     }
 
     // Initialize components.
@@ -22,7 +22,7 @@ window.addEventListener("load", () => {
 });
 
 window.addEventListener("keydown", (e) => {
-    if (SPONGE.isSilentMode) {
+    if (SPONGE.isWorkbench) {
         return;
     }
 
@@ -33,7 +33,7 @@ window.addEventListener("keydown", (e) => {
 
 let SPONGE = {
     isNwjs: false,
-    isSilentMode: false,
+    isWorkbench: false,
     workDirectory: null,
     rpgMakerName: null,
     rpgMakerVersion: null,
@@ -90,13 +90,13 @@ let SPONGE = {
         }
 
         // Diagnose the current environment.
-        if (!SPONGE.isSilentMode) {
+        if (!SPONGE.isWorkbench) {
             SPONGE_TESTS.diagnoseEnvironment();
             SPONGE_TESTS.diagnoseEngine();
         }
     },
     inject: () => {
-        if (SPONGE.isSilentMode) {
+        if (SPONGE.isWorkbench) {
             return;
         }
         
@@ -135,7 +135,7 @@ let SPONGE_WORKBENCH = {
         SPONGE_WORKBENCH.init();
 
         if (SPONGE_WORKBENCH.isInitialized) { 
-            window.location.href = "./js/libs/sponge/main.html?silent=main";
+            window.location.href = "./js/libs/sponge/main.html?workbench=true";
         } else {
             alert("Cannot open the workbench in the current environment.");
         }
