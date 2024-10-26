@@ -1,6 +1,6 @@
 {
     "mode": "development",
-    "version": "0.3.1",
+    "version": "0.3.2",
     "options": {
       "avif": "Q=50;effort=4;speed=5;bitdepth=12;encoder=svt;lossless=true;subsample_mode=auto",
       "heif": "Q=50;effort=4;speed=5;bitdepth=12;encoder=x265;lossless=true;subsample_mode=auto",
