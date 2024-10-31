@@ -20,7 +20,7 @@ Param(
     [switch]$ignoreWarnings
 )
 
-function Invoke-Startup {
+function Invoke-Title {
     if ($nologo) {
         return
     }
@@ -108,14 +108,14 @@ function Exit-With-Code([int] $exitCode) {
 }
 
 if ($help) {
-    Invoke-Startup
+    Invoke-Title
     Invoke-Help
 
     exit 0
 }
 
 [timespan]$execTime = Measure-Command {
-    Invoke-Startup | Out-Default
+    Invoke-Title | Out-Default
     Invoke-Prepare | Out-Default
     
     if ($mode.ToLower() -eq "install") {

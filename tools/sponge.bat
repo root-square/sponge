@@ -1,2 +1,3 @@
-Set-ExecutionPolicy Unrestricted
-./sponge.ps1
+@echo off
+title Sponge Patch Assistant
+powershell -NoProfile -ExecutionPolicy Unrestricted -File "./sponge.ps1"
