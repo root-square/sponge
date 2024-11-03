@@ -107,6 +107,10 @@ function Exit-With-Code([int] $exitCode) {
     exit $exitCode
 }
 
+if ($IsWindows -eq $false) {
+    Write-Error -Message "The operating system is not supported." -Category DeviceError
+}
+
 if ($help) {
     Invoke-Title
     Invoke-Help
