@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (desc)
 -->
 
+## [0.4.0] - 2024-11-04
+
+### Added
+- Add Sponge Patch Assistant(based on pwsh)
+
 ## [0.3.2] - 2024-10-26
 
 ### Added
