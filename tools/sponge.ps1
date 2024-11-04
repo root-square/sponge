@@ -143,7 +143,7 @@ function Invoke-Install {
         $contents = "$($indents)<script type=`"text/javascript`" src=`"js/libs/vips.js`"></script>`n$($indents)<script type=`"text/javascript`" src=`"js/libs/sponge.js`"></script>"
 
         $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
-        [System.IO.File]::WriteAllLines($script:PackagePath, ($indexHtml.Insert($indexHtml.LastIndexOf("</script>") + "</script>".Length, "`n$($contents)")), $Utf8NoBomEncoding)
+        [System.IO.File]::WriteAllLines($Script:IndexPath, ($indexHtml.Insert($indexHtml.LastIndexOf("</script>") + "</script>".Length, "`n$($contents)")), $Utf8NoBomEncoding)
         Write-Host "OK" -ForegroundColor Green
     } catch {
         Write-Host "FAILED" -ForegroundColor Red
