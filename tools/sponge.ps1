@@ -125,7 +125,9 @@ function Invoke-Install {
         $hash = [System.Security.Cryptography.HashAlgorithm]::Create('sha256').ComputeHash([System.Text.Encoding]::UTF8.GetBytes((Get-Date -Format "dddd MM/dd/yyyy HH:mm.ms")))
         $hashString = [System.BitConverter]::ToString($hash).Replace('-', '')
         $packageJson = Get-Content $Script:PackagePath -Encoding UTF8
-        Out-File -FilePath $script:PackagePath -InputObject ($packageJson -replace "(?<=['""]name['""]\s?:\s?)['""]{1}.*['""]{1}", "`"$hashString`"") -Encoding UTF8
+
+        $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
+        [System.IO.File]::WriteAllLines($script:PackagePath, ($packageJson -replace "(?<=['""]name['""]\s?:\s?)['""]{1}.*['""]{1}", "`"$hashString`""), $Utf8NoBomEncoding)
         Write-Host "OK" -ForegroundColor Green
     } catch {
         Write-Host "FAILED" -ForegroundColor Red
@@ -139,7 +141,9 @@ function Invoke-Install {
         $indexHtml = Get-Content -Raw $Script:IndexPath -Encoding UTF8
         $indents = (Get-Content $Script:IndexPath -Encoding UTF8 | Select-String '^.*(?=<script)' | %{ $_.Matches } | %{ $_.Value })[0]
         $contents = "$($indents)<script type=`"text/javascript`" src=`"js/libs/vips.js`"></script>`n$($indents)<script type=`"text/javascript`" src=`"js/libs/sponge.js`"></script>"
-        Out-File -FilePath $script:IndexPath -InputObject ($indexHtml.Insert($indexHtml.LastIndexOf("</script>") + "</script>".Length, "`n$($contents)")) -Encoding UTF8
+
+        $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
+        [System.IO.File]::WriteAllLines($script:PackagePath, ($indexHtml.Insert($indexHtml.LastIndexOf("</script>") + "</script>".Length, "`n$($contents)")), $Utf8NoBomEncoding)
         Write-Host "OK" -ForegroundColor Green
     } catch {
         Write-Host "FAILED" -ForegroundColor Red
