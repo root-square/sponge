@@ -47,6 +47,7 @@ function Invoke-Prepare {
         Write-Error -Message "Cannot find the manifest file (package.json) in the current directory." -Category ObjectNotFound
         Exit-With-Code 1
     }
+    Set-ItemProperty $Script:PackagePath -name IsReadOnly -value $false
 
     $packageJson = Get-Content -Raw $Script:PackagePath -Encoding UTF8 | ConvertFrom-Json
     $script:BaseDirectory = (Split-Path -Path $packageJson.main -Parent -Resolve)
@@ -54,8 +55,11 @@ function Invoke-Prepare {
     # Get paths to use.
     try {
         $Script:IndexPath = (Join-Path -Path "$($script:BaseDirectory)" -ChildPath "./index.html" -Resolve).ToString()
+        Set-ItemProperty $Script:IndexPath -name IsReadOnly -value $false
+        
         $Script:LibsPath = (Join-Path -Path "$($script:BaseDirectory)" -ChildPath "./js/libs" -Resolve).ToString()
     } catch {
+        Write-Error -Exception $_.Exception -Message "Cannot find index/libs paths." -Category ObjectNotFound
         Exit-With-Code 1
     }
 
@@ -68,6 +72,8 @@ function Invoke-Install {
         Write-Error -Message "The Sponge system has already been installed. If it had not been installed, despite the warning, please proceed with the manual installation." -Category InvalidOperation
         Exit-With-Code 1
     }
+
+    Clear-Host
 
     Write-Warning "This script will install Sponge components in the current directory. Do not run the script unless it is provided by a trusted provider." -WarningAction Inquire
     Write-Host ""
@@ -89,7 +95,7 @@ function Invoke-Install {
         Write-Host "OK" -ForegroundColor Green
     } catch {
         Write-Host "FAILED" -ForegroundColor Red
-        Write-Error -Message "Failed to download wasm-vips resources. Please check your network connection and the version string." -Category OperationStopped
+        Write-Error -Exception $_.Exception -Message "Failed to download wasm-vips resources. Please check your network connection and the version string." -Category OperationStopped
         Exit-With-Code 1
     }
 
@@ -114,7 +120,7 @@ function Invoke-Install {
         Write-Host "OK" -ForegroundColor Green
     } catch {
         Write-Host "FAILED" -ForegroundColor Red
-        Write-Error -Message "Failed to download Sponge resources. Please check your network connection and the version string." -Category OperationStopped
+        Write-Error -Exception $_.Exception -Message "Failed to download Sponge resources. Please check your network connection and the version string." -Category OperationStopped
         Exit-With-Code 1
     }
 
@@ -131,7 +137,7 @@ function Invoke-Install {
         Write-Host "OK" -ForegroundColor Green
     } catch {
         Write-Host "FAILED" -ForegroundColor Red
-        Write-Error -Message "Failed to update NW.js manifest package name. It may not be possible to run the game." -Category OperationStopped
+        Write-Error -Exception $_.Exception -Message "Failed to update NW.js manifest package name. It may not be possible to run the game." -Category OperationStopped
     }
 
     # (4) Update the index page.
@@ -147,7 +153,7 @@ function Invoke-Install {
         Write-Host "OK" -ForegroundColor Green
     } catch {
         Write-Host "FAILED" -ForegroundColor Red
-        Write-Error -Message "Failed to update the index page. It may not be possible to run the game." -Category OperationStopped
+        Write-Error -Exception $_.Exception -Message "Failed to update the index page. It may not be possible to run the game." -Category OperationStopped
     }
 }
 
@@ -156,6 +162,8 @@ function Invoke-Uninstall {
         Write-Error -Message "The Sponge system has not been installed. If it had not been uninstalled, despite the warning, please proceed with the manual uninstallation." -Category InvalidOperation
         Exit-With-Code 1
     }
+
+    Clear-Host
     
     Write-Warning "This script will uninstall Sponge components in the current directory. Are you sure you want to run it?" -WarningAction Inquire
     Write-Host ""
@@ -174,7 +182,7 @@ function Invoke-Uninstall {
         Write-Host "OK" -ForegroundColor Green
     } catch {
         Write-Host "FAILED" -ForegroundColor Red
-        Write-Error -Message "Failed to remove components. Please check your system privilege." -Category OperationStopped
+        Write-Error -Exception $_.Exception -Message "Failed to remove components. Please check your system privilege." -Category OperationStopped
         Exit-With-Code 1
     }
 
@@ -186,7 +194,7 @@ function Invoke-Uninstall {
         Write-Host "OK" -ForegroundColor Green
     } catch {
         Write-Host "FAILED" -ForegroundColor Red
-        Write-Error -Message "Failed to update the index page. It may not be possible to run the game." -Category OperationStopped
+        Write-Error -Exception $_.Exception -Message "Failed to update the index page. It may not be possible to run the game." -Category OperationStopped
     }
 }
 
@@ -229,10 +237,8 @@ if ($help) {
     }
     
     if ($mode.ToLower() -eq "install") {
-        Clear-Host
         Invoke-Install | Out-Default
     } elseif ($mode.ToLower() -eq "uninstall") {
-        Clear-Host
         Invoke-Uninstall | Out-Default
     } else {
         Write-Error -Message "Unable to find the specified operation mode." -Category InvalidArgument
