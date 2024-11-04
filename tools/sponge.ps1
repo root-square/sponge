@@ -229,8 +229,10 @@ if ($help) {
     }
     
     if ($mode.ToLower() -eq "install") {
+        Clear-Host
         Invoke-Install | Out-Default
     } elseif ($mode.ToLower() -eq "uninstall") {
+        Clear-Host
         Invoke-Uninstall | Out-Default
     } else {
         Write-Error -Message "Unable to find the specified operation mode." -Category InvalidArgument
