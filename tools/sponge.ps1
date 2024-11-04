@@ -73,10 +73,8 @@ function Invoke-Install {
         Exit-With-Code 1
     }
 
-    Clear-Host
-
     Write-Warning "This script will install Sponge components in the current directory. Do not run the script unless it is provided by a trusted provider." -WarningAction Inquire
-    Write-Host ""
+    Clear-Host
     
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
@@ -163,10 +161,8 @@ function Invoke-Uninstall {
         Exit-With-Code 1
     }
 
-    Clear-Host
-    
     Write-Warning "This script will uninstall Sponge components in the current directory. Are you sure you want to run it?" -WarningAction Inquire
-    Write-Host ""
+    Clear-Host
 
     # (1) Remove components.
     try {
@@ -246,6 +242,7 @@ if ($help) {
     }
 }
 
+Write-Host ""
 Write-Host "Finished in " -NoNewline
 Write-Host ("{0:d2}:{1:d2}.{2:d4}" -f $($execTime.Minutes), $($execTime.Seconds), $($execTime.Milliseconds)) -ForegroundColor Blue
 
