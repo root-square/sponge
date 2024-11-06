@@ -397,6 +397,7 @@ let WORKBENCH = {
                         if (format === null) {
                             viewer.ariaLabel = filePath;
                             WORKBENCH.status.setViewerMessage(`InvalidOperationError: The selected item is not an image file.`);
+                            WORKBENCH.status.setViewerInfo("ERROR");
                             return;
                         }
 
@@ -448,10 +449,12 @@ let WORKBENCH = {
                     }
                 } else {
                     WORKBENCH.status.setViewerMessage(`XMLHttpRequest: Unable to get an image arraybuffer.`);
+                    WORKBENCH.status.setViewerInfo("ERROR");
                 }
             }
             xhr.onerror = () => {
                 WORKBENCH.status.setViewerMessage(`XMLHttpRequest: An unknown error has occurred while loading the image.`);
+                WORKBENCH.status.setViewerInfo("ERROR");
             };
             xhr.send();
         },
