@@ -74,15 +74,11 @@
                 <div class="card-body rightside-container m-0 p-0">
                     <div class="g-start-1 d-flex flex-column border-end border-secondary-subtle border-1">
                         <ul class="nav nav-underline px-3 pt-1 border-bottom border-secondary-subtle border-1" style="font-size: 0.8rem">
-                            <li class="not-draggable nav-item dropdown">
-                                <a id="tab-preview" class="nav-link active dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="true" href="#" role="button" aria-expanded="false">Preview(RAW)</a>
-                                <ul class="dropdown-menu" style="font-size: 0.8rem">
-                                    <li><a class="dropdown-item" href="#" onclick="WORKBENCH.props.changeViewerMode('preview-raw')">RAW</a></li>
-                                    <li><a class="dropdown-item" href="#" onclick="WORKBENCH.props.changeViewerMode('preview-processed')">PROCESSED</a></li>
-                                </ul>
+                            <li class="not-draggable nav-item">
+                                <a id="tab-raw" class="nav-link active" href="#" onclick="WORKBENCH.props.changeViewerMode('raw')">Raw</a>
                             </li>
                             <li class="not-draggable nav-item">
-                                <a id="tab-metadata" class="nav-link" href="#" onclick="WORKBENCH.props.changeViewerMode('metadata')">Metadata</a>
+                                <a id="tab-processed" class="nav-link" href="#" onclick="WORKBENCH.props.changeViewerMode('processed')">Processed</a>
                             </li>
                         </ul>
 

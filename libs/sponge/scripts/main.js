@@ -371,9 +371,17 @@ let WORKBENCH = {
             if (index < 0 || index >= WORKBENCH.files.navList.length) return;
             if (refresh && (viewer.ariaLabel === null || typeof viewer.ariaLabel === 'undefined' || viewer.ariaLabel === "")) return;
 
-            WORKBENCH.status.setViewerMessage("Loading...");
+            // Revoke the current image URL to prevent memory leak.
+            var imgs = viewer.querySelectorAll("img");
+            imgs.forEach(function (item) {
+                URL.revokeObjectURL(item.src);
+            });
 
+            WORKBENCH.status.setViewerMessage("Loading..."); // Note: This removes all viewer contents before showing a message.
+
+            // Get an arraybuffer with XHR, and process it.
             const t0 = performance.now()
+
             const filePath = path.resolve(refresh === true ? viewer.ariaLabel : WORKBENCH.files.navList[index].fullname);
             const xhr = new XMLHttpRequest();
             xhr.open("GET", filePath);
@@ -386,11 +394,12 @@ let WORKBENCH = {
                         arrayBuffer = SPONGE_FUNCTIONS.decrypt(arrayBuffer, SPONGE.encryptionKey);
 
                         if (!SPONGE_FUNCTIONS.isImage(arrayBuffer)) {
+                            viewer.ariaLabel = filePath;
                             WORKBENCH.status.setViewerMessage(`InvalidOperationError: The selected item is not an image file.`);
                             return;
                         }
 
-                        if (WORKBENCH.props.viewerMode === "preview-raw") {
+                        if (WORKBENCH.props.viewerMode === "raw") {
                             const viewerContent = document.createElement("img");
                             viewerContent.className = "position-absolute w-100 h-100 border border-0 bg-transparent";
                             viewerContent.style.objectFit = "cover";
@@ -398,6 +407,7 @@ let WORKBENCH = {
                             SPONGE_FUNCTIONS.convert(arrayBuffer, "png", { Q: 100, effort: 7, bitdepth: 8, compression: 6, interlace: false }).then((data) => {
                                 const blob = new Blob([data]);
                                 viewerContent.src = URL.createObjectURL(blob);
+                                
                                 const t1 = performance.now();
                                 console.log(t1 - t0, 'milliseconds');
                             });
@@ -409,7 +419,7 @@ let WORKBENCH = {
                             viewer.innerHTML = "";
                             viewer.ariaLabel = filePath; 
                             viewer.appendChild(viewerContent);
-                        } else if (WORKBENCH.props.viewerMode === "preview-processed") {
+                        } else if (WORKBENCH.props.viewerMode === "processed") {
                             const viewerContent = document.createElement("img");
                             viewerContent.className = "position-absolute w-100 h-100 border border-0 bg-transparent";
                             viewerContent.style.objectFit = "cover";
@@ -418,6 +428,7 @@ let WORKBENCH = {
                                 SPONGE_FUNCTIONS.convert(data1, "png", { Q: 100, effort: 7, bitdepth: 8, compression: 6, interlace: false }).then((data2) => {
                                     const blob = new Blob([data2]);
                                     viewerContent.src = URL.createObjectURL(blob);
+                                    
                                     const t1 = performance.now();
                                     console.log(t1 - t0, 'milliseconds');
                                 });
@@ -430,8 +441,6 @@ let WORKBENCH = {
                             viewer.innerHTML = "";
                             viewer.ariaLabel = filePath; 
                             viewer.appendChild(viewerContent);
-                        } else if (WORKBENCH.props.viewerMode === "metadata") {
-                            
                         }
                     } catch (err) {
                         WORKBENCH.status.setViewerMessage(`${err.name}: ${err.message}`);
@@ -470,7 +479,7 @@ let WORKBENCH = {
     },
     props: {
         conversionFormat: "avif",
-        viewerMode: "preview-raw",
+        viewerMode: "raw",
         operationMode: "encode",
         init: () => {
             WORKBENCH.props.readOptions();
@@ -494,29 +503,20 @@ let WORKBENCH = {
         },
         changeViewerMode: (mode) => {
             switch (mode) {
-                case "preview-raw":
-                    WORKBENCH.props.viewerMode = "preview-raw";
-                    document.getElementById("tab-preview").className = "nav-link active dropdown-toggle";
-                    document.getElementById("tab-preview").innerText = "Preview(RAW)"
-                    document.getElementById("tab-metadata").className = "nav-link";
+                case "raw":
+                    WORKBENCH.props.viewerMode = "raw";
+                    document.getElementById("tab-raw").className = "nav-link active";
+                    document.getElementById("tab-processed").className = "nav-link";
                     break;
-                case "preview-processed":
-                    WORKBENCH.props.viewerMode = "preview-processed";
-                    document.getElementById("tab-preview").className = "nav-link active dropdown-toggle";
-                    document.getElementById("tab-preview").innerText = "Preview(PROCESSED)"
-                    document.getElementById("tab-metadata").className = "nav-link";
-                    break;
-                case "metadata":
-                    WORKBENCH.props.viewerMode = "metadata";
-                    document.getElementById("tab-preview").className = "nav-link dropdown-toggle";
-                    document.getElementById("tab-preview").innerText = "Preview"
-                    document.getElementById("tab-metadata").className = "nav-link active";
+                case "processed":
+                    WORKBENCH.props.viewerMode = "processed";
+                    document.getElementById("tab-raw").className = "nav-link";
+                    document.getElementById("tab-processed").className = "nav-link active";
                     break;
                 default:
-                    WORKBENCH.props.viewerMode = "preview-raw";
-                    document.getElementById("tab-preview").className = "nav-link active dropdown-toggle";
-                    document.getElementById("tab-preview").innerText = "Preview(RAW)"
-                    document.getElementById("tab-metadata").className = "nav-link";
+                    WORKBENCH.props.viewerMode = "raw";
+                    document.getElementById("tab-raw").className = "nav-link active";
+                    document.getElementById("tab-processed").className = "nav-link";
             }
             WORKBENCH.files.view(null, true);
         },
