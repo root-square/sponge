@@ -393,7 +393,8 @@ let WORKBENCH = {
                         arrayBuffer = SPONGE_FUNCTIONS.readSponge(arrayBuffer).body;
                         arrayBuffer = SPONGE_FUNCTIONS.decrypt(arrayBuffer, SPONGE.encryptionKey);
 
-                        if (!SPONGE_FUNCTIONS.isImage(arrayBuffer)) {
+                        const format = SPONGE_FUNCTIONS.isImage(arrayBuffer)
+                        if (format === null) {
                             viewer.ariaLabel = filePath;
                             WORKBENCH.status.setViewerMessage(`InvalidOperationError: The selected item is not an image file.`);
                             return;
@@ -409,7 +410,7 @@ let WORKBENCH = {
                                 viewerContent.src = URL.createObjectURL(blob);
                                 
                                 const t1 = performance.now();
-                                console.log(t1 - t0, 'milliseconds');
+                                WORKBENCH.status.setViewerInfo(`${format.toUpperCase()} / ${WORKBENCH.utils.humanFileSize(blob.size, true, 2)} / ${(t1-t0).toFixed(3)}ms`);
                             });
                                 
                             if (!viewer.classList.contains("grid-lines")) {
@@ -430,7 +431,7 @@ let WORKBENCH = {
                                     viewerContent.src = URL.createObjectURL(blob);
                                     
                                     const t1 = performance.now();
-                                    console.log(t1 - t0, 'milliseconds');
+                                    WORKBENCH.status.setViewerInfo(`${format.toUpperCase()} to ${WORKBENCH.props.conversionFormat.toUpperCase()} / ${WORKBENCH.utils.humanFileSize(blob.size, true, 2)}(${(blob.size / arrayBuffer.byteLength * 100).toFixed(2)}%) / ${(t1-t0).toFixed(3)}ms`);
                                 });
                             });
                                 
@@ -599,6 +600,10 @@ let WORKBENCH = {
             
             viewer.appendChild(viewerContent);
         },
+        setViewerInfo: (text) => {
+            const info = document.getElementById("viewer-info");
+            info.innerText = text;
+        },
         setToast: (text) => {
             document.getElementById('toast-notice-text').innerText = text;
 
@@ -612,6 +617,29 @@ let WORKBENCH = {
         setProgress: (progress) => {
             document.getElementById('status-bar').ariaValueNow = progress;
             document.getElementById('status-bar-inner').style.width = `${progress}%`;
+        }
+    },
+    utils: {
+        humanFileSize: (bytes, si=false, dp=1) => {
+            const thresh = si ? 1000 : 1024;
+
+            if (Math.abs(bytes) < thresh) {
+              return bytes + ' B';
+            }
+          
+            const units = si 
+              ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'] 
+              : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+            let u = -1;
+            const r = 10**dp;
+          
+            do {
+              bytes /= thresh;
+              ++u;
+            } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
+          
+          
+            return bytes.toFixed(dp) + ' ' + units[u];
         }
     },
     misc: {

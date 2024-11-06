@@ -184,7 +184,17 @@ let SPONGE_FUNCTIONS = {
         const header0to12 = Array.from(new Uint8Array(arrayBuffer, 0, 12), x => x.toString(16)).join(".");
         const header8to12 = Array.from(new Uint8Array(arrayBuffer, 8, 4), x => x.toString(16)).join(".");
 
-        return (header0to12 === avifSignature || header0to12 === jxlSignature || header0to8 === pngSignature || header8to12 === webpSignature);
+        if (header0to12 === avifSignature) {
+            return "avif";
+        } else if (header0to12 === jxlSignature) {
+            return "jxl";
+        } else if (header0to8 === pngSignature) {
+            return "png";
+        } else if (header8to12 === webpSignature) {
+            return "webp";
+        } else {
+            return null;
+        }
     },
     isSponge: (arrayBuffer) => {
         if (!arrayBuffer) return null;
