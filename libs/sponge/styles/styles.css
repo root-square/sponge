@@ -197,8 +197,6 @@ body {
 }
 
 .grid-lines {
-    width: 100%;
-    height: 100%;
     background-size: 10px 10px;
     background-image: repeating-linear-gradient(0deg, transparent, transparent 9px, var(--bs-dark-border-subtle) 9px, var(--bs-dark-border-subtle) 10px), 
     repeating-linear-gradient(-90deg, transparent, transparent 9px, var(--bs-dark-border-subtle) 9px, var(--bs-dark-border-subtle) 10px); 

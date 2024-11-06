@@ -86,8 +86,8 @@
                             </li>
                         </ul>
 
-                        <div id="viewer" class="bg-dark-subtle rounded-bottom-1 grid-lines position-relative overflow-auto">
-                            <div class="position-absolute w-100 h-100">
+                        <div id="viewer" class="bg-dark-subtle rounded-bottom-1 position-relative w-100 h-100 overflow-auto">
+                            <div id="viewer-content" class="position-absolute w-100 h-100">
                                 
                             </div>
                         </div>
@@ -213,13 +213,13 @@
                     <div class="g-start-2 btn-group ms-2" style="height:40px;">
                         <button id="btn-start" type="button" class="btn btn-primary" style="font-size: 0.8rem" data-bs-toggle="tooltip" data-bs-title="Start operation">ENCODE</button>
                         <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" style="font-size: 0.8rem" data-bs-toggle="dropdown" aria-expanded="false">
-                          <span class="visually-hidden">Toggle Dropdown</span>
+                            <span class="visually-hidden">Toggle Dropdown</span>
                         </button>
                         <ul class="dropdown-menu" style="font-size: 0.8rem">
-                          <li><a class="dropdown-item" href="#" onclick="WORKBENCH.props.changeOperationMode('encode')">ENCODE</a></li>
-                          <li><a class="dropdown-item" href="#" onclick="WORKBENCH.props.changeOperationMode('decode')">DECODE</a></li>
-                          <li><hr class="dropdown-divider"></li>
-                          <li><a class="dropdown-item" href="#" onclick="WORKBENCH.props.changeOperationMode('check')">CHECK</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="WORKBENCH.props.changeOperationMode('encode')">ENCODE</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="WORKBENCH.props.changeOperationMode('decode')">DECODE</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="WORKBENCH.props.changeOperationMode('check')">CHECK</a></li>
                         </ul>
                     </div>
                 </div>
@@ -239,6 +239,7 @@
 
     <script src="./externs/bootstrap/bootstrap.bundle.min.js"></script>
 
+    <script src="./../vips.js"></script>
     <script src="./../sponge.js"></script>
     <script src="./scripts/main.js"></script>
 </body>

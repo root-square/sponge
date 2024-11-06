@@ -365,8 +365,85 @@ let WORKBENCH = {
                 WORKBENCH.files.render("ignore-list");
             }
         },
-        view: (index) => {
-            
+        view: (index, refresh = false) => {
+            const viewer = document.getElementById("viewer");
+
+            if (index < 0 || index >= WORKBENCH.files.navList.length) return;
+            if (refresh && (viewer.ariaLabel === null || typeof viewer.ariaLabel === 'undefined' || viewer.ariaLabel === "")) return;
+
+            WORKBENCH.status.setViewerMessage("Loading...");
+
+            const t0 = performance.now()
+            const filePath = path.resolve(refresh === true ? viewer.ariaLabel : WORKBENCH.files.navList[index].fullname);
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", filePath);
+            xhr.responseType = "arraybuffer";
+            xhr.onload = () => {
+                if (xhr.status < 400) {
+                    try {
+                        let arrayBuffer = xhr.response;
+                        arrayBuffer = SPONGE_FUNCTIONS.readSponge(arrayBuffer).body;
+                        arrayBuffer = SPONGE_FUNCTIONS.decrypt(arrayBuffer, SPONGE.encryptionKey);
+
+                        if (!SPONGE_FUNCTIONS.isImage(arrayBuffer)) {
+                            WORKBENCH.status.setViewerMessage(`InvalidOperationError: The selected item is not an image file.`);
+                            return;
+                        }
+
+                        if (WORKBENCH.props.viewerMode === "preview-raw") {
+                            const viewerContent = document.createElement("img");
+                            viewerContent.className = "position-absolute w-100 h-100 border border-0 bg-transparent";
+                            viewerContent.style.objectFit = "cover";
+
+                            SPONGE_FUNCTIONS.convert(arrayBuffer, "png", { Q: 100, effort: 7, bitdepth: 8, compression: 6, interlace: false }).then((data) => {
+                                const blob = new Blob([data]);
+                                viewerContent.src = URL.createObjectURL(blob);
+                                const t1 = performance.now();
+                                console.log(t1 - t0, 'milliseconds');
+                            });
+                                
+                            if (!viewer.classList.contains("grid-lines")) {
+                                viewer.classList.add("grid-lines");
+                            }
+
+                            viewer.innerHTML = "";
+                            viewer.ariaLabel = filePath; 
+                            viewer.appendChild(viewerContent);
+                        } else if (WORKBENCH.props.viewerMode === "preview-processed") {
+                            const viewerContent = document.createElement("img");
+                            viewerContent.className = "position-absolute w-100 h-100 border border-0 bg-transparent";
+                            viewerContent.style.objectFit = "cover";
+
+                            SPONGE_FUNCTIONS.convert(arrayBuffer, WORKBENCH.props.conversionFormat, {}).then((data1) => {
+                                SPONGE_FUNCTIONS.convert(data1, "png", { Q: 100, effort: 7, bitdepth: 8, compression: 6, interlace: false }).then((data2) => {
+                                    const blob = new Blob([data2]);
+                                    viewerContent.src = URL.createObjectURL(blob);
+                                    const t1 = performance.now();
+                                    console.log(t1 - t0, 'milliseconds');
+                                });
+                            });
+                                
+                            if (!viewer.classList.contains("grid-lines")) {
+                                viewer.classList.add("grid-lines");
+                            }
+                            
+                            viewer.innerHTML = "";
+                            viewer.ariaLabel = filePath; 
+                            viewer.appendChild(viewerContent);
+                        } else if (WORKBENCH.props.viewerMode === "metadata") {
+                            
+                        }
+                    } catch (err) {
+                        WORKBENCH.status.setViewerMessage(`${err.name}: ${err.message}`);
+                    }
+                } else {
+                    WORKBENCH.status.setViewerMessage(`XMLHttpRequest: Unable to get an image arraybuffer.`);
+                }
+            }
+            xhr.onerror = () => {
+                WORKBENCH.status.setViewerMessage(`XMLHttpRequest: An unknown error has occurred while loading the image.`);
+            };
+            xhr.send();
         },
         onSwitched: function (target, index) {
             if (target !== "nav-list" && target !== "ignore-list") {
@@ -444,6 +521,7 @@ let WORKBENCH = {
                     document.getElementById("tab-preview").innerText = "Preview(RAW)"
                     document.getElementById("tab-metadata").className = "nav-link";
             }
+            WORKBENCH.files.view(null, true);
         },
         changeOperationMode: (mode) => {
             switch (mode) {
@@ -510,6 +588,20 @@ let WORKBENCH = {
         }
     },
     status: {
+        setViewerMessage: (text) => {
+            const viewer = document.getElementById("viewer");
+            if (viewer.classList.contains("grid-lines")) {
+                viewer.classList.remove("grid-lines");
+            }
+            viewer.innerHTML = ""
+            
+            const viewerContent = document.createElement("span");
+            viewerContent.className = "position-absolute top-50 start-50 translate-middle text-center text-wrap text-body-secondary fw-light lh-base";
+            viewerContent.style.fontSize= "0.9rem";
+            viewerContent.innerText = text;
+            
+            viewer.appendChild(viewerContent);
+        },
         setToast: (text) => {
             document.getElementById('toast-notice-text').innerText = text;
 

@@ -8,6 +8,10 @@
 
 const fs = require('fs');
 const path = require('path');
+let vips = null;
+(async () => {
+    vips = await Vips();
+})();
 
 window.addEventListener("load", () => {
     let url = new URL(window.location.href);
@@ -171,17 +175,30 @@ let SPONGE_FUNCTIONS = {
         png: {},
         webp: {}
     },
+    isImage: (arrayBuffer) => {
+        const avifSignature = "0.0.0.0.66.74.79.70.61.76.69.66";
+        const heifSignature = "0.0.0.0.66.74.79.70.68.65.69.63";
+        const jxlSignature = "0.0.0.c.4a.58.4c.20.d.a.87.a";
+        const pngSignature = "89.50.4e.47.d.a.1a.a";
+        const webpSignature = "57.45.42.50";
+
+        const header0to8 = Array.from(new Uint8Array(arrayBuffer, 0, 8), x => x.toString(16)).join(".");
+        const header0to12 = Array.from(new Uint8Array(arrayBuffer, 0, 12), x => x.toString(16)).join(".");
+        const header8to12 = Array.from(new Uint8Array(arrayBuffer, 8, 4), x => x.toString(16)).join(".");
+
+        return (header0to12 === avifSignature || header0to12 === heifSignature || header0to12 === jxlSignature || header0to8 === pngSignature || header8to12 === webpSignature);
+    },
     isSponge: (arrayBuffer) => {
         if (!arrayBuffer) return null;
 
-        const signature = "53.58.20.0a"; // SX<SP><LF>
+        const signature = "53.58.20.a"; // SX<SP><LF>
 
         let header = new Uint8Array(arrayBuffer, 0, 4);
-        return (Array.from(header, x => x.toString(16)).join(".") !== signature);
+        return (Array.from(header, x => x.toString(16)).join(".") === signature);
     },
     readSponge: (arrayBuffer) => {
         if (!arrayBuffer) return null;
-        if (!isSponge(arrayBuffer)) return { body: arrayBuffer };
+        if (!SPONGE_FUNCTIONS.isSponge(arrayBuffer)) return { body: arrayBuffer };
 
         const versionMajor = new Uint8Array(arrayBuffer, 4, 1);
         const versionMinor = new Uint8Array(arrayBuffer, 5, 1);
@@ -223,6 +240,45 @@ let SPONGE_FUNCTIONS = {
         body.set(new Uint8Array(arrayBuffer), 16);
 
         return outBuffer;
+    },
+    isEncrypted: (arrayBuffer) => {
+        if (!arrayBuffer) return null;
+
+        const signature = "52.50.47.4d.56"; // RPGMV
+
+        let header = new Uint8Array(arrayBuffer, 0, 5);
+        return (Array.from(header, x => x.toString(16)).join(".") === signature);
+    },
+    encrypt: (arrayBuffer, encryptionKey) => {
+        if (!arrayBuffer) return null;
+        
+        const outBuffer = new ArrayBuffer(arrayBuffer.byteLength + 16);
+
+        const header = new Uint8Array(outBuffer, 0, 16);
+        header.set([0x52,0x50,0x47,0x4d,0x56,0x00,0x00,0x00,0x00,0x03,0x01,0x00,0x00,0x00,0x00,0x00], 0); // Note: RPGMV Standard Header
+
+        const body = new Uint8Array(outBuffer, 16);
+        body.set(new Uint8Array(arrayBuffer));
+
+        const view = new DataView(body);
+        const key = encryptionKey.match(/.{2}/g);
+        for (let i = 0; i < 16; i++) {
+            view.setUint8(i, view.getUint8(i) ^ parseInt(key[i], 16));
+        }
+
+        return outBuffer;
+    },
+    decrypt: (arrayBuffer, encryptionKey) => {
+        if (!arrayBuffer) return null;
+        if (!SPONGE_FUNCTIONS.isEncrypted(arrayBuffer)) return arrayBuffer;
+        
+        const body = arrayBuffer.slice(16);
+        const view = new DataView(body);
+        const key = encryptionKey.match(/.{2}/g);
+        for (let i = 0; i < 16; i++) {
+            view.setUint8(i, view.getUint8(i) ^ parseInt(key[i], 16));
+        }
+        return body;
     },
     interpret: (format, optionsString) => {
         format = format.toLowerCase();
@@ -395,9 +451,7 @@ let SPONGE_FUNCTIONS = {
         format = format.toLowerCase();
         if (format !== "avif" && format !== "heif" && format !== "png" && format !== "jxl" && format !== "webp") return null;
 
-        const vips = await Vips(); 
-
-        let image = vips.Image.newFromMemory(arrayBuffer);
+        let image = vips.Image.newFromBuffer(arrayBuffer);
         let outBuffer = image.writeToBuffer(`.${format}`, options);
         return outBuffer;
     }
