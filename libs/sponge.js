@@ -170,14 +170,12 @@ let SPONGE_WORKBENCH = {
 let SPONGE_FUNCTIONS = {
     options: {
         avif: {},
-        heif: {},
         jxl: {},
         png: {},
         webp: {}
     },
     isImage: (arrayBuffer) => {
         const avifSignature = "0.0.0.0.66.74.79.70.61.76.69.66";
-        const heifSignature = "0.0.0.0.66.74.79.70.68.65.69.63";
         const jxlSignature = "0.0.0.c.4a.58.4c.20.d.a.87.a";
         const pngSignature = "89.50.4e.47.d.a.1a.a";
         const webpSignature = "57.45.42.50";
@@ -186,7 +184,7 @@ let SPONGE_FUNCTIONS = {
         const header0to12 = Array.from(new Uint8Array(arrayBuffer, 0, 12), x => x.toString(16)).join(".");
         const header8to12 = Array.from(new Uint8Array(arrayBuffer, 8, 4), x => x.toString(16)).join(".");
 
-        return (header0to12 === avifSignature || header0to12 === heifSignature || header0to12 === jxlSignature || header0to8 === pngSignature || header8to12 === webpSignature);
+        return (header0to12 === avifSignature || header0to12 === jxlSignature || header0to8 === pngSignature || header8to12 === webpSignature);
     },
     isSponge: (arrayBuffer) => {
         if (!arrayBuffer) return null;
@@ -217,15 +215,13 @@ let SPONGE_FUNCTIONS = {
 
         switch (format.toLowerCase()) {
             case "avif":
-                formatMain = 0x01;
-            case "heif":
-                formatMain = 0x02;
+                formatMain = 0x10;
             case "jxl":
-                formatMain = 0x03;
+                formatMain = 0x20;
             case "png":
-                formatMain = 0x04;
+                formatMain = 0x30;
             case "webp":
-                formatMain = 0x05;
+                formatMain = 0x40;
             default:
                 formatMain = 0x00;
         }
@@ -282,7 +278,7 @@ let SPONGE_FUNCTIONS = {
     },
     interpret: (format, optionsString) => {
         format = format.toLowerCase();
-        if (format !== "avif" && format !== "heif" && format !== "png" && format !== "jxl" && format !== "webp") return null;
+        if (format !== "avif" && format !== "png" && format !== "jxl" && format !== "webp") return null;
 
         let options = {};
 
@@ -317,7 +313,7 @@ let SPONGE_FUNCTIONS = {
                         }
                         break;
                     case "bitdepth":
-                        if (!isNaN(valueInt) && (valueInt === 1 || valueInt === 2 || valueInt === 4 || valueInt === 8 || valueInt === 16) && (format === "avif" || format === "heif" || format === "png")) {
+                        if (!isNaN(valueInt) && (valueInt === 1 || valueInt === 2 || valueInt === 4 || valueInt === 8 || valueInt === 16) && (format === "avif" || format === "png")) {
                             options.bitdepth = valueInt;
                         }
                         break;
@@ -327,7 +323,7 @@ let SPONGE_FUNCTIONS = {
                         }
                         break;
                     case "effort":
-                        if (format === "avif" || format === "heif") {
+                        if (format === "avif") {
                             if (!isNaN(valueInt) && valueInt >= 0 && valueInt <= 9) {
                                 options.effort = valueInt;
                             }
@@ -369,7 +365,7 @@ let SPONGE_FUNCTIONS = {
                         }
                         break;
                     case "lossless":
-                        if (valueBool !== null && (format === "avif" || format === "heif" || format === "jxl" || format === "webp")) {
+                        if (valueBool !== null && (format === "avif" || format === "jxl" || format === "webp")) {
                             options.lossless = valueBool;
                         }
                         break;
@@ -396,12 +392,12 @@ let SPONGE_FUNCTIONS = {
                         }
                         break;
                     case "speed":
-                        if (!isNaN(valueInt) && valueInt >= 0 && valueInt <= 9 && (format === "avif" || format === "heif")) {
+                        if (!isNaN(valueInt) && valueInt >= 0 && valueInt <= 9 && format === "avif") {
                             options.speed = valueInt;
                         }
                         break;
                     case "subsample_mode":
-                        if (format === "avif" || format === "heif") {
+                        if (format === "avif") {
                             if (valueLowerCase === "auto") {
                                 options.subsample_mode = 0;
                             } else if (valueLowerCase === "on") {
@@ -440,16 +436,16 @@ let SPONGE_FUNCTIONS = {
             }
         }
 
-        if (format === "avif" || format === "heif") {
+        if (format === "avif") {
             // Note: 1(HEVC), 4(AV1)
-            options.compression = (format === "heif") ? 1 : 4;
+            options.compression = 4;
         }
 
         return options;
     },
     convert: async (arrayBuffer, format, options) => {
         format = format.toLowerCase();
-        if (format !== "avif" && format !== "heif" && format !== "png" && format !== "jxl" && format !== "webp") return null;
+        if (format !== "avif" && format !== "png" && format !== "jxl" && format !== "webp") return null;
 
         let image = vips.Image.newFromBuffer(arrayBuffer);
         let outBuffer = image.writeToBuffer(`.${format}`, options);

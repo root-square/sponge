@@ -105,7 +105,6 @@
                                             <button id="btn-format" class="btn btn-outline-secondary btn-sm text-body-secondary fw-medium dropdown-toggle" style="font-size: 0.8rem;" type="button" data-bs-toggle="dropdown" aria-expanded="false">AVIF</button>
                                             <ul class="dropdown-menu" style="font-size: 0.8rem;">
                                                 <li><a class="dropdown-item" href="#" onclick="WORKBENCH.props.changeConversionFormat('avif')">AVIF</a></li>
-                                                <li><a class="dropdown-item" href="#" onclick="WORKBENCH.props.changeConversionFormat('heif')">HEIF</a></li>
                                                 <li><a class="dropdown-item" href="#" onclick="WORKBENCH.props.changeConversionFormat('jxl')">JPEG XL</a></li>
                                                 <li><a class="dropdown-item" href="#" onclick="WORKBENCH.props.changeConversionFormat('webp')">WEBP</a></li>
                                             </ul>
@@ -137,20 +136,6 @@
                                         <button type="button" class="btn btn-primary btn-sm mt-2 align-self-end" onclick="WORKBENCH.props.writeOptions('avif')">Save</button>
                                         <p class="not-draggable text-start text-body-secondary fw-light lh-l m-0" style="font-size: 0.8rem">※ The option string is split by a semicomma.</p>
                                         <p class="not-draggable text-start text-body-secondary fw-light lh-base m-0" style="font-size: 0.8rem">※ Available options : bitdepth(1/2/4/8/16), effort(0~9), encoder(auto/aom/rav1e/svt), keep(true/false), lossless(true/false), Q(1~100), speed(0,9), subsample_mode(auto/on/off)</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="accordion-item">
-                                <h2 class="accordion-header">
-                                    <button class="accordion-button collapsed" style="font-size: 0.8rem" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-heif" aria-expanded="false" aria-controls="collapse-heif">HEIF</button>
-                                </h2>
-                                <div id="collapse-heif" class="accordion-collapse collapse" data-bs-parent="#accordion-settings">
-                                    <div class="accordion-body d-flex flex-column">
-                                        <label class="not-draggable form-label" style="font-size: 0.8rem;" for="options-heif">Conversion Options (HEIF)</label>
-                                        <input type="text" class="form-control form-control-sm" style="font-size: 0.8rem;" id="options-heif" placeholder="Options">
-                                        <button type="button" class="btn btn-primary btn-sm mt-2 align-self-end" onclick="WORKBENCH.props.writeOptions('heif')">Save</button>
-                                        <p class="not-draggable text-start text-body-secondary fw-light lh-l m-0" style="font-size: 0.8rem">※ The option string is split by a semicomma.</p>
-                                        <p class="not-draggable text-start text-body-secondary fw-light lh-base m-0" style="font-size: 0.8rem">※ Available options : bitdepth(1/2/4/8/16), effort(0~9), keep(true/false), lossless(true/false), Q(1~100), speed(0,9), subsample_mode(auto/on/off)</p>
                                     </div>
                                 </div>
                             </div>

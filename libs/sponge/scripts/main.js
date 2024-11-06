@@ -480,9 +480,6 @@ let WORKBENCH = {
                 case "avif":
                     WORKBENCH.props.conversionFormat = "avif";
                     break;
-                case "heif":
-                    WORKBENCH.props.conversionFormat = "heif";
-                    break;
                 case "jxl":
                     WORKBENCH.props.conversionFormat = "jxl";
                     break;
@@ -547,14 +544,14 @@ let WORKBENCH = {
                 settingsJson = JSON.parse(fs.readFileSync(settingsPath));
             } else {
                 try {
-                    settingsJson = { mode: "unknown", version: "0.1.0", options: { avif: "", heif: "", jxl: "", png: "", webp: "" } };
+                    settingsJson = { mode: "unknown", version: "0.1.0", options: { avif: "", png: "", webp: "" } };
                     fs.writeFileSync(settingsPath, JSON.stringify(settingsJson));
                 } catch (err) {
                     SPONGE_WORKBENCH.error("WB_IO_SETTINGS_NOT_AVAILABLE", "Cannot read the settings data and write a new data.", err.stack);
                 }
             }
             
-            let formats = ["avif", "heif", "jxl", "png", "webp"];
+            let formats = ["avif", "jxl", "png", "webp"];
 
             for (let format of formats) {
                 if (Object.hasOwn(settingsJson.options, format)) {
@@ -569,7 +566,7 @@ let WORKBENCH = {
                 settingsJson = JSON.parse(fs.readFileSync(settingsPath));
             } else {
                 try {
-                    settingsJson = { mode: "unknown", version: "0.1.0", options: { avif: "", heif: "", jxl: "", png: "", webp: "" } };
+                    settingsJson = { mode: "unknown", version: "0.1.0", options: { avif: "", jxl: "", png: "", webp: "" } };
                     fs.writeFileSync(settingsPath, JSON.stringify(settingsJson));
                 } catch (err) {
                     SPONGE_WORKBENCH.error("WB_IO_SETTINGS_NOT_AVAILABLE", "Cannot read the settings data and write a new data.", err.stack);
