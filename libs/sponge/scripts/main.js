@@ -413,21 +413,21 @@ let WORKBENCH = {
                         const t0 = performance.now()
 
                         if (WORKBENCH.props.viewerMode === "raw") {
-                            SPONGE_FUNCTIONS.convert(arrayBuffer, "png", { Q: 100, effort: 7, bitdepth: 8, compression: 6, interlace: false }).then((data) => {
+                            SPONGE_FUNCTIONS.convert(arrayBuffer, "png", { Q: 100, effort: 7, bitdepth: 8, compression: 6, interlace: false }).then((displayData) => {
                                 const t1 = performance.now();
                                 
-                                const blob = new Blob([data]);
+                                const blob = new Blob([displayData]);
                                 viewerContent.src = URL.createObjectURL(blob);
-                                WORKBENCH.status.setViewerInfo(`${format.toUpperCase()} / ${WORKBENCH.utils.humanFileSize(blob.size, true, 2)} / ${(t1-t0).toFixed(3)}ms`);
+                                WORKBENCH.status.setViewerInfo(`${format.toUpperCase()} / ${WORKBENCH.utils.humanFileSize(displayData.byteLength, true, 2)} / ${(t1-t0).toFixed(3)}ms`);
                             });
                         } else if (WORKBENCH.props.viewerMode === "processed") {
-                            SPONGE_FUNCTIONS.convert(arrayBuffer, WORKBENCH.props.conversionFormat, SPONGE_FUNCTIONS.options[WORKBENCH.props.conversionFormat]).then((data1) => {
-                                SPONGE_FUNCTIONS.convert(data1, "png", { Q: 100, effort: 7, bitdepth: 8, compression: 6, interlace: false }).then((data2) => {
+                            SPONGE_FUNCTIONS.convert(arrayBuffer, WORKBENCH.props.conversionFormat, SPONGE_FUNCTIONS.options[WORKBENCH.props.conversionFormat]).then((convertedData) => {
+                                SPONGE_FUNCTIONS.convert(convertedData, "png", { Q: 100, effort: 7, bitdepth: 8, compression: 6, interlace: false }).then((displayData) => {
                                     const t1 = performance.now();
                                 
-                                    const blob = new Blob([data2]);
+                                    const blob = new Blob([displayData]);
                                     viewerContent.src = URL.createObjectURL(blob);
-                                    WORKBENCH.status.setViewerInfo(`${format.toUpperCase()} to ${WORKBENCH.props.conversionFormat.toUpperCase()} / ${WORKBENCH.utils.humanFileSize(blob.size, true, 2)}(${(blob.size / arrayBuffer.byteLength * 100).toFixed(2)}%) / ${(t1-t0).toFixed(3)}ms`);
+                                    WORKBENCH.status.setViewerInfo(`${format.toUpperCase()} to ${WORKBENCH.props.conversionFormat.toUpperCase()} / ${WORKBENCH.utils.humanFileSize(convertedData.byteLength, true, 2)}(${(convertedData.byteLength / arrayBuffer.byteLength * 100).toFixed(2)}%) / ${(t1-t0).toFixed(3)}ms`);
                                 });
                             });
                         } else {

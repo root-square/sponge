@@ -621,7 +621,7 @@ let SPONGE_TESTS = {
             SPONGE_WORKBENCH.error("DIAG_ENG_RPGMAKER_NOT_FOUND", "Unable to find an instance of RPG MAKER Engine.", null);
 
         // Error: DIAG_ENG_WASMVIPS_NOT_FOUND
-        if (typeof Vips === 'undefined') 
+        if (typeof Vips === 'undefined' || Vips === null) 
             SPONGE_WORKBENCH.error("DIAG_ENG_WASMVIPS_NOT_FOUND", "Unable to find an instance of wasm-vips.", null);
     },
 };
