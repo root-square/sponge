@@ -477,6 +477,9 @@ let WORKBENCH = {
     },
     props: {
         conversionFormat: "avif",
+        encryptResources: true,
+        excludeInferiorities: true,
+        ignoreAllExceptPng: true,
         viewerMode: "raw",
         operationMode: "encode",
         init: () => {
@@ -498,6 +501,19 @@ let WORKBENCH = {
             }
     
             document.getElementById("btn-format").innerText = WORKBENCH.props.conversionFormat.replace("jxl", "jpeg xl").toUpperCase();
+        },
+        changeSwitchSelection: (target) => {
+            switch (target) {
+                case "encrypt":
+                    WORKBENCH.props.encryptResources = document.getElementById("switch-encrypt").checked;
+                    break;
+                case "exclude-infs":
+                    WORKBENCH.props.excludeInferiorities = document.getElementById("switch-exclude-infs").checked;
+                    break;
+                case "ignore-aep":
+                    WORKBENCH.props.ignoreAllExceptPng = document.getElementById("switch-ignore-aep").checked;
+                    break;
+            }
         },
         changeViewerMode: (mode) => {
             switch (mode) {

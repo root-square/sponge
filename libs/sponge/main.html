@@ -88,7 +88,7 @@
                             </div>
                         </div>
 
-                        <div class="postition-absolute bottom-0 start-0 w-100 px-2 py-1 bg-transparent border-top border-secondary-subtle border-1">
+                        <div class="postition-absolute bottom-0 start-0 w-100 px-3 py-2 bg-transparent border-top border-secondary-subtle border-1">
                             <span id="viewer-info" class="text-body-secondary fw-light" style="font-size: 0.8rem">INFO</span>
                         </div>
                     </div>
@@ -100,7 +100,7 @@
                                 </h2>
                                 <div id="collapse-general" class="accordion-collapse collapse rounded-top-1 show" data-bs-parent="#accordion-settings">
                                     <div class="accordion-body d-flex flex-column align-items-start rounded-top-1">
-                                        <label class="not-draggable form-label" style="font-size: 0.8rem;">Conversion Format (for encoding)</label>
+                                        <label class="not-draggable form-label" style="font-size: 0.8rem;">Conversion Format</label>
                                         <div class="btn-group">
                                             <button id="btn-format" class="btn btn-outline-secondary btn-sm text-body-secondary fw-medium dropdown-toggle" style="font-size: 0.8rem;" type="button" data-bs-toggle="dropdown" aria-expanded="false">AVIF</button>
                                             <ul class="dropdown-menu" style="font-size: 0.8rem;">
@@ -110,17 +110,21 @@
                                             </ul>
                                         </div>
 
-                                        <label class="not-draggable form-label mt-2" style="font-size: 0.8rem;">Conversion Format (for decoding)</label>
-                                        <div class="btn-group">
-                                            <button class="btn btn-outline-secondary btn-sm text-body-secondary fw-medium dropdown-toggle disabled" style="font-size: 0.8rem;" type="button" data-bs-toggle="dropdown" aria-expanded="false">PNG</button>
-                                            <ul class="dropdown-menu" style="font-size: 0.8rem;">...</ul>
+                                        <label class="not-draggable form-label m-0 mt-2" style="font-size: 0.8rem;">Cryptography</label>
+                                        <div class="form-check form-switch d-flex flex-row" data-bs-toggle="tooltip" data-bs-title="Encrypts resources using RMMV/RMMZ standard encryption.">
+                                            <input id="switch-encrypt" class="form-check-input" type="checkbox" role="switch" onchange="WORKBENCH.props.changeSwitchSelection('encrypt')" checked>
+                                            <label class="form-check-label text-body-secondary ms-2 align-self-center" style="font-size: 0.8rem;" for="switch-encrypt">Encrypt resources</label>
                                         </div>
 
-                                        <label class="not-draggable form-label m-0 mt-2" style="font-size: 0.8rem;">Cryptography</label>
-                                        <div class="form-check form-switch d-flex flex-row">
-                                            <input id="switch-encrypt" class="form-check-input" type="checkbox" role="switch" checked>
-                                            <label class="form-check-label text-body-secondary ms-2 align-self-center" style="font-size: 0.8rem;" for="switch-encrypt">Encrypt resources</label>
-                                          </div>
+                                        <label class="not-draggable form-label m-0 mt-2" style="font-size: 0.8rem;">Rules</label>
+                                        <div class="form-check form-switch d-flex flex-row" data-bs-toggle="tooltip" data-bs-title="Keeps using the original file if the encoded file is larger than the original file.">
+                                            <input id="switch-exclude-infs" class="form-check-input" type="checkbox" role="switch" onchange="WORKBENCH.props.changeSwitchSelection('exclude-infs')" checked>
+                                            <label class="form-check-label text-body-secondary ms-2 align-self-center" style="font-size: 0.8rem;" for="switch-exclude-infs">Exclude inferiorities</label>
+                                        </div>
+                                        <div class="form-check form-switch d-flex flex-row" data-bs-toggle="tooltip" data-bs-title="Encodes only PNG files to prevent conflicts with image manipulation plugins such as Live2D.">
+                                            <input id="switch-ignore-aep" class="form-check-input" type="checkbox" role="switch" onchange="WORKBENCH.props.changeSwitchSelection('ignore-aep')" checked>
+                                            <label class="form-check-label text-body-secondary ms-2 align-self-center" style="font-size: 0.8rem;" for="switch-ignore-aep">Ignore all except PNG</label>
+                                        </div>
                                         <button type="button" class="btn btn-primary btn-sm mt-2 align-self-end">Save</button>
                                     </div>
                                 </div>
