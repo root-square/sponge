@@ -384,7 +384,7 @@ let WORKBENCH = {
             const xhr = new XMLHttpRequest();
             xhr.open("GET", filePath);
             xhr.responseType = "arraybuffer";
-            xhr.onload = () => {
+            xhr.onload = async () => {
                 if (xhr.status < 400) {
                     try {
                         let arrayBuffer = xhr.response;
@@ -412,17 +412,15 @@ let WORKBENCH = {
                                 
                                 const blob = new Blob([data]);
                                 viewerContent.src = URL.createObjectURL(blob);
-                            
                                 WORKBENCH.status.setViewerInfo(`${format.toUpperCase()} / ${WORKBENCH.utils.humanFileSize(blob.size, true, 2)} / ${(t1-t0).toFixed(3)}ms`);
                             });
                         } else if (WORKBENCH.props.viewerMode === "processed") {
-                            SPONGE_FUNCTIONS.convert(arrayBuffer, WORKBENCH.props.conversionFormat, SPONGE_FUNCTIONS.options[format]).then((data1) => {
+                            SPONGE_FUNCTIONS.convert(arrayBuffer, WORKBENCH.props.conversionFormat, SPONGE_FUNCTIONS.options[WORKBENCH.props.conversionFormat]).then((data1) => {
                                 SPONGE_FUNCTIONS.convert(data1, "png", { Q: 100, effort: 7, bitdepth: 8, compression: 6, interlace: false }).then((data2) => {
                                     const t1 = performance.now();
-                                    
+                                
                                     const blob = new Blob([data2]);
                                     viewerContent.src = URL.createObjectURL(blob);
-
                                     WORKBENCH.status.setViewerInfo(`${format.toUpperCase()} to ${WORKBENCH.props.conversionFormat.toUpperCase()} / ${WORKBENCH.utils.humanFileSize(blob.size, true, 2)}(${(blob.size / arrayBuffer.byteLength * 100).toFixed(2)}%) / ${(t1-t0).toFixed(3)}ms`);
                                 });
                             });
@@ -501,6 +499,8 @@ let WORKBENCH = {
             }
     
             document.getElementById("btn-format").innerText = WORKBENCH.props.conversionFormat.replace("jxl", "jpeg xl").toUpperCase();
+
+            WORKBENCH.files.view(null, true);
         },
         changeSwitchSelection: (target) => {
             switch (target) {
@@ -532,6 +532,7 @@ let WORKBENCH = {
                     document.getElementById("tab-raw").className = "nav-link active";
                     document.getElementById("tab-processed").className = "nav-link";
             }
+
             WORKBENCH.files.view(null, true);
         },
         changeOperationMode: (mode) => {
@@ -571,6 +572,8 @@ let WORKBENCH = {
                 if (Object.hasOwn(settingsJson.options, format)) {
                     document.getElementById(`options-${format}`).value = settingsJson.options[format];
                 }
+
+                SPONGE_FUNCTIONS.options[format] = SPONGE_FUNCTIONS.interpret(format, settingsJson.options[format]);
             }
         },
         writeOptions: (format) => {
@@ -587,15 +590,18 @@ let WORKBENCH = {
                 }
             }
 
-            settingsJson.options[format] = document.getElementById(`options-${format}`).value;
-
             try {
+                settingsJson.options[format] = document.getElementById(`options-${format}`).value;
                 fs.writeFileSync(settingsPath, JSON.stringify(settingsJson));
 
                 WORKBENCH.status.setToast("Saved successfully!");
             } catch (err) {
                 SPONGE_WORKBENCH.error("WB_IO_SETTINGS_NOT_WRITABLE", "Cannot write a new settings data.", err.stack);
             }
+
+            SPONGE_FUNCTIONS.options[format] = SPONGE_FUNCTIONS.interpret(format, settingsJson.options[format]);
+
+            WORKBENCH.files.view(null, true);
         }
     },
     status: {

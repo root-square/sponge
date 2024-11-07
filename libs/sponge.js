@@ -300,8 +300,8 @@ let SPONGE_FUNCTIONS = {
         for (const part of parts) {
             if (partRegex.test(part)) {
                 let dividerIndex = part.indexOf("=");
-                let key = part.slice(0, dividerIndex);
-                let value = part.slice(dividerIndex + 1, part.length - 1);
+                let key = part.slice(0, dividerIndex).trim();
+                let value = part.slice(dividerIndex + 1, part.length).trim();
 
                 // Convert the value to each type.
                 let valueInt = parseInt(value, 10);
@@ -402,11 +402,6 @@ let SPONGE_FUNCTIONS = {
                             options.Q = valueInt;
                         }
                         break;
-                    case "speed":
-                        if (!isNaN(valueInt) && valueInt >= 0 && valueInt <= 9 && format === "avif") {
-                            options.speed = valueInt;
-                        }
-                        break;
                     case "subsample_mode":
                         if (format === "avif") {
                             if (valueLowerCase === "auto") {
@@ -455,12 +450,18 @@ let SPONGE_FUNCTIONS = {
         return options;
     },
     convert: async (arrayBuffer, format, options) => {
-        format = format.toLowerCase();
-        if (format !== "avif" && format !== "png" && format !== "jxl" && format !== "webp") return null;
-
-        let image = vips.Image.newFromBuffer(arrayBuffer);
-        let outBuffer = image.writeToBuffer(`.${format}`, options);
-        return outBuffer;
+        return new Promise((resolve, reject) => {
+            try {
+                format = format.toLowerCase();
+                if (format !== "avif" && format !== "png" && format !== "jxl" && format !== "webp") return null;
+    
+                let image = vips.Image.newFromBuffer(arrayBuffer);
+                let outBuffer = image.writeToBuffer(`.${format}`, options);
+                resolve(outBuffer);
+            } catch (err) {
+                reject(err);
+            }
+        });
     }
 };
 

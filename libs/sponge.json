@@ -2,9 +2,9 @@
     "mode": "development",
     "version": "0.4.0",
     "options": {
-      "avif": "Q=50;effort=4;speed=5;bitdepth=12;encoder=svt;lossless=true;subsample_mode=auto",
-      "jxl": "Q=75;effort=7;tier=0;lossless=true",
+      "avif": "Q=80;effort=4;bitdepth=8;encoder=aom;lossless=false;subsample_mode=auto",
+      "jxl": "Q=100;effort=5;tier=4;lossless=false",
       "png": "Q=100;effort=7;bitdepth=8;compression=6;interlace=false",
-      "webp": "Q=75;effort=4;preset=default;lossless=true;near_lossless=false;smart_subsample=false;min_size=false;mixed=false;alpha_q=100"
+      "webp": "Q=100;effort=4;preset=default;lossless=false;near_lossless=false;smart_subsample=false;min_size=false;mixed=false;alpha_q=100"
     }
 }
