@@ -78,6 +78,12 @@ let WORKBENCH = {
         ignoreListEnd: 30,
         ignoreListItemHeight: 40,
         init: () => {
+            // Preset: Add ignores for RMMV.
+            if (SPONGE.rpgMakerName === "MV") {
+                let item = { isSelected: false, isDirectory: false, name: "Window.png", fullname: "www\\img\\system\\Window.png" };
+                WORKBENCH.files.ignoreList.push(item);
+            }
+
             // To make scrolling area, add a placeholder to the list element.
             let navListElement = document.getElementById("nav-list");
             const filePlaceholder = document.createElement("div");
