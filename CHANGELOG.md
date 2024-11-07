@@ -15,6 +15,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (desc)
 -->
 
+## [0.5.0] - 2024-11-08
+
+### Added
+- Implement viewer logics and interations.
+- Add RMMV standard encryption functions.
+- Add RMMV default ignores to the ignore list.
+- Apply options interpreter to workbench.
+
+### Changed
+- Optimize the default options.
+
+### Removed
+- Remove the HEIF support.
+- Remove the metadata tab from viewer.
+
+### Fixed
+- Change to encoding without the BOM(for package.json).
+
 ## [0.4.0] - 2024-11-04
 
 ### Added
