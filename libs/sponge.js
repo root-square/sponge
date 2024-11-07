@@ -8,6 +8,7 @@
 
 const fs = require('fs');
 const path = require('path');
+
 let vips = null;
 (async () => {
     vips = await Vips();

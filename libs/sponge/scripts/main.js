@@ -380,8 +380,6 @@ let WORKBENCH = {
             WORKBENCH.status.setViewerMessage("Loading..."); // Note: This removes all viewer contents before showing a message.
 
             // Get an arraybuffer with XHR, and process it.
-            const t0 = performance.now()
-
             const filePath = path.resolve(refresh === true ? viewer.ariaLabel : WORKBENCH.files.navList[index].fullname);
             const xhr = new XMLHttpRequest();
             xhr.open("GET", filePath);
@@ -401,49 +399,45 @@ let WORKBENCH = {
                             return;
                         }
 
-                        if (WORKBENCH.props.viewerMode === "raw") {
-                            const viewerContent = document.createElement("img");
-                            viewerContent.className = "position-absolute w-100 h-100 border border-0 bg-transparent";
-                            viewerContent.style.objectFit = "cover";
+                        // Process the selected image data.
+                        const viewerContent = document.createElement("img");
+                        viewerContent.className = "position-absolute w-100 h-100 border border-0 bg-transparent";
+                        viewerContent.style.objectFit = "cover";
 
+                        const t0 = performance.now()
+
+                        if (WORKBENCH.props.viewerMode === "raw") {
                             SPONGE_FUNCTIONS.convert(arrayBuffer, "png", { Q: 100, effort: 7, bitdepth: 8, compression: 6, interlace: false }).then((data) => {
+                                const t1 = performance.now();
+                                
                                 const blob = new Blob([data]);
                                 viewerContent.src = URL.createObjectURL(blob);
-                                
-                                const t1 = performance.now();
+                            
                                 WORKBENCH.status.setViewerInfo(`${format.toUpperCase()} / ${WORKBENCH.utils.humanFileSize(blob.size, true, 2)} / ${(t1-t0).toFixed(3)}ms`);
                             });
-                                
-                            if (!viewer.classList.contains("grid-lines")) {
-                                viewer.classList.add("grid-lines");
-                            }
-
-                            viewer.innerHTML = "";
-                            viewer.ariaLabel = filePath; 
-                            viewer.appendChild(viewerContent);
                         } else if (WORKBENCH.props.viewerMode === "processed") {
-                            const viewerContent = document.createElement("img");
-                            viewerContent.className = "position-absolute w-100 h-100 border border-0 bg-transparent";
-                            viewerContent.style.objectFit = "cover";
-
-                            SPONGE_FUNCTIONS.convert(arrayBuffer, WORKBENCH.props.conversionFormat, {}).then((data1) => {
+                            SPONGE_FUNCTIONS.convert(arrayBuffer, WORKBENCH.props.conversionFormat, SPONGE_FUNCTIONS.options[format]).then((data1) => {
                                 SPONGE_FUNCTIONS.convert(data1, "png", { Q: 100, effort: 7, bitdepth: 8, compression: 6, interlace: false }).then((data2) => {
+                                    const t1 = performance.now();
+                                    
                                     const blob = new Blob([data2]);
                                     viewerContent.src = URL.createObjectURL(blob);
-                                    
-                                    const t1 = performance.now();
+
                                     WORKBENCH.status.setViewerInfo(`${format.toUpperCase()} to ${WORKBENCH.props.conversionFormat.toUpperCase()} / ${WORKBENCH.utils.humanFileSize(blob.size, true, 2)}(${(blob.size / arrayBuffer.byteLength * 100).toFixed(2)}%) / ${(t1-t0).toFixed(3)}ms`);
                                 });
                             });
-                                
-                            if (!viewer.classList.contains("grid-lines")) {
-                                viewer.classList.add("grid-lines");
-                            }
-                            
-                            viewer.innerHTML = "";
-                            viewer.ariaLabel = filePath; 
-                            viewer.appendChild(viewerContent);
+                        } else {
+                            return;
                         }
+
+                        // Display elements.
+                        if (!viewer.classList.contains("grid-lines")) {
+                            viewer.classList.add("grid-lines");
+                        }
+
+                        viewer.innerHTML = "";
+                        viewer.ariaLabel = filePath; 
+                        viewer.appendChild(viewerContent);
                     } catch (err) {
                         WORKBENCH.status.setViewerMessage(`${err.name}: ${err.message}`);
                     }
