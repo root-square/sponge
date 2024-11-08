@@ -641,6 +641,13 @@ let WORKBENCH = {
         setProgress: (progress) => {
             document.getElementById('status-bar').ariaValueNow = progress;
             document.getElementById('status-bar-inner').style.width = `${progress}%`;
+        },
+        setModal: (status, details) => {
+            document.getElementById("result-status").value = status;
+            document.getElementById("result-details").value = details;
+
+            const modal = new bootstrap.Modal(document.getElementById('result-modal'), {});
+            modal.show();
         }
     },
     utils: {

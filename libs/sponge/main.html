@@ -215,6 +215,32 @@
         </div>
     </div>
 
+    <div id="result-modal" class="modal fade" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 id="resultModalLabel" class="modal-title text-start text-body-primary fw-medium lh-base" style="font-size: 0.8rem">RESULT</h1>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-1">
+                            <label for="result-status" class="col-form-label" style="padding-top: 0px; font-size: 0.8rem">Status:</label>
+                            <input id="result-status" type="text" class="form-control text-body-secondary" style="font-size: 0.8rem">
+                        </div>
+                        <div class="mb-1">
+                            <label for="result-details" class="col-form-label" style="font-size: 0.8rem">Details:</label>
+                            <textarea id="result-details" class="form-control text-body-secondary" style="height: 125px; font-size: 0.8rem"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" style="font-size: 0.8rem">COPY</button>
+                    <button type="button" class="btn btn-primary" style="font-size: 0.8rem" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="toast-notice" class="toast align-items-center position-absolute bottom-0 end-0 m-5" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
             <div class="toast-body">
