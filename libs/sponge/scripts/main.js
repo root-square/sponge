@@ -648,6 +648,10 @@ let WORKBENCH = {
 
             const modal = new bootstrap.Modal(document.getElementById('result-modal'), {});
             modal.show();
+        },
+        copyResultDetails: () => {
+            let clipboard = nw.Clipboard.get();
+            clipboard.set(document.getElementById("result-details").value, 'text');
         }
     },
     utils: {
