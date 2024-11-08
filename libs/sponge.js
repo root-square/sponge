@@ -107,7 +107,7 @@ let SPONGE = {
         
         if (Utils.RPGMAKER_NAME === "MV") {
             Bitmap.prototype._requestImage = SPONGE_OVERRIDES.MV.requestImage;
-            Decrypter.prototype.decryptImg = SPONGE_OVERRIDES.MV.decryptImage;
+            Decrypter.decryptImg = SPONGE_OVERRIDES.MV.decryptImage;
         } else if (Utils.RPGMAKER_NAME === "MZ") {
             Bitmap.prototype._startLoading = SPONGE_OVERRIDES.MZ.startLoading;
             Bitmap.prototype._startDecrypting = SPONGE_OVERRIDES.MZ.startDecrypting;
@@ -496,7 +496,7 @@ let SPONGE_OVERRIDES = {
         },
         // Note: This function overrides 'Decrypter.decryptImg'.
         decryptImage: function (url, bitmap) {
-            url = this.extToEncryptExt(url);
+            url = Decrypter.extToEncryptExt(url);
 
             var requestFile = new XMLHttpRequest();
             requestFile.open("GET", url);
@@ -504,7 +504,7 @@ let SPONGE_OVERRIDES = {
             requestFile.send();
         
             requestFile.onload = function () {
-                if(this.status < Decrypter._xhrOk) {
+                if(requestFile.status < Decrypter._xhrOk) {
                     var arrayBuffer = null; 
                     
                     if (Decrypter.hasEncryptedImages) {
