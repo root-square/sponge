@@ -565,10 +565,10 @@ let WORKBENCH = {
                 settingsJson = JSON.parse(fs.readFileSync(settingsPath));
             } else {
                 try {
-                    settingsJson = { mode: "unknown", version: "0.1.0", options: { avif: "", png: "", webp: "" } };
+                    settingsJson = { mode: "unknown", version: "0.1.0", options: { avif: "", jxl: "", png: "", webp: "" } };
                     fs.writeFileSync(settingsPath, JSON.stringify(settingsJson));
                 } catch (err) {
-                    SPONGE_WORKBENCH.error("WB_IO_SETTINGS_NOT_AVAILABLE", "Cannot read the settings data and write a new data.", err.stack);
+                    SPONGE_WORKBENCH.error("WB_IO_SETTINGS_NOT_AVAILABLE", "Failed to read the settings data and write a new data.", err.stack);
                 }
             }
             
@@ -577,9 +577,8 @@ let WORKBENCH = {
             for (let format of formats) {
                 if (Object.hasOwn(settingsJson.options, format)) {
                     document.getElementById(`options-${format}`).value = settingsJson.options[format];
+                    SPONGE_FUNCTIONS.options[format] = SPONGE_FUNCTIONS.interpret(format, settingsJson.options[format]);
                 }
-
-                SPONGE_FUNCTIONS.options[format] = SPONGE_FUNCTIONS.interpret(format, settingsJson.options[format]);
             }
         },
         writeOptions: (format) => {
@@ -592,7 +591,7 @@ let WORKBENCH = {
                     settingsJson = { mode: "unknown", version: "0.1.0", options: { avif: "", jxl: "", png: "", webp: "" } };
                     fs.writeFileSync(settingsPath, JSON.stringify(settingsJson));
                 } catch (err) {
-                    SPONGE_WORKBENCH.error("WB_IO_SETTINGS_NOT_AVAILABLE", "Cannot read the settings data and write a new data.", err.stack);
+                    SPONGE_WORKBENCH.error("WB_IO_SETTINGS_NOT_AVAILABLE", "Failed to read the settings data and write a new data.", err.stack);
                 }
             }
 
@@ -600,12 +599,12 @@ let WORKBENCH = {
                 settingsJson.options[format] = document.getElementById(`options-${format}`).value;
                 fs.writeFileSync(settingsPath, JSON.stringify(settingsJson));
 
+                SPONGE_FUNCTIONS.options[format] = SPONGE_FUNCTIONS.interpret(format, settingsJson.options[format]);
+
                 WORKBENCH.status.setToast("Saved successfully!");
             } catch (err) {
-                SPONGE_WORKBENCH.error("WB_IO_SETTINGS_NOT_WRITABLE", "Cannot write a new settings data.", err.stack);
+                SPONGE_WORKBENCH.error("WB_IO_SETTINGS_NOT_WRITABLE", "Failed to write a new settings data.", err.stack);
             }
-
-            SPONGE_FUNCTIONS.options[format] = SPONGE_FUNCTIONS.interpret(format, settingsJson.options[format]);
 
             WORKBENCH.files.view(null, true);
         }

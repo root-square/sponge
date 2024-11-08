@@ -50,6 +50,12 @@ let SPONGE = {
             SPONGE.isNwjs = false;
         }
 
+        // Diagnose the current environment.
+        if (!SPONGE.isWorkbench) {
+            SPONGE_TESTS.diagnoseEnvironment();
+            SPONGE_TESTS.diagnoseEngine();
+        }
+
         let baseDirectory = path.dirname(process.execPath);
 
         // Parse the actual work directory.
@@ -94,10 +100,25 @@ let SPONGE = {
             }
         }
 
-        // Diagnose the current environment.
-        if (!SPONGE.isWorkbench) {
-            SPONGE_TESTS.diagnoseEnvironment();
-            SPONGE_TESTS.diagnoseEngine();
+        // Parse the options.
+        const formats = ["avif", "jxl", "png", "webp"];
+        const settingsPath = path.resolve(SPONGE.workDirectory, "js/libs/sponge.json");
+        let settingsJson = null;
+        if (fs.existsSync(settingsPath)) {
+            settingsJson = JSON.parse(fs.readFileSync(settingsPath));
+        } else {
+            try {
+                settingsJson = { mode: "unknown", version: "0.1.0", options: { avif: "", jxl: "", png: "", webp: "" } };
+                fs.writeFileSync(settingsPath, JSON.stringify(settingsJson));
+            } catch (err) {
+                SPONGE_WORKBENCH.error("SPONGE_SETTINGS_NOT_AVAILABLE", "Failed to read the settings data and write a new data.", err.stack);
+            }
+        }
+
+        for (let format of formats) {
+            if (Object.hasOwn(settingsJson.options, format)) {
+                SPONGE_FUNCTIONS.options[format] = SPONGE_FUNCTIONS.interpret(format, settingsJson.options[format]);
+            }
         }
     },
     inject: () => {
