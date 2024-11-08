@@ -5,7 +5,6 @@
 #* https://github.com/root-square/sponge/blob/main/LICENSE
 #*-----------------------------------------------------------------------------
 #Requires -Version 5.1
-#Requires -RunAsAdministrator
 
 [CmdletBinding(PositionalBinding = $false)]
 Param(
