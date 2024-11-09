@@ -282,7 +282,7 @@ let WORKBENCH = {
         },
         navigateWithPath: (targetPath, setHistory = false) => {
             if (!fs.existsSync(targetPath) || !fs.statSync(targetPath).isDirectory()) {
-                WORKBENCH.status.setToast("Cannot find the directory.");
+                WORKBENCH.status.showToast("Cannot find the directory.");
                 return;
             }
             
@@ -401,7 +401,7 @@ let WORKBENCH = {
                         if (format === null) {
                             viewer.ariaLabel = filePath;
                             WORKBENCH.status.setViewerMessage(`InvalidOperationError: The selected item is not an image file.`);
-                            WORKBENCH.status.setViewerInfo("ERROR");
+                            WORKBENCH.status.setViewerStatus("ERROR");
                             return;
                         }
 
@@ -418,7 +418,7 @@ let WORKBENCH = {
                                 
                                 const blob = new Blob([displayData]);
                                 viewerContent.src = URL.createObjectURL(blob);
-                                WORKBENCH.status.setViewerInfo(`${format.toUpperCase()} / ${WORKBENCH.utils.humanFileSize(displayData.byteLength, true, 2)} / ${(t1-t0).toFixed(3)}ms`);
+                                WORKBENCH.status.setViewerStatus(`${format.toUpperCase()} / ${WORKBENCH.utils.humanFileSize(displayData.byteLength, true, 2)} / ${(t1-t0).toFixed(3)}ms`);
                             });
                         } else if (WORKBENCH.props.viewerMode === "processed") {
                             SPONGE_FUNCTIONS.convert(arrayBuffer, WORKBENCH.props.conversionFormat, SPONGE_FUNCTIONS.options[WORKBENCH.props.conversionFormat]).then((convertedData) => {
@@ -427,7 +427,7 @@ let WORKBENCH = {
                                 
                                     const blob = new Blob([displayData]);
                                     viewerContent.src = URL.createObjectURL(blob);
-                                    WORKBENCH.status.setViewerInfo(`${format.toUpperCase()} to ${WORKBENCH.props.conversionFormat.toUpperCase()} / ${WORKBENCH.utils.humanFileSize(convertedData.byteLength, true, 2)}(${(convertedData.byteLength / arrayBuffer.byteLength * 100).toFixed(2)}%) / ${(t1-t0).toFixed(3)}ms`);
+                                    WORKBENCH.status.setViewerStatus(`${format.toUpperCase()} to ${WORKBENCH.props.conversionFormat.toUpperCase()} / ${WORKBENCH.utils.humanFileSize(convertedData.byteLength, true, 2)}(${(convertedData.byteLength / arrayBuffer.byteLength * 100).toFixed(2)}%) / ${(t1-t0).toFixed(3)}ms`);
                                 });
                             });
                         } else {
@@ -447,12 +447,12 @@ let WORKBENCH = {
                     }
                 } else {
                     WORKBENCH.status.setViewerMessage(`XMLHttpRequest: Unable to get an image arraybuffer.`);
-                    WORKBENCH.status.setViewerInfo("ERROR");
+                    WORKBENCH.status.setViewerStatus("ERROR");
                 }
             }
             xhr.onerror = () => {
                 WORKBENCH.status.setViewerMessage(`XMLHttpRequest: An unknown error has occurred while loading the image.`);
-                WORKBENCH.status.setViewerInfo("ERROR");
+                WORKBENCH.status.setViewerStatus("ERROR");
             };
             xhr.send();
         },
@@ -601,7 +601,7 @@ let WORKBENCH = {
 
                 SPONGE_FUNCTIONS.options[format] = SPONGE_FUNCTIONS.interpret(format, settingsJson.options[format]);
 
-                WORKBENCH.status.setToast("Saved successfully!");
+                WORKBENCH.status.showToast("Saved successfully!");
             } catch (err) {
                 SPONGE_WORKBENCH.error("WB_IO_SETTINGS_NOT_WRITABLE", "Failed to write a new settings data.", err.stack);
             }
@@ -624,25 +624,23 @@ let WORKBENCH = {
             
             viewer.appendChild(viewerContent);
         },
-        setViewerInfo: (text) => {
+        setViewerStatus: (text) => {
             const info = document.getElementById("viewer-info");
             info.innerText = text;
         },
-        setToast: (text) => {
+        setProgress: (progress, text) => {
+            document.getElementById('status-bar').ariaValueNow = progress;
+            document.getElementById('status-bar-inner').style.width = `${progress}%`;
+            document.getElementById('status-text').innerText = text;
+        },
+        showToast: (text) => {
             document.getElementById('toast-notice-text').innerText = text;
 
             let toast = document.getElementById('toast-notice');
             let toastInstance = bootstrap.Toast.getOrCreateInstance(toast);
             toastInstance.show();
         },
-        setText: (text) => {
-            document.getElementById('status-text').innerText = text;
-        },
-        setProgress: (progress) => {
-            document.getElementById('status-bar').ariaValueNow = progress;
-            document.getElementById('status-bar-inner').style.width = `${progress}%`;
-        },
-        setModal: (status, details) => {
+        showResultModal: (status, details) => {
             document.getElementById("result-status").value = status;
             document.getElementById("result-details").value = details;
 
