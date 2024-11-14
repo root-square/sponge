@@ -237,7 +237,7 @@ let SPONGE_FUNCTIONS = {
         const formatMain = new Uint8Array(arrayBuffer, 6, 1);
         const formatSub = new Uint8Array(arrayBuffer, 7, 1);
         const bitFlags = new Uint8Array(arrayBuffer, 8, 8);
-        const body = source.slice(16);
+        const body = arrayBuffer.slice(16);
 
         return { versionMajor: versionMajor, versionMinor: versionMinor, formatMain: formatMain, formatSub: formatSub, bitFlags: bitFlags, body: body};
     },
@@ -290,10 +290,10 @@ let SPONGE_FUNCTIONS = {
         const body = new Uint8Array(outBuffer, 16);
         body.set(new Uint8Array(arrayBuffer));
 
-        const view = new DataView(body);
+        const view = new DataView(outBuffer);
         const key = encryptionKey.match(/.{2}/g);
         for (let i = 0; i < 16; i++) {
-            view.setUint8(i, view.getUint8(i) ^ parseInt(key[i], 16));
+            view.setUint8(i+16, view.getUint8(i+16) ^ parseInt(key[i+16], 16));
         }
 
         return outBuffer;
@@ -477,7 +477,7 @@ let SPONGE_FUNCTIONS = {
             try {
                 format = format.toLowerCase();
                 if (format !== "avif" && format !== "png" && format !== "jxl" && format !== "webp") return null;
-    
+                
                 let image = vips.Image.newFromBuffer(arrayBuffer);
                 let outBuffer = image.writeToBuffer(`.${format}`, options);
                 resolve(outBuffer);

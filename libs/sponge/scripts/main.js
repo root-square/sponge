@@ -641,7 +641,7 @@ let WORKBENCH = {
                                 try {
                                     if (err) reject(err);
     
-                                    let arrayBuffer = nodeBuffer.buffer;
+                                    let arrayBuffer = WORKBENCH.utils.toArrayBuffer(nodeBuffer);
                                     arrayBuffer = SPONGE_FUNCTIONS.readSponge(arrayBuffer).body;
                                     arrayBuffer = SPONGE_FUNCTIONS.decrypt(arrayBuffer, SPONGE.encryptionKey);
     
@@ -649,7 +649,7 @@ let WORKBENCH = {
                                         reject(new Error("The file is not a PNG file."));
                                     }
         
-                                    const convertedData = SPONGE_FUNCTIONS.convert(arrayBuffer, WORKBENCH.props.conversionFormat, SPONGE_FUNCTIONS.options[WORKBENCH.props.conversionFormat]).then((data) => {
+                                    SPONGE_FUNCTIONS.convert(arrayBuffer, WORKBENCH.props.conversionFormat, SPONGE_FUNCTIONS.options[WORKBENCH.props.conversionFormat]).then((convertedData) => {
                                         if (WORKBENCH.props.excludeInferiorities && arrayBuffer.byteLength <= convertedData.byteLength) {
                                             reject(new Error("The encoded file is larger than the original file."));
                                         }
@@ -660,11 +660,11 @@ let WORKBENCH = {
         
                                         convertedData = SPONGE_FUNCTIONS.writeSponge(convertedData, WORKBENCH.props.conversionFormat);
         
-                                        fs.writeFile(resolvedPath, convertedData, {flag: 'w+', signal: WORKBENCH.tasks.abortController.signal}).then(() => {
+                                        fs.writeFile(resolvedPath, WORKBENCH.utils.toBuffer(convertedData), {flag: 'w+', signal: WORKBENCH.tasks.abortController.signal}, function(err) {
+                                            if (err) reject(err);
+
                                             resolve();
-                                        }).catch((err) => {
-                                            reject(err)
-                                        })
+                                        });
                                     }).catch((err) => reject(err));
                                 } catch (err) {
                                     reject(err);
@@ -686,7 +686,7 @@ let WORKBENCH = {
                                 try {
                                     if (err) reject(err);
 
-                                    let arrayBuffer = nodeBuffer.buffer;
+                                    let arrayBuffer = WORKBENCH.utils.toArrayBuffer(nodeBuffer);
                                     arrayBuffer = SPONGE_FUNCTIONS.readSponge(arrayBuffer).body;
                                     arrayBuffer = SPONGE_FUNCTIONS.decrypt(arrayBuffer, SPONGE.encryptionKey);
     
@@ -694,16 +694,16 @@ let WORKBENCH = {
                                         reject(new Error("The file is not an image file."));
                                     }
         
-                                    const convertedData = SPONGE_FUNCTIONS.convert(arrayBuffer, "png", SPONGE_FUNCTIONS.options.png).then(() => {
+                                    SPONGE_FUNCTIONS.convert(arrayBuffer, "png", SPONGE_FUNCTIONS.options.png).then((convertedData) => {
                                         if (WORKBENCH.props.encryptResources) {
                                             convertedData = SPONGE_FUNCTIONS.encrypt(convertedData, SPONGE.encryptionKey);
                                         }
         
-                                        fs.writeFile(resolvedPath, convertedData, {flag: 'w+', signal: WORKBENCH.tasks.abortController.signal}).then(() => {
+                                        fs.writeFile(resolvedPath, WORKBENCH.utils.toBuffer(convertedData), {flag: 'w+', signal: WORKBENCH.tasks.abortController.signal}, function(err) {
+                                            if (err) reject(err);
+
                                             resolve();
-                                        }).catch((err) => {
-                                            reject(err)
-                                        })
+                                        });
                                     }).catch((err) => reject(err));
                                 } catch (err) {
                                     reject(err);
@@ -724,7 +724,7 @@ let WORKBENCH = {
                             try{
                                 if (err) reject(err);
 
-                                let arrayBuffer = nodeBuffer.buffer;
+                                let arrayBuffer = WORKBENCH.utils.toArrayBuffer(nodeBuffer);
 
                                 let result = { isSponge: false, isEncrypted: false, filename: "", format: "" };
     
@@ -946,6 +946,22 @@ let WORKBENCH = {
           
           
             return bytes.toFixed(dp) + ' ' + units[u];
+        },
+        toArrayBuffer: (buffer) => {
+            const arrayBuffer = new ArrayBuffer(buffer.length);
+            const view = new Uint8Array(arrayBuffer);
+            for (let i = 0; i < buffer.length; ++i) {
+              view[i] = buffer[i];
+            }
+            return arrayBuffer;
+        },
+        toBuffer: (arrayBuffer) => {
+            const buffer = Buffer.alloc(arrayBuffer.byteLength);
+            const view = new Uint8Array(arrayBuffer);
+            for (let i = 0; i < buffer.length; ++i) {
+              buffer[i] = view[i];
+            }
+            return buffer;
         }
     },
     misc: {
