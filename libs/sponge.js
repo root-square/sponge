@@ -198,17 +198,19 @@ let SPONGE_FUNCTIONS = {
     },
     isImage: (arrayBuffer) => {
         const avifSignature = "0.0.0.0.66.74.79.70.61.76.69.66";
-        const jxlSignature = "0.0.0.c.4a.58.4c.20.d.a.87.a";
+        const jxlNcsSignature = "ff.a"; // JXL: Naked code-stream.
+        const jxlIbcSignature = "0.0.0.c.4a.58.4c.20.d.a.87.a"; // JXL: ISOBMFF-based container.
         const pngSignature = "89.50.4e.47.d.a.1a.a";
         const webpSignature = "57.45.42.50";
 
+        const header0to2 = Array.from(new Uint8Array(arrayBuffer, 0, 2), x => x.toString(16)).join(".");
         const header0to8 = Array.from(new Uint8Array(arrayBuffer, 0, 8), x => x.toString(16)).join(".");
         const header0to12 = Array.from(new Uint8Array(arrayBuffer, 0, 12), x => x.toString(16)).join(".");
         const header8to12 = Array.from(new Uint8Array(arrayBuffer, 8, 4), x => x.toString(16)).join(".");
 
         if (header0to12 === avifSignature) {
             return "avif";
-        } else if (header0to12 === jxlSignature) {
+        } else if ((header0to2 === jxlNcsSignature) || (header0to12 === jxlIbcSignature)) {
             return "jxl";
         } else if (header0to8 === pngSignature) {
             return "png";
@@ -621,6 +623,10 @@ let SPONGE_TESTS = {
         let nodeVersion = parseFloat(regex.exec(process.version));
         if (!isNaN(nodeVersion) && nodeVersion < 16.4)
             SPONGE_WORKBENCH.error("DIAG_ENV_WASM_NOT_SUPPORTED", "At least version 16.4 of node.js is required to call the WASM final SIMD opcodes.", null);
+
+        // Error: DIAG_ENV_WB_NOT_SUPPORTED
+        if (!isNaN(nodeVersion) && nodeVersion < 18.0)
+            SPONGE_WORKBENCH.error("DIAG_ENV_WB_NOT_SUPPORTED", "At least version 18.0 of node.js is required to run the Sponge Workbench.", null);
     },
     diagnoseEngine: () => {
         // Error: DIAG_ENG_RPGMAKER_NOT_FOUND

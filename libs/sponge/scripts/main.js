@@ -481,11 +481,11 @@ let WORKBENCH = {
     },
     props: {
         conversionFormat: "avif",
+        viewerMode: "raw",
+        operationMode: "encode",
         encryptResources: true,
         excludeInferiorities: true,
         ignoreAllExceptPng: true,
-        viewerMode: "raw",
-        operationMode: "encode",
         init: () => {
             WORKBENCH.props.readOptions();
         },
@@ -549,8 +549,8 @@ let WORKBENCH = {
                 case "decode":
                     WORKBENCH.props.operationMode = "decode";
                     break;
-                case "check":
-                    WORKBENCH.props.operationMode = "check";
+                case "inspect":
+                    WORKBENCH.props.operationMode = "inspect";
                     break;
                 default:
                     WORKBENCH.props.operationMode = "encode";
@@ -609,6 +609,269 @@ let WORKBENCH = {
             WORKBENCH.files.view(null, true);
         }
     },
+    tasks: {
+        abortController: null,
+        indexFiles: (targetPath, extensions, callback) => {
+            if (typeof extension === 'undefined' || extension === null) {
+                extensions = [".png", ".rpgmvp", ".png_"];
+            }
+
+            fs.readdir(targetPath, { recursive: true, withFileTypes: true }, function (err, files) {
+                callback(err, files.filter(item => !item.isDirectory() && extensions.includes(path.extname(item.name).toLowerCase())));
+            });
+        },
+        buildPromise: (type, file) => {
+            switch (type.toLowerCase()) {
+                case "encode":
+                    {
+                        return new Promise((resolve, reject) => {    
+                            if (WORKBENCH.tasks.abortController.signal.aborted) {
+                                reject(new Error("The operation has been aborted."));
+                            }
+    
+                            const parentPath = file.path ? file.path : file.parentPath;
+                            const resolvedPath = path.resolve(path.join(parentPath, file.name));
+    
+                            fs.readFile(resolvedPath, { encoding: null, flag: 'r', signal: WORKBENCH.tasks.abortController.signal }, function(err, nodeBuffer) {
+                                try {
+                                    if (err) reject(err);
+    
+                                    let arrayBuffer = nodeBuffer.buffer;
+                                    arrayBuffer = SPONGE_FUNCTIONS.readSponge(arrayBuffer).body;
+                                    arrayBuffer = SPONGE_FUNCTIONS.decrypt(arrayBuffer, SPONGE.encryptionKey);
+    
+                                    if (WORKBENCH.props.ignoreAllExceptPng && SPONGE_FUNCTIONS.isImage(arrayBuffer) !== "png") {
+                                        reject(new Error("The file is not a PNG file."));
+                                    }
+        
+                                    const convertedData = SPONGE_FUNCTIONS.convert(arrayBuffer, WORKBENCH.props.conversionFormat, SPONGE_FUNCTIONS.options[WORKBENCH.props.conversionFormat]).then((data) => {
+                                        if (WORKBENCH.props.excludeInferiorities && arrayBuffer.byteLength <= convertedData.byteLength) {
+                                            reject(new Error("The encoded file is larger than the original file."));
+                                        }
+            
+                                        if (WORKBENCH.props.encryptResources) {
+                                            convertedData = SPONGE_FUNCTIONS.encrypt(convertedData, SPONGE.encryptionKey);
+                                        }
+        
+                                        convertedData = SPONGE_FUNCTIONS.writeSponge(convertedData, WORKBENCH.props.conversionFormat);
+        
+                                        fs.writeFile(resolvedPath, convertedData, {flag: 'w+', signal: WORKBENCH.tasks.abortController.signal}).then(() => {
+                                            resolve();
+                                        }).catch((err) => {
+                                            reject(err)
+                                        })
+                                    }).catch((err) => reject(err));
+                                } catch (err) {
+                                    reject(err);
+                                }
+                            });
+                        });
+                    }
+                case "decode":
+                    {
+                        return new Promise((resolve, reject) => {    
+                            if (WORKBENCH.tasks.abortController.signal.aborted) {
+                                reject(new Error("The operation has been aborted."));
+                            }
+    
+                            const parentPath = file.path ? file.path : file.parentPath;
+                            const resolvedPath = path.resolve(path.join(parentPath, file.name));
+    
+                            fs.readFile(resolvedPath, { encoding: null, flag: 'r', signal: WORKBENCH.tasks.abortController.signal }, function(err, nodeBuffer) {
+                                try {
+                                    if (err) reject(err);
+
+                                    let arrayBuffer = nodeBuffer.buffer;
+                                    arrayBuffer = SPONGE_FUNCTIONS.readSponge(arrayBuffer).body;
+                                    arrayBuffer = SPONGE_FUNCTIONS.decrypt(arrayBuffer, SPONGE.encryptionKey);
+    
+                                    if (SPONGE_FUNCTIONS.isImage(arrayBuffer) === null) {
+                                        reject(new Error("The file is not an image file."));
+                                    }
+        
+                                    const convertedData = SPONGE_FUNCTIONS.convert(arrayBuffer, "png", SPONGE_FUNCTIONS.options.png).then(() => {
+                                        if (WORKBENCH.props.encryptResources) {
+                                            convertedData = SPONGE_FUNCTIONS.encrypt(convertedData, SPONGE.encryptionKey);
+                                        }
+        
+                                        fs.writeFile(resolvedPath, convertedData, {flag: 'w+', signal: WORKBENCH.tasks.abortController.signal}).then(() => {
+                                            resolve();
+                                        }).catch((err) => {
+                                            reject(err)
+                                        })
+                                    }).catch((err) => reject(err));
+                                } catch (err) {
+                                    reject(err);
+                                }
+                            });
+                        });
+                    }
+                case "inspect":
+                    return new Promise((resolve, reject) => {    
+                        if (WORKBENCH.tasks.abortController.signal.aborted) {
+                            reject(new Error("The operation has been aborted."));
+                        }
+
+                        const parentPath = file.path ? file.path : file.parentPath;
+                        const resolvedPath = path.resolve(path.join(parentPath, file.name));
+
+                        fs.readFile(resolvedPath, { encoding: null, flag: 'r', signal: WORKBENCH.tasks.abortController.signal }, function(err, nodeBuffer) {
+                            try{
+                                if (err) reject(err);
+
+                                let arrayBuffer = nodeBuffer.buffer;
+
+                                let result = { isSponge: false, isEncrypted: false, filename: "", format: "" };
+    
+                                if (SPONGE_FUNCTIONS.isSponge(arrayBuffer)) {
+                                    arrayBuffer = SPONGE_FUNCTIONS.readSponge(arrayBuffer).body;
+                                    result.isSponge = true;
+                                }
+    
+                                if (SPONGE_FUNCTIONS.isEncrypted(arrayBuffer)) {
+                                    arrayBuffer = SPONGE_FUNCTIONS.decrypt(arrayBuffer, SPONGE.encryptionKey);
+                                    result.isEncrypted = true;
+                                }
+    
+                                result.filename = resolvedPath;
+    
+                                result.format = SPONGE_FUNCTIONS.isImage(arrayBuffer);
+                                if (result.format === null) {
+                                    reject(new Error("Failed to find an image header."));
+                                }
+                                
+                                resolve(result);
+                            } catch (err) {
+                                reject(err);
+                            }
+                        });
+                    });
+                default:
+                    break;
+            }
+        },
+        startTask: () => {
+            try {
+                let targetPath = "./img/";
+                if (SPONGE.rpgMakerName === "MV") {
+                    targetPath = "./www/img/";
+                }
+
+                document.getElementById("task-starter-section").classList.replace("d-inline-flex", "d-none");
+                document.getElementById("task-stopper-section").classList.replace("d-none", "d-inline-flex");    
+
+                WORKBENCH.tasks.abortController = new AbortController();
+
+                WORKBENCH.tasks.indexFiles(targetPath, [".png", ".rpgmvp", ".png_"], (err, files) => {
+                    if (err) throw err;
+
+                    // Create a promise producer.
+                    const producerType = WORKBENCH.props.operationMode;
+                    let producerCount = 0;
+                    let producer = () => {
+                        if (producerCount < files.length) {
+                            return WORKBENCH.tasks.buildPromise(producerType, files[producerCount++]);
+                        } else {
+                            return null;
+                        }
+                    };
+
+                    // Create a promise pool.
+                    let abortFlag = false;
+                    let codecResult = { files: { total: 0, success: 0, error: 0 }, options: { avif: SPONGE_FUNCTIONS.options.avif, jxl: SPONGE_FUNCTIONS.options.jxl, png: SPONGE_FUNCTIONS.options.png, webp: SPONGE_FUNCTIONS.options.webp }, errors: [] };
+                    let inspctResult = { files: { total: 0, success: 0, error: 0, sponge: 0, crypto: 0 }, formats: { avif:0, jxl: 0, png: 0, webp: 0 }, options: { avif: SPONGE_FUNCTIONS.options.avif, jxl: SPONGE_FUNCTIONS.options.jxl, png: SPONGE_FUNCTIONS.options.png, webp: SPONGE_FUNCTIONS.options.webp }, errors: [] };
+                    
+                    const concurrency = 4;
+                    const pool = new PromisePool(producer, concurrency);
+                    
+                    pool.addEventListener('fulfilled', function (event) {
+                        const resultData = event.data.result;
+
+                        if (WORKBENCH.props.operationMode === "encode" || WORKBENCH.props.operationMode === "decode") {
+                            codecResult.files.total += 1;
+                            codecResult.files.success += 1;
+                        } else if (WORKBENCH.props.operationMode === "inspect") {
+                            inspctResult.files.total += 1;
+                            inspctResult.files.success += 1;
+                            
+                            if (resultData.isSponge) {
+                                inspctResult.files.sponge += 1;
+                            }
+
+                            if (resultData.isEncrypted) {
+                                inspctResult.files.crypto += 1;
+                            }
+
+                            switch (resultData.format.toLowerCase()) {
+                                case "avif":
+                                    inspctResult.formats.avif += 1;
+                                    break;
+                                case "jxl":
+                                    inspctResult.formats.jxl += 1;
+                                    break;
+                                case "png":
+                                    inspctResult.formats.png += 1;
+                                    break;
+                                case "webp":
+                                    inspctResult.formats.webp += 1;
+                                    break;
+                            }
+                        }
+
+                        WORKBENCH.status.setProgress(Math.round(producerCount / files.length * 100), `Processing... (${producerCount}/${files.length})`);
+                    });
+                    
+                    pool.addEventListener('rejected', function (event) {
+                        const errorData = event.data.error;
+
+                        if (WORKBENCH.props.operationMode === "encode" || WORKBENCH.props.operationMode === "decode") {
+                            codecResult.files.total += 1;
+                            codecResult.files.error += 1;
+                            codecResult.errors.push(errorData);
+                        } else if (WORKBENCH.props.operationMode === "inspect") {
+                            inspctResult.files.total += 1;
+                            inspctResult.files.error += 1;
+                            inspctResult.errors.push(errorData);
+                        }
+                        
+                        WORKBENCH.status.setProgress(Math.round(producerCount / files.length * 100), `ERROR: ${event.data.error.message}`);
+                    });
+                    
+                    pool.start().then(() => {                        
+                        let result = null;
+                        
+                        if (WORKBENCH.props.operationMode === "encode" || WORKBENCH.props.operationMode === "decode") {
+                            result = JSON.stringify(codecResult);
+                        } else if (WORKBENCH.props.operationMode === "inspect") {
+                            result = JSON.stringify(inspctResult);
+                        }
+
+                        WORKBENCH.tasks.stopTask(false);
+
+                        if (WORKBENCH.tasks.abortController.signal.aborted) {
+                            WORKBENCH.status.setProgress(100, `The operation has been aborted.`);
+                            WORKBENCH.status.showResultModal(`The operation has been aborted.`, result);
+                        } else {
+                            WORKBENCH.status.setProgress(100, `Completed successfully!`);
+                            WORKBENCH.status.showResultModal(`Completed successfully!`, result);
+                        }
+                    });
+                });
+            } catch (err) {
+                WORKBENCH.tasks.stopTask(false);
+                WORKBENCH.status.showResultModal(`Failed to start an operation.`, err);
+                return;
+            }
+        },
+        stopTask: (abort = false) => {
+            if (abort) {
+                WORKBENCH.tasks.abortController.abort();
+            }
+
+            document.getElementById("task-starter-section").classList.replace("d-none", "d-inline-flex");
+            document.getElementById("task-stopper-section").classList.replace("d-inline-flex", "d-none");
+        }
+    },
     status: {
         setViewerMessage: (text) => {
             const viewer = document.getElementById("viewer");
@@ -620,7 +883,7 @@ let WORKBENCH = {
             const viewerContent = document.createElement("span");
             viewerContent.className = "position-absolute top-50 start-50 translate-middle text-center text-wrap text-body-secondary fw-light lh-base";
             viewerContent.style.fontSize= "0.9rem";
-            viewerContent.innerText = text;
+            viewerContent.innerText = text.replaceAll(/(\n|\r\n)/g, "<br>");
             
             viewer.appendChild(viewerContent);
         },
@@ -642,7 +905,12 @@ let WORKBENCH = {
         },
         showResultModal: (status, details) => {
             document.getElementById("result-status").value = status;
-            document.getElementById("result-details").value = details;
+
+            if (details instanceof Error || (details && details.stack && details.message)) {
+                document.getElementById("result-details").value = `${details.stack}`;
+            } else {
+                document.getElementById("result-details").value = details;
+            }
 
             const modal = new bootstrap.Modal(document.getElementById('result-modal'), {});
             modal.show();

@@ -198,8 +198,8 @@
                         </div>
                     </div>
 
-                    <div class="g-start-2 btn-group ms-2" style="height:40px;">
-                        <button id="btn-start" type="button" class="btn btn-primary" style="font-size: 0.8rem" data-bs-toggle="tooltip" data-bs-title="Start operation">ENCODE</button>
+                    <div id="task-starter-section" class="g-start-2 btn-group ms-2 d-inline-flex" style="height:40px;">
+                        <button id="btn-start" type="button" class="btn btn-primary" style="font-size: 0.8rem" data-bs-toggle="tooltip" data-bs-title="Start operation" onclick="WORKBENCH.tasks.startTask()">ENCODE</button>
                         <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" style="font-size: 0.8rem" data-bs-toggle="dropdown" aria-expanded="false">
                             <span class="visually-hidden">Toggle Dropdown</span>
                         </button>
@@ -207,8 +207,12 @@
                             <li><a class="dropdown-item" href="#" onclick="WORKBENCH.props.changeOperationMode('encode')">ENCODE</a></li>
                             <li><a class="dropdown-item" href="#" onclick="WORKBENCH.props.changeOperationMode('decode')">DECODE</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#" onclick="WORKBENCH.props.changeOperationMode('check')">CHECK</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="WORKBENCH.props.changeOperationMode('inspect')">INSPECT</a></li>
                         </ul>
+                    </div>
+
+                    <div id="task-stopper-section" class="g-start-2 btn-group ms-2 d-none" style="height:40px;">
+                        <button id="btn-stop" type="button" class="btn btn-outline-light" style="font-size: 0.8rem" onclick="WORKBENCH.tasks.stopTask(true)">STOP</button>
                     </div>
                 </div>
             </div>
@@ -252,6 +256,7 @@
     </div>
 
     <script src="./externs/bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="./externs/es6-promise-pool/es6-promise-pool.js"></script>
 
     <script src="./../vips.js"></script>
     <script src="./../sponge.js"></script>
