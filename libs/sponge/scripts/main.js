@@ -617,7 +617,12 @@ let WORKBENCH = {
             }
 
             fs.readdir(targetPath, { recursive: true, withFileTypes: true }, function (err, files) {
-                callback(err, files.filter(item => !item.isDirectory() && extensions.includes(path.extname(item.name).toLowerCase())));
+                let ignores = [];
+                for (let i = 0 ; i < WORKBENCH.files.ignoreList.length; i++) {
+                    ignores.push(path.resolve(WORKBENCH.files.ignoreList[i].fullname));
+                }
+
+                callback(err, files.filter(item => !item.isDirectory() && extensions.includes(path.extname(item.name).toLowerCase()) && !ignores.includes(path.resolve(path.join(item.path ? item.path : item.parentPath, item.name)))));
             });
         },
         buildPromise: (type, file) => {
