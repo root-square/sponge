@@ -632,109 +632,105 @@ let WORKBENCH = {
             // Returns: {type, message, result, error}
             switch (type.toLowerCase()) {
                 case "encode":
-                    {
-                        return new Promise((resolve, reject) => {    
-                            if (WORKBENCH.tasks.abortController.signal.aborted) {
-                                resolve(WORKBENCH.tasks.buildResult("failure", file.name, "OPERATION_ABORTED", new Error("The operation has been aborted.")));
-                            }
+                    return new Promise((resolve, reject) => {    
+                        if (WORKBENCH.tasks.abortController.signal.aborted) {
+                            resolve(WORKBENCH.tasks.buildResult("failure", file.name, "OPERATION_ABORTED", new Error("The operation has been aborted.")));
+                        }
 
-                            const t0 = performance.now();
-    
-                            const parentPath = file.path ? file.path : file.parentPath;
-                            const resolvedPath = path.resolve(path.join(parentPath, file.name));
-    
-                            fs.readFile(resolvedPath, { encoding: null, flag: 'r', signal: WORKBENCH.tasks.abortController.signal }, function(err, buf) {
-                                try {
-                                    if (err) {
-                                        resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "READ_FILE_FAILED", err));
-                                    }
-    
-                                    let arrayBuffer = WORKBENCH.utils.toArrayBuffer(buf);
-                                    arrayBuffer = SPONGE_FUNCTIONS.readSponge(arrayBuffer).body;
-                                    arrayBuffer = SPONGE_FUNCTIONS.decrypt(arrayBuffer, SPONGE.encryptionKey);
-    
-                                    if (WORKBENCH.props.ignoreAllExceptPng && SPONGE_FUNCTIONS.isImage(arrayBuffer) !== "png") {
-                                        resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "NON_TARGETED_FILE_IGNORED", new Error("The file is not a PNG file.")));
-                                    }
-        
-                                    SPONGE_FUNCTIONS.convert(arrayBuffer, WORKBENCH.props.conversionFormat, SPONGE_FUNCTIONS.options[WORKBENCH.props.conversionFormat]).then((convertedData) => {
-                                        if (WORKBENCH.props.excludeInferiorities && arrayBuffer.byteLength <= convertedData.byteLength) {
-                                            resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "INFERIOR_FILE_EXCLUDED", new Error("The encoded file is larger than the original file.")));
-                                        }
-            
-                                        if (WORKBENCH.props.encryptResources) {
-                                            convertedData = SPONGE_FUNCTIONS.encrypt(convertedData, SPONGE.encryptionKey);
-                                        }
-        
-                                        convertedData = SPONGE_FUNCTIONS.writeSponge(convertedData, WORKBENCH.props.conversionFormat);
-        
-                                        fs.writeFile(resolvedPath, Buffer.from(convertedData), {flag: 'w+', signal: WORKBENCH.tasks.abortController.signal}, function(err) {
-                                            if (err) {
-                                                resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "WRITE_FILE_FAILED", err));
-                                            }
+                        const t0 = performance.now();
 
-                                            const t1 = performance.now();
-                                            
-                                            resolve(WORKBENCH.tasks.buildResult("success", resolvedPath, "COMPLETED", { elapsedTime: t1-t0, result: null }));
-                                        });
-                                    }).catch((err) => {
-                                        resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "FILE_CONVERSION_FAILED", err));
-                                    });
-                                } catch (err) {
-                                    resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "FILE_PROCESSING_FAILED", err));
+                        const parentPath = file.path ? file.path : file.parentPath;
+                        const resolvedPath = path.resolve(path.join(parentPath, file.name));
+
+                        fs.readFile(resolvedPath, { encoding: null, flag: 'r', signal: WORKBENCH.tasks.abortController.signal }, function(err, buf) {
+                            try {
+                                if (err) {
+                                    resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "READ_FILE_FAILED", err));
                                 }
-                            });
+
+                                let arrayBuffer = WORKBENCH.utils.toArrayBuffer(buf);
+                                arrayBuffer = SPONGE_FUNCTIONS.readSponge(arrayBuffer).body;
+                                arrayBuffer = SPONGE_FUNCTIONS.decrypt(arrayBuffer, SPONGE.encryptionKey);
+
+                                if (WORKBENCH.props.ignoreAllExceptPng && SPONGE_FUNCTIONS.isImage(arrayBuffer) !== "png") {
+                                    resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "NON_TARGETED_FILE_IGNORED", new Error("The file is not a PNG file.")));
+                                }
+    
+                                SPONGE_FUNCTIONS.convert(arrayBuffer, WORKBENCH.props.conversionFormat, SPONGE_FUNCTIONS.options[WORKBENCH.props.conversionFormat]).then((convertedData) => {
+                                    if (WORKBENCH.props.excludeInferiorities && arrayBuffer.byteLength <= convertedData.byteLength) {
+                                        resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "INFERIOR_FILE_EXCLUDED", new Error("The encoded file is larger than the original file.")));
+                                    }
+        
+                                    if (WORKBENCH.props.encryptResources) {
+                                        convertedData = SPONGE_FUNCTIONS.encrypt(convertedData, SPONGE.encryptionKey);
+                                    }
+    
+                                    convertedData = SPONGE_FUNCTIONS.writeSponge(convertedData, WORKBENCH.props.conversionFormat);
+    
+                                    fs.writeFile(resolvedPath, Buffer.from(convertedData), {flag: 'w+', signal: WORKBENCH.tasks.abortController.signal}, function(err) {
+                                        if (err) {
+                                            resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "WRITE_FILE_FAILED", err));
+                                        }
+
+                                        const t1 = performance.now();
+                                        
+                                        resolve(WORKBENCH.tasks.buildResult("success", resolvedPath, "COMPLETED", { elapsedTime: t1-t0, result: null }));
+                                    });
+                                }).catch((err) => {
+                                    resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "FILE_CONVERSION_FAILED", err));
+                                });
+                            } catch (err) {
+                                resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "FILE_PROCESSING_FAILED", err));
+                            }
                         });
-                    }
+                    });
                 case "decode":
-                    {
-                        return new Promise((resolve, reject) => {    
-                            if (WORKBENCH.tasks.abortController.signal.aborted) {
-                                resolve(WORKBENCH.tasks.buildResult("failure", file.name, "OPERATION_ABORTED", new Error("The operation has been aborted.")));
-                            }
+                    return new Promise((resolve, reject) => {    
+                        if (WORKBENCH.tasks.abortController.signal.aborted) {
+                            resolve(WORKBENCH.tasks.buildResult("failure", file.name, "OPERATION_ABORTED", new Error("The operation has been aborted.")));
+                        }
 
-                            const t0 = performance.now();
-    
-                            const parentPath = file.path ? file.path : file.parentPath;
-                            const resolvedPath = path.resolve(path.join(parentPath, file.name));
-    
-                            fs.readFile(resolvedPath, { encoding: null, flag: 'r', signal: WORKBENCH.tasks.abortController.signal }, function(err, buf) {
-                                try {
-                                    if (err) {
-                                        resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "READ_FILE_FAILED", err));
-                                    }
+                        const t0 = performance.now();
 
-                                    let arrayBuffer = WORKBENCH.utils.toArrayBuffer(buf);
-                                    arrayBuffer = SPONGE_FUNCTIONS.readSponge(arrayBuffer).body;
-                                    arrayBuffer = SPONGE_FUNCTIONS.decrypt(arrayBuffer, SPONGE.encryptionKey);
-    
-                                    if (SPONGE_FUNCTIONS.isImage(arrayBuffer) === null) {
-                                        resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "WRITE_FILE_FAILED", new Error("The file is not an image file.")));
-                                    }
-        
-                                    SPONGE_FUNCTIONS.convert(arrayBuffer, "png", SPONGE_FUNCTIONS.options.png).then((convertedData) => {
-                                        if (WORKBENCH.props.encryptResources) {
-                                            convertedData = SPONGE_FUNCTIONS.encrypt(convertedData, SPONGE.encryptionKey);
-                                        }
-        
-                                        fs.writeFile(resolvedPath, Buffer.from(convertedData), {flag: 'w+', signal: WORKBENCH.tasks.abortController.signal}, function(err) {
-                                            if (err) {
-                                                resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "WRITE_FILE_FAILED", err));
-                                            }
+                        const parentPath = file.path ? file.path : file.parentPath;
+                        const resolvedPath = path.resolve(path.join(parentPath, file.name));
 
-                                            const t1 = performance.now();
-                                            
-                                            resolve(WORKBENCH.tasks.buildResult("success", resolvedPath, "COMPLETED", { elapsedTime: t1-t0, result: null }));
-                                        });
-                                    }).catch((err) => {
-                                        resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "FILE_CONVERSION_FAILED", err));
-                                    });
-                                } catch (err) {
-                                    resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "FILE_PROCESSING_FAILED", err));
+                        fs.readFile(resolvedPath, { encoding: null, flag: 'r', signal: WORKBENCH.tasks.abortController.signal }, function(err, buf) {
+                            try {
+                                if (err) {
+                                    resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "READ_FILE_FAILED", err));
                                 }
-                            });
+
+                                let arrayBuffer = WORKBENCH.utils.toArrayBuffer(buf);
+                                arrayBuffer = SPONGE_FUNCTIONS.readSponge(arrayBuffer).body;
+                                arrayBuffer = SPONGE_FUNCTIONS.decrypt(arrayBuffer, SPONGE.encryptionKey);
+
+                                if (SPONGE_FUNCTIONS.isImage(arrayBuffer) === null) {
+                                    resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "WRITE_FILE_FAILED", new Error("The file is not an image file.")));
+                                }
+    
+                                SPONGE_FUNCTIONS.convert(arrayBuffer, "png", SPONGE_FUNCTIONS.options.png).then((convertedData) => {
+                                    if (WORKBENCH.props.encryptResources) {
+                                        convertedData = SPONGE_FUNCTIONS.encrypt(convertedData, SPONGE.encryptionKey);
+                                    }
+    
+                                    fs.writeFile(resolvedPath, Buffer.from(convertedData), {flag: 'w+', signal: WORKBENCH.tasks.abortController.signal}, function(err) {
+                                        if (err) {
+                                            resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "WRITE_FILE_FAILED", err));
+                                        }
+
+                                        const t1 = performance.now();
+                                        
+                                        resolve(WORKBENCH.tasks.buildResult("success", resolvedPath, "COMPLETED", { elapsedTime: t1-t0, result: null }));
+                                    });
+                                }).catch((err) => {
+                                    resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "FILE_CONVERSION_FAILED", err));
+                                });
+                            } catch (err) {
+                                resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "FILE_PROCESSING_FAILED", err));
+                            }
                         });
-                    }
+                    });
                 case "inspect":
                     return new Promise((resolve, reject) => {    
                         if (WORKBENCH.tasks.abortController.signal.aborted) {
@@ -818,8 +814,8 @@ let WORKBENCH = {
                     const concurrency = 4;
                     const pool = new PromisePool(producer, concurrency);
                     
-                    let processingTimes = 0;
-                    let processingCount = 0;
+                    let processingTimes = 1000;
+                    let processingCount = 1;
 
                     pool.addEventListener('fulfilled', function (event) {
                         const resultData = event.data.result;
@@ -874,6 +870,9 @@ let WORKBENCH = {
                         // Calculate the remaining time.
                         if (typeof resultData.data.elapsedTime !== "undefined" && resultData.data.elapsedTime !== null &&!isNaN(resultData.data.elapsedTime)) {
                             processingTimes += resultData.data.elapsedTime;
+                            processingCount++;
+                        } else {
+                            processingTimes += 100;
                             processingCount++;
                         }
                         
