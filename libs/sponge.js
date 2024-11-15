@@ -8,6 +8,8 @@
 
 const fs = require('fs');
 const path = require('path');
+const Vips = require('wasm-vips');
+const { Buffer, Blob } = require('buffer');
 
 let vips = null;
 (async () => {
@@ -196,17 +198,17 @@ let SPONGE_FUNCTIONS = {
         png: {},
         webp: {}
     },
-    isImage: (arrayBuffer) => {
+    isImage: (buf) => {
         const avifSignature = "0.0.0.0.66.74.79.70.61.76.69.66";
         const jxlNcsSignature = "ff.a"; // JXL: Naked code-stream.
         const jxlIbcSignature = "0.0.0.c.4a.58.4c.20.d.a.87.a"; // JXL: ISOBMFF-based container.
         const pngSignature = "89.50.4e.47.d.a.1a.a";
         const webpSignature = "57.45.42.50";
 
-        const header0to2 = Array.from(new Uint8Array(arrayBuffer, 0, 2), x => x.toString(16)).join(".");
-        const header0to8 = Array.from(new Uint8Array(arrayBuffer, 0, 8), x => x.toString(16)).join(".");
-        const header0to12 = Array.from(new Uint8Array(arrayBuffer, 0, 12), x => x.toString(16)).join(".");
-        const header8to12 = Array.from(new Uint8Array(arrayBuffer, 8, 4), x => x.toString(16)).join(".");
+        const header0to2 = Array.from(new Uint8Array(buf.buffer, 0, 2), x => x.toString(16)).join(".");
+        const header0to8 = Array.from(new Uint8Array(buf.buffer, 0, 8), x => x.toString(16)).join(".");
+        const header0to12 = Array.from(new Uint8Array(buf.buffer, 0, 12), x => x.toString(16)).join(".");
+        const header8to12 = Array.from(new Uint8Array(buf.buffer, 8, 4), x => x.toString(16)).join(".");
 
         if (header0to12 === avifSignature) {
             return "avif";
@@ -220,28 +222,28 @@ let SPONGE_FUNCTIONS = {
             return null;
         }
     },
-    isSponge: (arrayBuffer) => {
-        if (!arrayBuffer) return null;
+    isSponge: (buf) => {
+        if (!buf) return null;
 
         const signature = "53.58.20.a"; // SX<SP><LF>
 
-        let header = new Uint8Array(arrayBuffer, 0, 4);
+        let header = new Uint8Array(buf.buffer, 0, 4);
         return (Array.from(header, x => x.toString(16)).join(".") === signature);
     },
-    readSponge: (arrayBuffer) => {
-        if (!arrayBuffer) return null;
-        if (!SPONGE_FUNCTIONS.isSponge(arrayBuffer)) return { body: arrayBuffer };
+    readSponge: (buf) => {
+        if (!buf) return null;
+        if (!SPONGE_FUNCTIONS.isSponge(buf)) return { body: buf };
 
-        const versionMajor = new Uint8Array(arrayBuffer, 4, 1);
-        const versionMinor = new Uint8Array(arrayBuffer, 5, 1);
-        const formatMain = new Uint8Array(arrayBuffer, 6, 1);
-        const formatSub = new Uint8Array(arrayBuffer, 7, 1);
-        const bitFlags = new Uint8Array(arrayBuffer, 8, 8);
-        const body = arrayBuffer.slice(16);
+        const versionMajor = new Uint8Array(buf.buffer, 4, 1);
+        const versionMinor = new Uint8Array(buf.buffer, 5, 1);
+        const formatMain = new Uint8Array(buf.buffer, 6, 1);
+        const formatSub = new Uint8Array(buf.buffer, 7, 1);
+        const bitFlags = new Uint8Array(buf.buffer, 8, 8);
+        const body = buff.subarray(16);
 
         return { versionMajor: versionMajor, versionMinor: versionMinor, formatMain: formatMain, formatSub: formatSub, bitFlags: bitFlags, body: body};
     },
-    writeSponge: (arrayBuffer, format) => {
+    writeSponge: (buf, format) => {
         let versionMajor = 0x31;
         let versionMinor = 0x30;
         let formatMain = 0x00;
@@ -260,35 +262,35 @@ let SPONGE_FUNCTIONS = {
                 formatMain = 0x00;
         }
 
-        let outBuffer = new ArrayBuffer(arrayBuffer.byteLength + 16);
+        let outBuffer = Buffer.alloc(buf.byteLength + 16);
 
-        let header = new Uint8Array(outBuffer, 0, 16);
+        let header = new Uint8Array(outBuffer.buffer, 0, 16);
         header.set([0x53, 0x58, 0x20, 0x0a, versionMajor, versionMinor, formatMain, formatSub], 0);
         header.fill(0x00, 8, 16);
 
-        let body = new Uint8Array(outBuffer);
-        body.set(new Uint8Array(arrayBuffer), 16);
+        let body = new Uint8Array(outBuffer.buffer);
+        body.set(new Uint8Array(buf.buffer), 16);
 
         return outBuffer;
     },
-    isEncrypted: (arrayBuffer) => {
-        if (!arrayBuffer) return null;
+    isEncrypted: (buf) => {
+        if (!buf) return null;
 
         const signature = "52.50.47.4d.56"; // RPGMV
 
-        let header = new Uint8Array(arrayBuffer, 0, 5);
+        let header = new Uint8Array(buf.buffer, 0, 5);
         return (Array.from(header, x => x.toString(16)).join(".") === signature);
     },
-    encrypt: (arrayBuffer, encryptionKey) => {
-        if (!arrayBuffer) return null;
+    encrypt: (buf, encryptionKey) => {
+        if (!buf) return null;
         
-        const outBuffer = new ArrayBuffer(arrayBuffer.byteLength + 16);
+        const outBuffer = Buffer.alloc(buf.byteLength + 16);
 
-        const header = new Uint8Array(outBuffer, 0, 16);
+        const header = new Uint8Array(outBuffer.buffer, 0, 16);
         header.set([0x52,0x50,0x47,0x4d,0x56,0x00,0x00,0x00,0x00,0x03,0x01,0x00,0x00,0x00,0x00,0x00], 0); // Note: RPGMV Standard Header
 
-        const body = new Uint8Array(outBuffer, 16);
-        body.set(new Uint8Array(arrayBuffer));
+        const body = new Uint8Array(outBuffer.buffer, 16);
+        body.set(new Uint8Array(buf.buffer));
 
         const key = encryptionKey.match(/.{2}/g);
         for (let i = 0; i < 16; i++) {
@@ -297,12 +299,12 @@ let SPONGE_FUNCTIONS = {
 
         return outBuffer;
     },
-    decrypt: (arrayBuffer, encryptionKey) => {
-        if (!arrayBuffer) return null;
-        if (!SPONGE_FUNCTIONS.isEncrypted(arrayBuffer)) return arrayBuffer;
+    decrypt: (buf, encryptionKey) => {
+        if (!buf) return null;
+        if (!SPONGE_FUNCTIONS.isEncrypted(buf)) return buf;
         
-        const body = arrayBuffer.slice(16);
-        const view = new DataView(body);
+        const body = buf.subarray(16);
+        const view = new DataView(body.buffer);
         const key = encryptionKey.match(/.{2}/g);
         for (let i = 0; i < 16; i++) {
             view.setUint8(i, view.getUint8(i) ^ parseInt(key[i], 16));
@@ -471,13 +473,13 @@ let SPONGE_FUNCTIONS = {
 
         return options;
     },
-    convert: async (arrayBuffer, format, options) => {
+    convert: async (buf, format, options) => {
         return new Promise((resolve, reject) => {
             try {
                 format = format.toLowerCase();
                 if (format !== "avif" && format !== "png" && format !== "jxl" && format !== "webp") return null;
                 
-                let image = vips.Image.newFromBuffer(arrayBuffer);
+                let image = vips.Image.newFromBuffer(buf);
                 let outBuffer = image.writeToBuffer(`.${format}`, options);
                 resolve(outBuffer);
             } catch (err) {

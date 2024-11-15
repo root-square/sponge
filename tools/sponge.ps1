@@ -85,7 +85,7 @@ function Invoke-Install {
             $vipsVersion = "0.0"
         }
              
-        Invoke-WebRequest "https://cdn.jsdelivr.net/npm/wasm-vips@$($vipsVersion)/lib/vips.js" -OutFile (Join-Path -Path "$($script:LibsPath)" -ChildPath "./vips.js")
+        Invoke-WebRequest "https://cdn.jsdelivr.net/npm/wasm-vips@$($vipsVersion)/lib/vips-node.js" -OutFile (Join-Path -Path "$($script:LibsPath)" -ChildPath "./vips.js")
         Invoke-WebRequest "https://cdn.jsdelivr.net/npm/wasm-vips@$($vipsVersion)/lib/vips.wasm" -OutFile (Join-Path -Path "$($script:LibsPath)" -ChildPath "./vips.wasm")
         Invoke-WebRequest "https://cdn.jsdelivr.net/npm/wasm-vips@$($vipsVersion)/lib/vips-heif.wasm" -OutFile (Join-Path -Path "$($script:LibsPath)" -ChildPath "./vips-heif.wasm")
         Invoke-WebRequest "https://cdn.jsdelivr.net/npm/wasm-vips@$($vipsVersion)/lib/vips-jxl.wasm" -OutFile (Join-Path -Path "$($script:LibsPath)" -ChildPath "./vips-jxl.wasm")

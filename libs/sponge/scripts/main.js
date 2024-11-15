@@ -385,76 +385,83 @@ let WORKBENCH = {
 
             WORKBENCH.status.setViewerMessage("Loading..."); // Note: This removes all viewer contents before showing a message.
 
-            // Get an arraybuffer with XHR, and process it.
-            const filePath = path.resolve(refresh === true ? viewer.ariaLabel : WORKBENCH.files.navList[index].fullname);
-            const xhr = new XMLHttpRequest();
-            xhr.open("GET", filePath);
-            xhr.responseType = "arraybuffer";
-            xhr.onload = async () => {
-                if (xhr.status < 400) {
-                    try {
-                        let arrayBuffer = xhr.response;
-                        arrayBuffer = SPONGE_FUNCTIONS.readSponge(arrayBuffer).body;
-                        arrayBuffer = SPONGE_FUNCTIONS.decrypt(arrayBuffer, SPONGE.encryptionKey);
+            // Get a file buffer, and process it.
+            const resolvedPath = path.resolve(refresh === true ? viewer.ariaLabel : WORKBENCH.files.navList[index].fullname);
 
-                        const format = SPONGE_FUNCTIONS.isImage(arrayBuffer)
-                        if (format === null) {
-                            viewer.ariaLabel = filePath;
-                            WORKBENCH.status.setViewerMessage(`InvalidOperationError: The selected item is not an image file.`);
+            fs.readFile(resolvedPath, { encoding: null, flag: 'r' }, function(err, buf) {
+                try {
+                    if (err) {
+                        console.error(err);
+                        WORKBENCH.status.setViewerMessage(`ERROR: Failed to read the file.`);
+                        WORKBENCH.status.setViewerStatus("ERROR");
+                    }
+
+                    buf = SPONGE_FUNCTIONS.readSponge(buf).body;
+                    buf = SPONGE_FUNCTIONS.decrypt(buf, SPONGE.encryptionKey);
+
+                    const format = SPONGE_FUNCTIONS.isImage(buf)
+                    if (format === null) {
+                        viewer.ariaLabel = filePath;
+                        WORKBENCH.status.setViewerMessage(`ERROR: The item is not an image file.`);
+                        WORKBENCH.status.setViewerStatus("ERROR");
+                        return;
+                    }
+
+                    // Process the image data.
+                    const viewerContent = document.createElement("img");
+                    viewerContent.className = "position-absolute w-100 h-100 border border-0 bg-transparent";
+                    viewerContent.style.objectFit = "cover";
+                    
+                    const t0 = performance.now()
+
+                    if (WORKBENCH.props.viewerMode === "raw") {
+                        SPONGE_FUNCTIONS.convert(buf, "png", SPONGE_FUNCTIONS.options.png).then((displayData) => {
+                            const t1 = performance.now();
+                            
+                            const blob = new Blob([displayData]);
+                            viewerContent.src = URL.createObjectURL(blob);
+                            WORKBENCH.status.setViewerStatus(`${format.toUpperCase()} / ${WORKBENCH.utils.humanFileSize(displayData.byteLength, true, 2)} / ${(t1-t0).toFixed(3)}ms`);
+                        }).catch((err) => {
+                            console.error(err);
+                            WORKBENCH.status.setViewerMessage(`ERROR: Failed to convert the image.`);
                             WORKBENCH.status.setViewerStatus("ERROR");
-                            return;
-                        }
-
-                        // Process the selected image data.
-                        const viewerContent = document.createElement("img");
-                        viewerContent.className = "position-absolute w-100 h-100 border border-0 bg-transparent";
-                        viewerContent.style.objectFit = "cover";
-
-                        const t0 = performance.now()
-
-                        if (WORKBENCH.props.viewerMode === "raw") {
-                            SPONGE_FUNCTIONS.convert(arrayBuffer, "png", { Q: 100, effort: 7, bitdepth: 8, compression: 6, interlace: false }).then((displayData) => {
+                        });
+                    } else if (WORKBENCH.props.viewerMode === "processed") {
+                        SPONGE_FUNCTIONS.convert(buf, WORKBENCH.props.conversionFormat, SPONGE_FUNCTIONS.options[WORKBENCH.props.conversionFormat]).then((convertedData) => {
+                            SPONGE_FUNCTIONS.convert(convertedData, "png", SPONGE_FUNCTIONS.options.png).then((displayData) => {
                                 const t1 = performance.now();
-                                
+                            
                                 const blob = new Blob([displayData]);
                                 viewerContent.src = URL.createObjectURL(blob);
-                                WORKBENCH.status.setViewerStatus(`${format.toUpperCase()} / ${WORKBENCH.utils.humanFileSize(displayData.byteLength, true, 2)} / ${(t1-t0).toFixed(3)}ms`);
+                                WORKBENCH.status.setViewerStatus(`${format.toUpperCase()} to ${WORKBENCH.props.conversionFormat.toUpperCase()} / ${WORKBENCH.utils.humanFileSize(convertedData.byteLength, true, 2)}(${(convertedData.byteLength / buf.byteLength * 100).toFixed(2)}%) / ${(t1-t0).toFixed(3)}ms`);
+                            }).catch((err) => {
+                                console.error(err);
+                                WORKBENCH.status.setViewerMessage(`ERROR: Failed to convert the image.`);
+                                WORKBENCH.status.setViewerStatus("ERROR");
                             });
-                        } else if (WORKBENCH.props.viewerMode === "processed") {
-                            SPONGE_FUNCTIONS.convert(arrayBuffer, WORKBENCH.props.conversionFormat, SPONGE_FUNCTIONS.options[WORKBENCH.props.conversionFormat]).then((convertedData) => {
-                                SPONGE_FUNCTIONS.convert(convertedData, "png", { Q: 100, effort: 7, bitdepth: 8, compression: 6, interlace: false }).then((displayData) => {
-                                    const t1 = performance.now();
-                                
-                                    const blob = new Blob([displayData]);
-                                    viewerContent.src = URL.createObjectURL(blob);
-                                    WORKBENCH.status.setViewerStatus(`${format.toUpperCase()} to ${WORKBENCH.props.conversionFormat.toUpperCase()} / ${WORKBENCH.utils.humanFileSize(convertedData.byteLength, true, 2)}(${(convertedData.byteLength / arrayBuffer.byteLength * 100).toFixed(2)}%) / ${(t1-t0).toFixed(3)}ms`);
-                                });
-                            });
-                        } else {
-                            return;
-                        }
-
-                        // Display elements.
-                        if (!viewer.classList.contains("grid-lines")) {
-                            viewer.classList.add("grid-lines");
-                        }
-
-                        viewer.innerHTML = "";
-                        viewer.ariaLabel = filePath; 
-                        viewer.appendChild(viewerContent);
-                    } catch (err) {
-                        WORKBENCH.status.setViewerMessage(`${err.name}: ${err.message}`);
+                        }).catch((err) => {
+                            console.error(err);
+                            WORKBENCH.status.setViewerMessage(`ERROR: Failed to convert the image.`);
+                            WORKBENCH.status.setViewerStatus("ERROR");
+                        });
+                    } else {
+                        return;
                     }
-                } else {
-                    WORKBENCH.status.setViewerMessage(`XMLHttpRequest: Unable to get an image arraybuffer.`);
+
+                    // Display elements.
+                    if (!viewer.classList.contains("grid-lines")) {
+                        viewer.classList.add("grid-lines");
+                    }
+                    
+                    viewer.innerHTML = "";
+                    viewer.ariaLabel = filePath; 
+                    viewer.appendChild(viewerContent);
+                } catch (err) {
+                    console.error(err);
+                    WORKBENCH.status.setViewerMessage(`ERROR: ${err.message}`);
                     WORKBENCH.status.setViewerStatus("ERROR");
                 }
-            }
-            xhr.onerror = () => {
-                WORKBENCH.status.setViewerMessage(`XMLHttpRequest: An unknown error has occurred while loading the image.`);
-                WORKBENCH.status.setViewerStatus("ERROR");
-            };
-            xhr.send();
+            });
         },
         onSwitched: function (target, index) {
             if (target !== "nav-list" && target !== "ignore-list") {
@@ -643,22 +650,21 @@ let WORKBENCH = {
                             const parentPath = file.path ? file.path : file.parentPath;
                             const resolvedPath = path.resolve(path.join(parentPath, file.name));
     
-                            fs.readFile(resolvedPath, { encoding: null, flag: 'r', signal: WORKBENCH.tasks.abortController.signal }, function(err, nodeBuffer) {
+                            fs.readFile(resolvedPath, { encoding: null, flag: 'r', signal: WORKBENCH.tasks.abortController.signal }, function(err, buf) {
                                 try {
                                     if (err) {
                                         resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "READ_FILE_FAILED", err));
                                     }
+
+                                    buf = SPONGE_FUNCTIONS.readSponge(buf).body;
+                                    buf = SPONGE_FUNCTIONS.decrypt(buf, SPONGE.encryptionKey);
     
-                                    let arrayBuffer = WORKBENCH.utils.toArrayBuffer(nodeBuffer);
-                                    arrayBuffer = SPONGE_FUNCTIONS.readSponge(arrayBuffer).body;
-                                    arrayBuffer = SPONGE_FUNCTIONS.decrypt(arrayBuffer, SPONGE.encryptionKey);
-    
-                                    if (WORKBENCH.props.ignoreAllExceptPng && SPONGE_FUNCTIONS.isImage(arrayBuffer) !== "png") {
+                                    if (WORKBENCH.props.ignoreAllExceptPng && SPONGE_FUNCTIONS.isImage(buf) !== "png") {
                                         resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "NON_TARGETED_FILE_IGNORED", new Error("The file is not a PNG file.")));
                                     }
         
-                                    SPONGE_FUNCTIONS.convert(arrayBuffer, WORKBENCH.props.conversionFormat, SPONGE_FUNCTIONS.options[WORKBENCH.props.conversionFormat]).then((convertedData) => {
-                                        if (WORKBENCH.props.excludeInferiorities && arrayBuffer.byteLength <= convertedData.byteLength) {
+                                    SPONGE_FUNCTIONS.convert(buf, WORKBENCH.props.conversionFormat, SPONGE_FUNCTIONS.options[WORKBENCH.props.conversionFormat]).then((convertedData) => {
+                                        if (WORKBENCH.props.excludeInferiorities && buf.byteLength <= convertedData.byteLength) {
                                             resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "INFERIOR_FILE_EXCLUDED", new Error("The encoded file is larger than the original file.")));
                                         }
             
@@ -668,7 +674,7 @@ let WORKBENCH = {
         
                                         convertedData = SPONGE_FUNCTIONS.writeSponge(convertedData, WORKBENCH.props.conversionFormat);
         
-                                        fs.writeFile(resolvedPath, WORKBENCH.utils.toBuffer(convertedData), {flag: 'w+', signal: WORKBENCH.tasks.abortController.signal}, function(err) {
+                                        fs.writeFile(resolvedPath, convertedData, {flag: 'w+', signal: WORKBENCH.tasks.abortController.signal}, function(err) {
                                             if (err) {
                                                 resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "WRITE_FILE_FAILED", err));
                                             }
@@ -698,26 +704,25 @@ let WORKBENCH = {
                             const parentPath = file.path ? file.path : file.parentPath;
                             const resolvedPath = path.resolve(path.join(parentPath, file.name));
     
-                            fs.readFile(resolvedPath, { encoding: null, flag: 'r', signal: WORKBENCH.tasks.abortController.signal }, function(err, nodeBuffer) {
+                            fs.readFile(resolvedPath, { encoding: null, flag: 'r', signal: WORKBENCH.tasks.abortController.signal }, function(err, buf) {
                                 try {
                                     if (err) {
                                         resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "READ_FILE_FAILED", err));
                                     }
 
-                                    let arrayBuffer = WORKBENCH.utils.toArrayBuffer(nodeBuffer);
-                                    arrayBuffer = SPONGE_FUNCTIONS.readSponge(arrayBuffer).body;
-                                    arrayBuffer = SPONGE_FUNCTIONS.decrypt(arrayBuffer, SPONGE.encryptionKey);
+                                    buf = SPONGE_FUNCTIONS.readSponge(buf).body;
+                                    buf = SPONGE_FUNCTIONS.decrypt(buf, SPONGE.encryptionKey);
     
-                                    if (SPONGE_FUNCTIONS.isImage(arrayBuffer) === null) {
+                                    if (SPONGE_FUNCTIONS.isImage(buf) === null) {
                                         resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "WRITE_FILE_FAILED", new Error("The file is not an image file.")));
                                     }
         
-                                    SPONGE_FUNCTIONS.convert(arrayBuffer, "png", SPONGE_FUNCTIONS.options.png).then((convertedData) => {
+                                    SPONGE_FUNCTIONS.convert(buf, "png", SPONGE_FUNCTIONS.options.png).then((convertedData) => {
                                         if (WORKBENCH.props.encryptResources) {
                                             convertedData = SPONGE_FUNCTIONS.encrypt(convertedData, SPONGE.encryptionKey);
                                         }
         
-                                        fs.writeFile(resolvedPath, WORKBENCH.utils.toBuffer(convertedData), {flag: 'w+', signal: WORKBENCH.tasks.abortController.signal}, function(err) {
+                                        fs.writeFile(resolvedPath, convertedData, {flag: 'w+', signal: WORKBENCH.tasks.abortController.signal}, function(err) {
                                             if (err) {
                                                 resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "WRITE_FILE_FAILED", err));
                                             }
@@ -746,29 +751,27 @@ let WORKBENCH = {
                         const parentPath = file.path ? file.path : file.parentPath;
                         const resolvedPath = path.resolve(path.join(parentPath, file.name));
 
-                        fs.readFile(resolvedPath, { encoding: null, flag: 'r', signal: WORKBENCH.tasks.abortController.signal }, function(err, nodeBuffer) {
+                        fs.readFile(resolvedPath, { encoding: null, flag: 'r', signal: WORKBENCH.tasks.abortController.signal }, function(err, buf) {
                             try{
                                 if (err) {
                                     resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "READ_FILE_FAILED", err));
                                 }
 
-                                let arrayBuffer = WORKBENCH.utils.toArrayBuffer(nodeBuffer);
-
                                 let result = { isSponge: false, isEncrypted: false, filename: "", format: "" };
     
-                                if (SPONGE_FUNCTIONS.isSponge(arrayBuffer)) {
-                                    arrayBuffer = SPONGE_FUNCTIONS.readSponge(arrayBuffer).body;
+                                if (SPONGE_FUNCTIONS.isSponge(buf)) {
+                                    buf = SPONGE_FUNCTIONS.readSponge(buf).body;
                                     result.isSponge = true;
                                 }
     
-                                if (SPONGE_FUNCTIONS.isEncrypted(arrayBuffer)) {
-                                    arrayBuffer = SPONGE_FUNCTIONS.decrypt(arrayBuffer, SPONGE.encryptionKey);
+                                if (SPONGE_FUNCTIONS.isEncrypted(buf)) {
+                                    buf = SPONGE_FUNCTIONS.decrypt(buf, SPONGE.encryptionKey);
                                     result.isEncrypted = true;
                                 }
     
                                 result.filename = resolvedPath;
     
-                                result.format = SPONGE_FUNCTIONS.isImage(arrayBuffer);
+                                result.format = SPONGE_FUNCTIONS.isImage(buf);
                                 if (result.format === null) {
                                     resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "IMHDER_NOT_FOUND", new Error("Failed to find an image header.")));
                                 }
@@ -995,22 +998,6 @@ let WORKBENCH = {
             humanized += `${seconds}s`;
           
             return humanized;
-        },
-        toArrayBuffer: (buffer) => {
-            const arrayBuffer = new ArrayBuffer(buffer.length);
-            const view = new Uint8Array(arrayBuffer);
-            for (let i = 0; i < buffer.length; ++i) {
-              view[i] = buffer[i];
-            }
-            return arrayBuffer;
-        },
-        toBuffer: (arrayBuffer) => {
-            const buffer = Buffer.alloc(arrayBuffer.byteLength);
-            const view = new Uint8Array(arrayBuffer);
-            for (let i = 0; i < buffer.length; ++i) {
-              buffer[i] = view[i];
-            }
-            return buffer;
         }
     },
     misc: {
