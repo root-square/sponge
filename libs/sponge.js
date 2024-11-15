@@ -290,10 +290,9 @@ let SPONGE_FUNCTIONS = {
         const body = new Uint8Array(outBuffer, 16);
         body.set(new Uint8Array(arrayBuffer));
 
-        const view = new DataView(outBuffer);
         const key = encryptionKey.match(/.{2}/g);
         for (let i = 0; i < 16; i++) {
-            view.setUint8(i+16, view.getUint8(i+16) ^ parseInt(key[i+16], 16));
+            body.fill(body.at(i) ^ parseInt(key[i], 16), i, i+1);
         }
 
         return outBuffer;
