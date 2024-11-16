@@ -625,16 +625,15 @@ let WORKBENCH = {
                 callback(err, files.filter(item => !item.isDirectory() && extensions.includes(path.extname(item.name).toLowerCase()) && !ignores.includes(path.resolve(path.join(item.path ? item.path : item.parentPath, item.name)))));
             });
         },
-        buildResult: (type, filename, code, data) => {
+        createResult: (type, filename, code, data) => {
             return { type: type, filename: filename, code: code, data: data };
         },
         buildPromise: (type, file) => {
-            // Returns: {type, message, result, error}
             switch (type.toLowerCase()) {
                 case "encode":
-                    return new Promise((resolve, reject) => {    
+                    return new Promise((resolve) => {    
                         if (WORKBENCH.tasks.abortController.signal.aborted) {
-                            resolve(WORKBENCH.tasks.buildResult("failure", file.name, "OPERATION_ABORTED", new Error("The operation has been aborted.")));
+                            resolve(WORKBENCH.tasks.createResult("failure", file.name, "OPERATION_ABORTED", "The operation has been aborted."));
                         }
 
                         const t0 = performance.now();
@@ -645,20 +644,30 @@ let WORKBENCH = {
                         fs.readFile(resolvedPath, { encoding: null, flag: 'r', signal: WORKBENCH.tasks.abortController.signal }, function(err, buf) {
                             try {
                                 if (err) {
-                                    resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "READ_FILE_FAILED", err));
+                                    resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "READ_FILE_FAILED", err.message));
                                 }
 
                                 let arrayBuffer = WORKBENCH.utils.toArrayBuffer(buf);
-                                arrayBuffer = SPONGE_FUNCTIONS.readSponge(arrayBuffer).body;
-                                arrayBuffer = SPONGE_FUNCTIONS.decrypt(arrayBuffer, SPONGE.encryptionKey);
+
+                                if (SPONGE_FUNCTIONS.isSponge(arrayBuffer)) {
+                                    arrayBuffer = SPONGE_FUNCTIONS.readSponge(arrayBuffer).body;
+                                }
+    
+                                if (SPONGE_FUNCTIONS.isEncrypted(arrayBuffer)) {
+                                    arrayBuffer = SPONGE_FUNCTIONS.decrypt(arrayBuffer, SPONGE.encryptionKey);
+                                }
+
+                                if (SPONGE_FUNCTIONS.isImage(arrayBuffer) === null) {
+                                    resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "IMHDER_NOT_FOUND", "Failed to find an image header."));
+                                }
 
                                 if (WORKBENCH.props.ignoreAllExceptPng && SPONGE_FUNCTIONS.isImage(arrayBuffer) !== "png") {
-                                    resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "NON_TARGETED_FILE_IGNORED", new Error("The file is not a PNG file.")));
+                                    resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "NON_TARGETED_FILE_IGNORED", "The file is not a PNG file."));
                                 }
     
                                 SPONGE_FUNCTIONS.convert(arrayBuffer, WORKBENCH.props.conversionFormat, SPONGE_FUNCTIONS.options[WORKBENCH.props.conversionFormat]).then((convertedData) => {
                                     if (WORKBENCH.props.excludeInferiorities && arrayBuffer.byteLength <= convertedData.byteLength) {
-                                        resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "INFERIOR_FILE_EXCLUDED", new Error("The encoded file is larger than the original file.")));
+                                        resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "INFERIOR_FILE_EXCLUDED", "The encoded file is larger than the original file."));
                                     }
         
                                     if (WORKBENCH.props.encryptResources) {
@@ -669,25 +678,27 @@ let WORKBENCH = {
     
                                     fs.writeFile(resolvedPath, Buffer.from(convertedData), {flag: 'w+', signal: WORKBENCH.tasks.abortController.signal}, function(err) {
                                         if (err) {
-                                            resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "WRITE_FILE_FAILED", err));
+                                            resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "WRITE_FILE_FAILED", err.message));
                                         }
 
                                         const t1 = performance.now();
-                                        
-                                        resolve(WORKBENCH.tasks.buildResult("success", resolvedPath, "COMPLETED", { elapsedTime: t1-t0, result: null }));
+
+                                        resolve(WORKBENCH.tasks.createResult("success", resolvedPath, "COMPLETED", { elapsedTime: (t1-t0), result: null }));
                                     });
                                 }).catch((err) => {
-                                    resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "FILE_CONVERSION_FAILED", err));
+                                    console.error(err);
+                                    resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "FILE_CONVERSION_FAILED", err.message));
                                 });
                             } catch (err) {
-                                resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "FILE_PROCESSING_FAILED", err));
+                                console.error(err);
+                                resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "FILE_PROCESSING_FAILED", err.message));
                             }
                         });
                     });
                 case "decode":
-                    return new Promise((resolve, reject) => {    
+                    return new Promise((resolve) => {    
                         if (WORKBENCH.tasks.abortController.signal.aborted) {
-                            resolve(WORKBENCH.tasks.buildResult("failure", file.name, "OPERATION_ABORTED", new Error("The operation has been aborted.")));
+                            resolve(WORKBENCH.tasks.createResult("failure", file.name, "OPERATION_ABORTED", "The operation has been aborted."));
                         }
 
                         const t0 = performance.now();
@@ -698,17 +709,23 @@ let WORKBENCH = {
                         fs.readFile(resolvedPath, { encoding: null, flag: 'r', signal: WORKBENCH.tasks.abortController.signal }, function(err, buf) {
                             try {
                                 if (err) {
-                                    resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "READ_FILE_FAILED", err));
+                                    resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "READ_FILE_FAILED", err.message));
                                 }
 
                                 let arrayBuffer = WORKBENCH.utils.toArrayBuffer(buf);
-                                arrayBuffer = SPONGE_FUNCTIONS.readSponge(arrayBuffer).body;
-                                arrayBuffer = SPONGE_FUNCTIONS.decrypt(arrayBuffer, SPONGE.encryptionKey);
 
-                                if (SPONGE_FUNCTIONS.isImage(arrayBuffer) === null) {
-                                    resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "WRITE_FILE_FAILED", new Error("The file is not an image file.")));
+                                if (SPONGE_FUNCTIONS.isSponge(arrayBuffer)) {
+                                    arrayBuffer = SPONGE_FUNCTIONS.readSponge(arrayBuffer).body;
                                 }
     
+                                if (SPONGE_FUNCTIONS.isEncrypted(arrayBuffer)) {
+                                    arrayBuffer = SPONGE_FUNCTIONS.decrypt(arrayBuffer, SPONGE.encryptionKey);
+                                }
+
+                                if (SPONGE_FUNCTIONS.isImage(arrayBuffer) === null) {
+                                    resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "IMHDER_NOT_FOUND", "Failed to find an image header."));
+                                }
+
                                 SPONGE_FUNCTIONS.convert(arrayBuffer, "png", SPONGE_FUNCTIONS.options.png).then((convertedData) => {
                                     if (WORKBENCH.props.encryptResources) {
                                         convertedData = SPONGE_FUNCTIONS.encrypt(convertedData, SPONGE.encryptionKey);
@@ -716,25 +733,25 @@ let WORKBENCH = {
     
                                     fs.writeFile(resolvedPath, Buffer.from(convertedData), {flag: 'w+', signal: WORKBENCH.tasks.abortController.signal}, function(err) {
                                         if (err) {
-                                            resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "WRITE_FILE_FAILED", err));
+                                            resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "WRITE_FILE_FAILED", err.message));
                                         }
 
                                         const t1 = performance.now();
                                         
-                                        resolve(WORKBENCH.tasks.buildResult("success", resolvedPath, "COMPLETED", { elapsedTime: t1-t0, result: null }));
+                                        resolve(WORKBENCH.tasks.createResult("success", resolvedPath, "COMPLETED", { elapsedTime: t1-t0, result: null }));
                                     });
                                 }).catch((err) => {
-                                    resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "FILE_CONVERSION_FAILED", err));
+                                    resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "FILE_CONVERSION_FAILED", err.message));
                                 });
                             } catch (err) {
-                                resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "FILE_PROCESSING_FAILED", err));
+                                resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "FILE_PROCESSING_FAILED", err.message));
                             }
                         });
                     });
                 case "inspect":
-                    return new Promise((resolve, reject) => {    
+                    return new Promise((resolve) => {    
                         if (WORKBENCH.tasks.abortController.signal.aborted) {
-                            resolve(WORKBENCH.tasks.buildResult("failure", file.name, "OPERATION_ABORTED", new Error("The operation has been aborted.")));
+                            resolve(WORKBENCH.tasks.createResult("failure", file.name, "OPERATION_ABORTED", "The operation has been aborted."));
                         }
 
                         const t0 = performance.now();
@@ -745,12 +762,12 @@ let WORKBENCH = {
                         fs.readFile(resolvedPath, { encoding: null, flag: 'r', signal: WORKBENCH.tasks.abortController.signal }, function(err, buf) {
                             try{
                                 if (err) {
-                                    resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "READ_FILE_FAILED", err));
+                                    resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "READ_FILE_FAILED", err.message));
                                 }
 
-                                let arrayBuffer = buf.buffer;
-
                                 let result = { isSponge: false, isEncrypted: false, filename: "", format: "" };
+
+                                let arrayBuffer = buf.buffer;
     
                                 if (SPONGE_FUNCTIONS.isSponge(arrayBuffer)) {
                                     arrayBuffer = SPONGE_FUNCTIONS.readSponge(arrayBuffer).body;
@@ -766,14 +783,14 @@ let WORKBENCH = {
     
                                 result.format = SPONGE_FUNCTIONS.isImage(arrayBuffer);
                                 if (result.format === null) {
-                                    resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "IMHDER_NOT_FOUND", new Error("Failed to find an image header.")));
+                                    resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "IMHDER_NOT_FOUND", "Failed to find an image header."));
                                 }
 
                                 const t1 = performance.now();
                                 
-                                resolve(WORKBENCH.tasks.buildResult("success", resolvedPath, "COMPLETED", { elapsedTime: t1-t0, result: result }));
+                                resolve(WORKBENCH.tasks.createResult("success", resolvedPath, "COMPLETED", { elapsedTime: t1-t0, result: result }));
                             } catch (err) {
-                                resolve(WORKBENCH.tasks.buildResult("failure", resolvedPath, "FILE_PROCESSING_FAILED", err));
+                                resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "FILE_PROCESSING_FAILED", err.message));
                             }
                         });
                     });
@@ -811,11 +828,11 @@ let WORKBENCH = {
                     let codingResult = { files: { total: 0, success: 0, failure: 0 }, options: { avif: SPONGE_FUNCTIONS.options.avif, jxl: SPONGE_FUNCTIONS.options.jxl, png: SPONGE_FUNCTIONS.options.png, webp: SPONGE_FUNCTIONS.options.webp }, errors: [] };
                     let inspectionResult = { files: { total: 0, success: 0, failure: 0, sponge: 0, crypto: 0 }, formats: { avif:0, jxl: 0, png: 0, webp: 0 }, options: { avif: SPONGE_FUNCTIONS.options.avif, jxl: SPONGE_FUNCTIONS.options.jxl, png: SPONGE_FUNCTIONS.options.png, webp: SPONGE_FUNCTIONS.options.webp }, errors: [] };
 
+                    let processingTimes = 10;
+                    let processingCount = 1;
+
                     const concurrency = 4;
                     const pool = new PromisePool(producer, concurrency);
-                    
-                    let processingTimes = 1000;
-                    let processingCount = 1;
 
                     pool.addEventListener('fulfilled', function (event) {
                         const resultData = event.data.result;
@@ -861,19 +878,17 @@ let WORKBENCH = {
                                 inspectionResult.files.failure += 1;
                                 inspectionResult.errors.push(resultData);
                             }
-
-                            if (resultData.code === "FILE_CONVERSION_FAILED") {
-                                console.error(resultData.data);
-                            }
                         }
 
                         // Calculate the remaining time.
-                        if (typeof resultData.data.elapsedTime !== "undefined" && resultData.data.elapsedTime !== null &&!isNaN(resultData.data.elapsedTime)) {
-                            processingTimes += resultData.data.elapsedTime;
-                            processingCount++;
-                        } else {
-                            processingTimes += 100;
-                            processingCount++;
+                        if (resultData.type === "success") {
+                            if (typeof resultData.data.elapsedTime !== "undefined" && resultData.data.elapsedTime !== null &&!isNaN(resultData.data.elapsedTime)) {
+                                processingTimes += resultData.data.elapsedTime;
+                                processingCount++;
+                            } else {
+                                processingTimes += 1;
+                                processingCount++;
+                            }
                         }
                         
                         const remainingTime = Math.round(processingTimes / (processingCount === 0 ? 1 : processingCount) * (files.length - producerCount));
@@ -1004,9 +1019,7 @@ let WORKBENCH = {
         toArrayBuffer: (buffer) => {
             const arrayBuffer = new ArrayBuffer(buffer.length);
             const view = new Uint8Array(arrayBuffer);
-            for (let i = 0; i < buffer.length; ++i) {
-              view[i] = buffer[i];
-            }
+            buffer.copy(view, 0, 0, buffer.length);
             return arrayBuffer;
         },
         toBuffer: (arrayBuffer) => {

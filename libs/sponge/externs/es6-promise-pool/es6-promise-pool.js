@@ -163,10 +163,7 @@
         this._callbacks = null;
     };
 
-    PromisePool.prototype._onPooledPromiseFulfilled = function (
-        promise,
-        result
-    ) {
+    PromisePool.prototype._onPooledPromiseFulfilled = function (promise, result) {
         this._size--;
         if (this.active()) {
             this._fireEvent("fulfilled", {
