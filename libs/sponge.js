@@ -8,6 +8,8 @@
 
 const fs = require('fs');
 const path = require('path');
+const Vips = require('./vips.js');
+const { Buffer, Blob } = require('buffer');
 
 let vips = null;
 (async () => {
