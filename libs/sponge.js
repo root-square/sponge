@@ -54,8 +54,8 @@ let SPONGE = {
 
         // Diagnose the current environment.
         if (!SPONGE.isWorkbench) {
-            SPONGE_TESTS.diagnoseEnvironment();
-            SPONGE_TESTS.diagnoseEngine();
+            if (!SPONGE_TESTS.diagnoseEnvironment()) return;
+            if (!SPONGE_TESTS.diagnoseEngine()) return;
         }
 
         let baseDirectory = path.dirname(process.execPath);
@@ -164,13 +164,14 @@ let SPONGE_WORKBENCH = {
     main: () => {
         SPONGE_WORKBENCH.init();
 
-        if (SPONGE_WORKBENCH.isInitialized) { 
-            window.location.href = "./js/libs/sponge/main.html?workbench=true";
+        if (SPONGE_WORKBENCH.isInitialized) {
+            let modifier = SPONGE.rpgMakerName === "MV" ? "./www" : null;
+            window.location.href = path.join(modifier === null ? "" : modifier, "./js/libs/sponge/main.html?workbench=true");
         } else {
             alert("Cannot open the workbench in the current environment.");
         }
     },
-    error: (type, desc, stacktrace, modifier = null) => {
+    error: (type, desc, stacktrace) => {
         SPONGE_WORKBENCH.init();
 
         if (SPONGE_WORKBENCH.isInitialized) {
@@ -185,8 +186,9 @@ let SPONGE_WORKBENCH = {
             if (stacktrace !== null && typeof stacktrace === "string" && stacktrace.length !== 0) {
                 params.append("stacktrace", encodeURIComponent(stacktrace));
             }
-    
-            window.location.href = path.resolve(modifier === null ? "" : modifier, `./js/libs/sponge/error.html?${params.toString()}`);
+
+            let modifier = SPONGE.rpgMakerName === "MV" ? "./www" : null;
+            window.location.href = path.join(modifier === null ? "" : modifier, `./js/libs/sponge/error.html?${params.toString()}`);
         } else {
             alert(`${type}\n${desc}`);
         }
@@ -645,18 +647,27 @@ let SPONGE_TESTS = {
     diagnoseEnvironment: () => {
         // Error: DIAG_ENV_NODE_NOT_FOUND
         let isNode = typeof process !== 'undefined' && !!process.versions && !!process.versions.node;
-        if (!isNode)
+        if (!isNode) {
             SPONGE_WORKBENCH.error("DIAG_ENV_NODE_NOT_FOUND", "The JavaScript runtime environment does not appear to be node.js.", null);
+            return false;
+        }
 
         // Error: DIAG_ENV_WASM_NOT_SUPPORTED
         let regex = /(?<=[vV])(\d+\.\d+)/;
-        let nodeVersion = parseFloat(regex.exec(process.version));
-        if (!isNaN(nodeVersion) && nodeVersion < 16.4)
+        let nodeVersion = parseFloat(regex.exec(process.version)[0]);
+        alert(nodeVersion);
+        if (!isNaN(nodeVersion) && nodeVersion < 16.4) {
             SPONGE_WORKBENCH.error("DIAG_ENV_WASM_NOT_SUPPORTED", "At least version 16.4 of node.js is required to call the WASM final SIMD opcodes.", null);
+            return false;
+        }
 
         // Error: DIAG_ENV_WB_NOT_SUPPORTED
-        if (!isNaN(nodeVersion) && nodeVersion < 18.0)
+        if (!isNaN(nodeVersion) && nodeVersion < 18.0) {
             SPONGE_WORKBENCH.error("DIAG_ENV_WB_NOT_SUPPORTED", "At least version 18.0 of node.js is required to run the Sponge Workbench.", null);
+            return false;
+        }
+
+        return true;
     },
     diagnoseEngine: () => {
         // Error: DIAG_ENG_RPGMAKER_NOT_FOUND
@@ -674,11 +685,17 @@ let SPONGE_TESTS = {
             isRMExists = false;
         }
 
-        if (!isRMExists)
+        if (!isRMExists) {
             SPONGE_WORKBENCH.error("DIAG_ENG_RPGMAKER_NOT_FOUND", "Unable to find an instance of RPG MAKER Engine.", null);
+            return false;
+        }
 
         // Error: DIAG_ENG_WASMVIPS_NOT_FOUND
-        if (typeof Vips === 'undefined' || Vips === null) 
+        if (typeof Vips === 'undefined' || Vips === null)  {
             SPONGE_WORKBENCH.error("DIAG_ENG_WASMVIPS_NOT_FOUND", "Unable to find an instance of wasm-vips.", null);
+            return false;
+        }
+
+        return true;
     },
 };
