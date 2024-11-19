@@ -15,6 +15,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (desc)
 -->
 
+## [0.6.0] - 2024-11-19
+### Added
+- Add options loader to SPONGE.
+- Add core tasks(encode, decode, inspect).
+- Add a result modal to the Workbench.
+
+### Changed
+- Change the injection target of 'decryptImage'.
+
+### Removed
+- Remove the 'RusAsAdministrator' param from SPA.
+
+### Fixed
+- Fix bugs in override functions.
+- Fix bugs in the data size calculation logic of the Workbench.
+
 ## [0.5.0] - 2024-11-08
 
 ### Added
