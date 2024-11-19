@@ -8,7 +8,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const { Buffer, Blob } = require('buffer');
 
 let vips = null;
 (async () => {
@@ -133,6 +132,7 @@ let SPONGE = {
         if (Utils.RPGMAKER_NAME === "MV") {
             Bitmap.prototype._requestImage = SPONGE_OVERRIDES.MV.requestImage;
             Decrypter.decryptImg = SPONGE_OVERRIDES.MV.decryptImage;
+            //Scene_Boot.prototype.create = SPONGE_OVERRIDES.MV.create;
         } else if (Utils.RPGMAKER_NAME === "MZ") {
             Bitmap.prototype._startLoading = SPONGE_OVERRIDES.MZ.startLoading;
             Bitmap.prototype._startDecrypting = SPONGE_OVERRIDES.MZ.startDecrypting;
@@ -497,16 +497,6 @@ let SPONGE_FUNCTIONS = {
         }
 
         return options;
-    },
-    waitForObject: () => {
-        return new Promise((resolve, reject) => {
-            const intervalId = setInterval(() => {
-                if (typeof vips !== "undefined" && vips !== null && SPONGE.isInitialized) {
-                    clearInterval(intervalId);
-                    resolve();
-                }
-            }, 100);
-        });
     }
 };
 
@@ -550,35 +540,30 @@ let SPONGE_OVERRIDES = {
         
             requestFile.onload = function () {
                 if(requestFile.status < Decrypter._xhrOk) {
-                    // Wait for dependencies.
-                    SPONGE_FUNCTIONS.waitForObject().then(() => {
-                        // Parse the Sponge Exchnage(SX) Container and decode it.   
-                        var arrayBuffer = requestFile.response;
+                    // Parse the Sponge Exchnage(SX) Container and decode it.   
+                    var arrayBuffer = requestFile.response;
 
-                        if (SPONGE_FUNCTIONS.isSponge(arrayBuffer)) {
-                            arrayBuffer = SPONGE_FUNCTIONS.readSponge(arrayBuffer).body;
-                        }
+                    if (SPONGE_FUNCTIONS.isSponge(arrayBuffer)) {
+                        arrayBuffer = SPONGE_FUNCTIONS.readSponge(arrayBuffer).body;
+                    }
 
-                        if (SPONGE_FUNCTIONS.isEncrypted(arrayBuffer)) {
-                            arrayBuffer = SPONGE_FUNCTIONS.decrypt(arrayBuffer, SPONGE.encryptionKey);
-                        }
+                    if (SPONGE_FUNCTIONS.isEncrypted(arrayBuffer)) {
+                        arrayBuffer = SPONGE_FUNCTIONS.decrypt(arrayBuffer, SPONGE.encryptionKey);
+                    }
 
-                        console.log(arrayBuffer);
-
-                        if (SPONGE_FUNCTIONS.isImage(arrayBuffer) === "png") {
-                            const blob = new Blob([arrayBuffer]);
+                    if (SPONGE_FUNCTIONS.isImage(arrayBuffer) === "png") {
+                        const blob = new Blob([arrayBuffer], { type: "image/png" });
+                        bitmap._image.src = URL.createObjectURL(blob);
+                        bitmap._image.addEventListener('load', bitmap._loadListener = Bitmap.prototype._onLoad.bind(bitmap));
+                        bitmap._image.addEventListener('error', bitmap._errorListener = bitmap._loader || Bitmap.prototype._onError.bind(bitmap));
+                    } else {
+                        SPONGE_FUNCTIONS.convert(arrayBuffer, "png", SPONGE_FUNCTIONS.options.png).then((data) => {
+                            const blob = new Blob([data], { type: "image/png" });
                             bitmap._image.src = URL.createObjectURL(blob);
                             bitmap._image.addEventListener('load', bitmap._loadListener = Bitmap.prototype._onLoad.bind(bitmap));
                             bitmap._image.addEventListener('error', bitmap._errorListener = bitmap._loader || Bitmap.prototype._onError.bind(bitmap));
-                        } else {
-                            SPONGE_FUNCTIONS.convert(arrayBuffer, "png", SPONGE_FUNCTIONS.options.png).then((data) => {
-                                const blob = new Blob([data]);
-                                bitmap._image.src = URL.createObjectURL(blob);
-                                bitmap._image.addEventListener('load', bitmap._loadListener = Bitmap.prototype._onLoad.bind(bitmap));
-                                bitmap._image.addEventListener('error', bitmap._errorListener = bitmap._loader || Bitmap.prototype._onError.bind(bitmap));
-                            });
-                        }
-                    });
+                        });
+                    }
                 }
             };
         
@@ -655,7 +640,6 @@ let SPONGE_TESTS = {
         // Error: DIAG_ENV_WASM_NOT_SUPPORTED
         let regex = /(?<=[vV])(\d+\.\d+)/;
         let nodeVersion = parseFloat(regex.exec(process.version)[0]);
-        alert(nodeVersion);
         if (!isNaN(nodeVersion) && nodeVersion < 16.4) {
             SPONGE_WORKBENCH.error("DIAG_ENV_WASM_NOT_SUPPORTED", "At least version 16.4 of node.js is required to call the WASM final SIMD opcodes.", null);
             return false;
