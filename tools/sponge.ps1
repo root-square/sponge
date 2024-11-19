@@ -85,7 +85,7 @@ function Invoke-Install {
             $vipsVersion = "0.0"
         }
              
-        Invoke-WebRequest "https://cdn.jsdelivr.net/npm/wasm-vips@$($vipsVersion)/lib/vips-node.js" -OutFile (Join-Path -Path "$($script:LibsPath)" -ChildPath "./vips-node.js")
+        Invoke-WebRequest "https://cdn.jsdelivr.net/npm/wasm-vips@$($vipsVersion)/lib/vips.js" -OutFile (Join-Path -Path "$($script:LibsPath)" -ChildPath "./vips.js")
         Invoke-WebRequest "https://cdn.jsdelivr.net/npm/wasm-vips@$($vipsVersion)/lib/vips.wasm" -OutFile (Join-Path -Path "$($script:LibsPath)" -ChildPath "./vips.wasm")
         Invoke-WebRequest "https://cdn.jsdelivr.net/npm/wasm-vips@$($vipsVersion)/lib/vips-heif.wasm" -OutFile (Join-Path -Path "$($script:LibsPath)" -ChildPath "./vips-heif.wasm")
         Invoke-WebRequest "https://cdn.jsdelivr.net/npm/wasm-vips@$($vipsVersion)/lib/vips-jxl.wasm" -OutFile (Join-Path -Path "$($script:LibsPath)" -ChildPath "./vips-jxl.wasm")
@@ -143,7 +143,7 @@ function Invoke-Install {
         
         $indexHtml = Get-Content -Raw $Script:IndexPath -Encoding UTF8
         $indents = (Get-Content $Script:IndexPath -Encoding UTF8 | Select-String '^.*(?=<script)' | %{ $_.Matches } | %{ $_.Value })[0]
-        $contents = "$($indents)<script type=`"text/javascript`" src=`"js/libs/vips-node.js`"></script>`n$($indents)<script type=`"text/javascript`" src=`"js/libs/sponge.js`"></script>"
+        $contents = "$($indents)<script type=`"text/javascript`" src=`"js/libs/vips.js`"></script>`n$($indents)<script type=`"text/javascript`" src=`"js/libs/sponge.js`"></script>"
 
         $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
         [System.IO.File]::WriteAllLines($Script:IndexPath, ($indexHtml.Insert($indexHtml.LastIndexOf("</script>") + "</script>".Length, "`n$($contents)")), $Utf8NoBomEncoding)

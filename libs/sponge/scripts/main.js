@@ -647,26 +647,26 @@ let WORKBENCH = {
                                     resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "READ_FILE_FAILED", err.message));
                                 }
 
-                                let arrayBuffer = WORKBENCH.utils.toArrayBuffer(buf);
+                                let data = WORKBENCH.utils.toArrayBuffer(buf);
 
-                                if (SPONGE_FUNCTIONS.isSponge(arrayBuffer)) {
-                                    arrayBuffer = SPONGE_FUNCTIONS.readSponge(arrayBuffer).body;
+                                if (SPONGE_FUNCTIONS.isSponge(data)) {
+                                    data = SPONGE_FUNCTIONS.readSponge(data).body;
                                 }
     
-                                if (SPONGE_FUNCTIONS.isEncrypted(arrayBuffer)) {
-                                    arrayBuffer = SPONGE_FUNCTIONS.decrypt(arrayBuffer, SPONGE.encryptionKey);
+                                if (SPONGE_FUNCTIONS.isEncrypted(data)) {
+                                    data = SPONGE_FUNCTIONS.decrypt(data, SPONGE.encryptionKey);
                                 }
 
-                                if (SPONGE_FUNCTIONS.isImage(arrayBuffer) === null) {
+                                if (SPONGE_FUNCTIONS.isImage(data) === null) {
                                     resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "IMHDER_NOT_FOUND", "Failed to find an image header."));
                                 }
 
-                                if (WORKBENCH.props.ignoreAllExceptPng && SPONGE_FUNCTIONS.isImage(arrayBuffer) !== "png") {
+                                if (WORKBENCH.props.ignoreAllExceptPng && SPONGE_FUNCTIONS.isImage(data) !== "png") {
                                     resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "NON_TARGETED_FILE_IGNORED", "The file is not a PNG file."));
                                 }
     
-                                SPONGE_FUNCTIONS.convert(arrayBuffer, WORKBENCH.props.conversionFormat, SPONGE_FUNCTIONS.options[WORKBENCH.props.conversionFormat]).then((convertedData) => {
-                                    if (WORKBENCH.props.excludeInferiorities && arrayBuffer.byteLength <= convertedData.byteLength) {
+                                SPONGE_FUNCTIONS.convert(data, WORKBENCH.props.conversionFormat, SPONGE_FUNCTIONS.options[WORKBENCH.props.conversionFormat]).then((convertedData) => {
+                                    if (WORKBENCH.props.excludeInferiorities && data.length <= convertedData.length) {
                                         resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "INFERIOR_FILE_EXCLUDED", "The encoded file is larger than the original file."));
                                     }
         
@@ -676,7 +676,7 @@ let WORKBENCH = {
     
                                     convertedData = SPONGE_FUNCTIONS.writeSponge(convertedData, WORKBENCH.props.conversionFormat);
     
-                                    fs.writeFile(resolvedPath, Buffer.from(convertedData), {flag: 'w+', signal: WORKBENCH.tasks.abortController.signal}, function(err) {
+                                    fs.writeFile(resolvedPath, convertedData, {flag: 'w+', signal: WORKBENCH.tasks.abortController.signal}, function(err) {
                                         if (err) {
                                             resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "WRITE_FILE_FAILED", err.message));
                                         }
@@ -712,26 +712,26 @@ let WORKBENCH = {
                                     resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "READ_FILE_FAILED", err.message));
                                 }
 
-                                let arrayBuffer = WORKBENCH.utils.toArrayBuffer(buf);
+                                let data = WORKBENCH.utils.toArrayBuffer(buf);
 
-                                if (SPONGE_FUNCTIONS.isSponge(arrayBuffer)) {
-                                    arrayBuffer = SPONGE_FUNCTIONS.readSponge(arrayBuffer).body;
+                                if (SPONGE_FUNCTIONS.isSponge(data)) {
+                                    data = SPONGE_FUNCTIONS.readSponge(data).body;
                                 }
     
-                                if (SPONGE_FUNCTIONS.isEncrypted(arrayBuffer)) {
-                                    arrayBuffer = SPONGE_FUNCTIONS.decrypt(arrayBuffer, SPONGE.encryptionKey);
+                                if (SPONGE_FUNCTIONS.isEncrypted(data)) {
+                                    data = SPONGE_FUNCTIONS.decrypt(data, SPONGE.encryptionKey);
                                 }
 
-                                if (SPONGE_FUNCTIONS.isImage(arrayBuffer) === null) {
+                                if (SPONGE_FUNCTIONS.isImage(data) === null) {
                                     resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "IMHDER_NOT_FOUND", "Failed to find an image header."));
                                 }
 
-                                SPONGE_FUNCTIONS.convert(arrayBuffer, "png", SPONGE_FUNCTIONS.options.png).then((convertedData) => {
+                                SPONGE_FUNCTIONS.convert(data, "png", SPONGE_FUNCTIONS.options.png).then((convertedData) => {
                                     if (WORKBENCH.props.encryptResources) {
                                         convertedData = SPONGE_FUNCTIONS.encrypt(convertedData, SPONGE.encryptionKey);
                                     }
     
-                                    fs.writeFile(resolvedPath, Buffer.from(convertedData), {flag: 'w+', signal: WORKBENCH.tasks.abortController.signal}, function(err) {
+                                    fs.writeFile(resolvedPath, convertedData, {flag: 'w+', signal: WORKBENCH.tasks.abortController.signal}, function(err) {
                                         if (err) {
                                             resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "WRITE_FILE_FAILED", err.message));
                                         }
@@ -767,21 +767,21 @@ let WORKBENCH = {
 
                                 let result = { isSponge: false, isEncrypted: false, filename: "", format: "" };
 
-                                let arrayBuffer = buf.buffer;
+                                let data = buf.buffer;
     
-                                if (SPONGE_FUNCTIONS.isSponge(arrayBuffer)) {
-                                    arrayBuffer = SPONGE_FUNCTIONS.readSponge(arrayBuffer).body;
+                                if (SPONGE_FUNCTIONS.isSponge(data)) {
+                                    data = SPONGE_FUNCTIONS.readSponge(data).body;
                                     result.isSponge = true;
                                 }
     
-                                if (SPONGE_FUNCTIONS.isEncrypted(arrayBuffer)) {
-                                    arrayBuffer = SPONGE_FUNCTIONS.decrypt(arrayBuffer, SPONGE.encryptionKey);
+                                if (SPONGE_FUNCTIONS.isEncrypted(data)) {
+                                    data = SPONGE_FUNCTIONS.decrypt(data, SPONGE.encryptionKey);
                                     result.isEncrypted = true;
                                 }
     
                                 result.filename = resolvedPath;
     
-                                result.format = SPONGE_FUNCTIONS.isImage(arrayBuffer);
+                                result.format = SPONGE_FUNCTIONS.isImage(data);
                                 if (result.format === null) {
                                     resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "IMHDER_NOT_FOUND", "Failed to find an image header."));
                                 }

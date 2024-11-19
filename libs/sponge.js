@@ -8,7 +8,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const Vips = require('./vips.js');
 const { Buffer, Blob } = require('buffer');
 
 let vips = null;
@@ -41,6 +40,7 @@ window.addEventListener("keydown", (e) => {
 let SPONGE = {
     isNwjs: false,
     isWorkbench: false,
+    isInitialized: false,
     workDirectory: null,
     rpgMakerName: null,
     rpgMakerVersion: null,
@@ -122,6 +122,8 @@ let SPONGE = {
                 SPONGE_FUNCTIONS.options[format] = SPONGE_FUNCTIONS.interpret(format, settingsJson.options[format]);
             }
         }
+
+        SPONGE.isInitialized = true;
     },
     inject: () => {
         if (SPONGE.isWorkbench) {
@@ -199,6 +201,8 @@ let SPONGE_FUNCTIONS = {
         webp: {}
     },
     isImage: (arrayBuffer) => {
+        if (!arrayBuffer) return null;
+
         const avifSignature = "0.0.0.0.66.74.79.70.61.76.69.66";
         const jxlNcsSignature = "ff.a"; // JXL: Naked code-stream.
         const jxlIbcSignature = "0.0.0.c.4a.58.4c.20.d.a.87.a"; // JXL: ISOBMFF-based container.
@@ -234,16 +238,19 @@ let SPONGE_FUNCTIONS = {
         if (!arrayBuffer) return null;
         if (!SPONGE_FUNCTIONS.isSponge(arrayBuffer)) return { body: arrayBuffer };
 
-        const versionMajor = new Uint8Array(arrayBuffer, 4, 1);
-        const versionMinor = new Uint8Array(arrayBuffer, 5, 1);
-        const formatMain = new Uint8Array(arrayBuffer, 6, 1);
-        const formatSub = new Uint8Array(arrayBuffer, 7, 1);
-        const bitFlags = new Uint8Array(arrayBuffer, 8, 8);
+        const view = new Uint8Array(arrayBuffer, 0, 8);
+        const versionMajor = view.at(4).toString(10);
+        const versionMinor = view.at(5).toString(10);
+        const formatMain = view.at(6).toString(16);
+        const formatSub = view.at(7).toString(16);
+        const bitFlags = Array.from(new Uint8Array(arrayBuffer, 8, 8));
         const body = arrayBuffer.slice(16);
 
         return { versionMajor: versionMajor, versionMinor: versionMinor, formatMain: formatMain, formatSub: formatSub, bitFlags: bitFlags, body: body};
     },
     writeSponge: (arrayBuffer, format) => {
+        if (!arrayBuffer) return null;
+
         let versionMajor = 0x31;
         let versionMinor = 0x30;
         let formatMain = 0x00;
@@ -303,13 +310,29 @@ let SPONGE_FUNCTIONS = {
         if (!arrayBuffer) return null;
         if (!SPONGE_FUNCTIONS.isEncrypted(arrayBuffer)) return arrayBuffer;
         
-        const body = arrayBuffer.slice(16);
-        const view = new DataView(body);
+        const outBuffer = arrayBuffer.slice(16);
+
+        const body = new Uint8Array(outBuffer);
+
         const key = encryptionKey.match(/.{2}/g);
         for (let i = 0; i < 16; i++) {
-            view.setUint8(i, view.getUint8(i) ^ parseInt(key[i], 16));
+            body.fill(body.at(i) ^ parseInt(key[i], 16), i, i+1);
         }
-        return body;
+        return outBuffer;
+    },
+    convert: (arrayBuffer, format, options) => {
+        return new Promise((resolve, reject) => {
+            try {
+                format = format.toLowerCase();
+                if (format !== "avif" && format !== "png" && format !== "jxl" && format !== "webp") reject();
+                
+                let image = vips.Image.newFromBuffer(arrayBuffer);
+                let outBuffer = image.writeToBuffer(`.${format}`, options);
+                resolve(outBuffer);
+            } catch (err) {
+                reject(err);
+            }
+        });
     },
     interpret: (format, optionsString) => {
         format = format.toLowerCase();
@@ -473,18 +496,14 @@ let SPONGE_FUNCTIONS = {
 
         return options;
     },
-    convert: async (arrayBuffer, format, options) => {
+    waitForObject: () => {
         return new Promise((resolve, reject) => {
-            try {
-                format = format.toLowerCase();
-                if (format !== "avif" && format !== "png" && format !== "jxl" && format !== "webp") return null;
-                
-                let image = vips.Image.newFromBuffer(arrayBuffer);
-                let outBuffer = image.writeToBuffer(`.${format}`, options);
-                resolve(outBuffer);
-            } catch (err) {
-                reject(err);
-            }
+            const intervalId = setInterval(() => {
+                if (typeof vips !== "undefined" && vips !== null && SPONGE.isInitialized) {
+                    clearInterval(intervalId);
+                    resolve();
+                }
+            }, 100);
         });
     }
 };
@@ -529,28 +548,35 @@ let SPONGE_OVERRIDES = {
         
             requestFile.onload = function () {
                 if(requestFile.status < Decrypter._xhrOk) {
-                    var arrayBuffer = null; 
-                    
-                    if (Decrypter.hasEncryptedImages) {
-                        arrayBuffer = Decrypter.decryptArrayBuffer(requestFile.response);   
-                    } else {
-                        arrayBuffer = requestFile.response;
-                    }
+                    // Wait for dependencies.
+                    SPONGE_FUNCTIONS.waitForObject().then(() => {
+                        // Parse the Sponge Exchnage(SX) Container and decode it.   
+                        var arrayBuffer = requestFile.response;
 
-                    // Parse the Sponge Exchnage(SX) Container and decode it.                  
-                    if (!SPONGE_FUNCTIONS.isSponge(arrayBuffer)) {
-                        bitmap._image.src = Decrypter.createBlobUrl(arrayBuffer);
-                        bitmap._image.addEventListener('load', bitmap._loadListener = Bitmap.prototype._onLoad.bind(bitmap));
-                        bitmap._image.addEventListener('error', bitmap._errorListener = bitmap._loader || Bitmap.prototype._onError.bind(bitmap));
-                    } else {
-                        var body = SPONGE_FUNCTIONS.readSponge(arrayBuffer).body;
+                        if (SPONGE_FUNCTIONS.isSponge(arrayBuffer)) {
+                            arrayBuffer = SPONGE_FUNCTIONS.readSponge(arrayBuffer).body;
+                        }
 
-                        SPONGE_FUNCTIONS.convert(body, "png", SPONGE_FUNCTIONS.options.png).then((data) => {
-                            bitmap._image.src = Decrypter.createBlobUrl(data);
+                        if (SPONGE_FUNCTIONS.isEncrypted(arrayBuffer)) {
+                            arrayBuffer = SPONGE_FUNCTIONS.decrypt(arrayBuffer, SPONGE.encryptionKey);
+                        }
+
+                        console.log(arrayBuffer);
+
+                        if (SPONGE_FUNCTIONS.isImage(arrayBuffer) === "png") {
+                            const blob = new Blob([arrayBuffer]);
+                            bitmap._image.src = URL.createObjectURL(blob);
                             bitmap._image.addEventListener('load', bitmap._loadListener = Bitmap.prototype._onLoad.bind(bitmap));
                             bitmap._image.addEventListener('error', bitmap._errorListener = bitmap._loader || Bitmap.prototype._onError.bind(bitmap));
-                        });
-                    }
+                        } else {
+                            SPONGE_FUNCTIONS.convert(arrayBuffer, "png", SPONGE_FUNCTIONS.options.png).then((data) => {
+                                const blob = new Blob([data]);
+                                bitmap._image.src = URL.createObjectURL(blob);
+                                bitmap._image.addEventListener('load', bitmap._loadListener = Bitmap.prototype._onLoad.bind(bitmap));
+                                bitmap._image.addEventListener('error', bitmap._errorListener = bitmap._loader || Bitmap.prototype._onError.bind(bitmap));
+                            });
+                        }
+                    });
                 }
             };
         
@@ -582,26 +608,29 @@ let SPONGE_OVERRIDES = {
             xhr.responseType = "arraybuffer";
             xhr.onload = () => {
                 if (xhr.status < 400) {
-                    let arrayBuffer = null; 
-                    
-                    if (Utils.hasEncryptedImages) {
-                        arrayBuffer = Utils.decryptArrayBuffer(xhr.response);
-                    } else {
-                        arrayBuffer = requestFile.response;
-                    }
+                    // Wait for dependencies.
+                    SPONGE_FUNCTIONS.waitForObject().then(() => {
+                        // Parse the Sponge Exchnage(SX) Container and decode it.   
+                        var arrayBuffer = xhr.response;
 
-                    // Parse the Sponge Exchnage(SX) Container and decode it.
-                    if (!SPONGE_FUNCTIONS.isSponge(arrayBuffer)) {
-                        const blob = new Blob([arrayBuffer]);
-                        this._image.src = URL.createObjectURL(blob);
-                    } else {
-                        var body = SPONGE_FUNCTIONS.readSponge(arrayBuffer).body;
-                        
-                        SPONGE_FUNCTIONS.convert(body, "png", SPONGE_FUNCTIONS.options.png).then((data) => {
-                            const blob = new Blob([data]);
+                        if (SPONGE_FUNCTIONS.isSponge(arrayBuffer)) {
+                            arrayBuffer = SPONGE_FUNCTIONS.readSponge(arrayBuffer).body;
+                        }
+                    
+                        if (SPONGE_FUNCTIONS.isEncrypted(arrayBuffer)) {
+                            arrayBuffer = SPONGE_FUNCTIONS.decrypt(arrayBuffer, SPONGE.encryptionKey);
+                        }
+                    
+                        if (SPONGE_FUNCTIONS.isImage(arrayBuffer) === "png") {
+                            const blob = new Blob([arrayBuffer], { type: "image/png" });
                             this._image.src = URL.createObjectURL(blob);
-                        });
-                    }
+                        } else {
+                            SPONGE_FUNCTIONS.convert(arrayBuffer, "png", SPONGE_FUNCTIONS.options.png).then((data) => {
+                                const blob = new Blob([data], { type: "image/png" });
+                                this._image.src = URL.createObjectURL(blob);
+                            });
+                        }
+                    });
                 } else {
                     this._onError();
                 }
