@@ -8,6 +8,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { Buffer } = require('buffer');
 
 let vips = null;
 (async () => {
@@ -337,7 +338,7 @@ let SPONGE_FUNCTIONS = {
                 format = format.toLowerCase();
                 if (format !== "avif" && format !== "png" && format !== "jxl" && format !== "webp") reject();
                 
-                let image = vips.Image.newFromBuffer(arrayBuffer);
+                let image = vips.Image.newFromBuffer(arrayBuffer, "", { access: 1 /* Sequential */ });
                 let outBuffer = image.writeToBuffer(`.${format}`, options);
                 resolve(outBuffer);
             } catch (err) {

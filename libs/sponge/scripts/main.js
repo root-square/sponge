@@ -4,6 +4,8 @@
  * Released under the MIT license
  * https://github.com/root-square/sponge/blob/main/LICENSE
  *-----------------------------------------------------------------------------*/
+'use strict';
+
 window.addEventListener("load", () => {
     // Enable tooltips.
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
@@ -647,7 +649,8 @@ let WORKBENCH = {
                                     resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "READ_FILE_FAILED", err.message));
                                 }
 
-                                let data = WORKBENCH.utils.toArrayBuffer(buf);
+                                let data = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.length);
+                                let dataLength = data.byteLength;
 
                                 if (SPONGE_FUNCTIONS.isSponge(data)) {
                                     data = SPONGE_FUNCTIONS.readSponge(data).body;
@@ -664,9 +667,14 @@ let WORKBENCH = {
                                 if (WORKBENCH.props.ignoreAllExceptPng && SPONGE_FUNCTIONS.isImage(data) !== "png") {
                                     resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "NON_TARGETED_FILE_IGNORED", "The file is not a PNG file."));
                                 }
+
+                                let dataView = new Uint8Array(data, 0, data.byteLength);
     
-                                SPONGE_FUNCTIONS.convert(data, WORKBENCH.props.conversionFormat, SPONGE_FUNCTIONS.options[WORKBENCH.props.conversionFormat]).then((convertedData) => {
-                                    if (WORKBENCH.props.excludeInferiorities && data.length <= convertedData.length) {
+                                SPONGE_FUNCTIONS.convert(dataView, WORKBENCH.props.conversionFormat, SPONGE_FUNCTIONS.options[WORKBENCH.props.conversionFormat]).then((convertedData) => {
+                                    data = null;
+                                    dataView = null;
+
+                                    if (WORKBENCH.props.excludeInferiorities && dataLength <= convertedData.byteLength) {
                                         resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "INFERIOR_FILE_EXCLUDED", "The encoded file is larger than the original file."));
                                     }
         
@@ -676,7 +684,9 @@ let WORKBENCH = {
     
                                     convertedData = SPONGE_FUNCTIONS.writeSponge(convertedData, WORKBENCH.props.conversionFormat);
     
-                                    fs.writeFile(resolvedPath, convertedData, {flag: 'w+', signal: WORKBENCH.tasks.abortController.signal}, function(err) {
+                                    fs.writeFile(resolvedPath, Buffer.from(convertedData), {flag: 'w+', signal: WORKBENCH.tasks.abortController.signal}, function(err) {
+                                        convertedData = null;
+
                                         if (err) {
                                             resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "WRITE_FILE_FAILED", err.message));
                                         }
@@ -686,11 +696,10 @@ let WORKBENCH = {
                                         resolve(WORKBENCH.tasks.createResult("success", resolvedPath, "COMPLETED", { elapsedTime: (t1-t0), result: null }));
                                     });
                                 }).catch((err) => {
-                                    console.error(err);
+                                    data = null;
                                     resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "FILE_CONVERSION_FAILED", err.message));
                                 });
                             } catch (err) {
-                                console.error(err);
                                 resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "FILE_PROCESSING_FAILED", err.message));
                             }
                         });
@@ -712,7 +721,7 @@ let WORKBENCH = {
                                     resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "READ_FILE_FAILED", err.message));
                                 }
 
-                                let data = WORKBENCH.utils.toArrayBuffer(buf);
+                                let data = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.length);
 
                                 if (SPONGE_FUNCTIONS.isSponge(data)) {
                                     data = SPONGE_FUNCTIONS.readSponge(data).body;
@@ -726,12 +735,17 @@ let WORKBENCH = {
                                     resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "IMHDER_NOT_FOUND", "Failed to find an image header."));
                                 }
 
-                                SPONGE_FUNCTIONS.convert(data, "png", SPONGE_FUNCTIONS.options.png).then((convertedData) => {
+                                let dataView = new Uint8Array(data, 0, data.byteLength);
+
+                                SPONGE_FUNCTIONS.convert(dataView, "png", SPONGE_FUNCTIONS.options.png).then((convertedData) => {
+                                    data = null;
+                                    dataView = null;
+                                    
                                     if (WORKBENCH.props.encryptResources) {
                                         convertedData = SPONGE_FUNCTIONS.encrypt(convertedData, SPONGE.encryptionKey);
                                     }
     
-                                    fs.writeFile(resolvedPath, convertedData, {flag: 'w+', signal: WORKBENCH.tasks.abortController.signal}, function(err) {
+                                    fs.writeFile(resolvedPath, Buffer.from(convertedData), {flag: 'w+', signal: WORKBENCH.tasks.abortController.signal}, function(err) {
                                         if (err) {
                                             resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "WRITE_FILE_FAILED", err.message));
                                         }
@@ -741,6 +755,7 @@ let WORKBENCH = {
                                         resolve(WORKBENCH.tasks.createResult("success", resolvedPath, "COMPLETED", { elapsedTime: t1-t0, result: null }));
                                     });
                                 }).catch((err) => {
+                                    data = null;
                                     resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "FILE_CONVERSION_FAILED", err.message));
                                 });
                             } catch (err) {
@@ -991,7 +1006,7 @@ let WORKBENCH = {
             }
           
             const units = si 
-                ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'] 
+                ? ['KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'] 
                 : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
             let u = -1;
             const r = 10**dp;
@@ -1017,15 +1032,12 @@ let WORKBENCH = {
             return humanized;
         },
         toArrayBuffer: (buffer) => {
-            const arrayBuffer = new ArrayBuffer(buffer.length);
-            const view = new Uint8Array(arrayBuffer);
-            buffer.copy(view, 0, 0, buffer.length);
-            return arrayBuffer;
+            return buffer.buffer.slice(0, buffer.length);
         },
         toBuffer: (arrayBuffer) => {
             const buffer = Buffer.alloc(arrayBuffer.byteLength);
             const view = new Uint8Array(arrayBuffer);
-            for (let i = 0; i < buffer.length; ++i) {
+            for (let i = 0; i < arrayBuffer.byteLength; ++i) {
               buffer[i] = view[i];
             }
             return buffer;
