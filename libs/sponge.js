@@ -165,8 +165,13 @@ let SPONGE_WORKBENCH = {
         SPONGE_WORKBENCH.init();
 
         if (SPONGE_WORKBENCH.isInitialized) {
-            let modifier = SPONGE.rpgMakerName === "MV" ? "./www" : null;
-            window.location.href = path.join(modifier === null ? "" : modifier, "./js/libs/sponge/main.html?workbench=true");
+            let url = "./js/libs/sponge/main.html?workbench=true";
+            fs.stat(path.resolve(url), function (err, stats) {
+                if (err && SPONGE.rpgMakerName === "MV") {
+                    url = path.join("./www", url);
+                }
+                window.location.href = url;
+            });
         } else {
             alert("Cannot open the workbench in the current environment.");
         }
@@ -187,8 +192,13 @@ let SPONGE_WORKBENCH = {
                 params.append("stacktrace", encodeURIComponent(stacktrace));
             }
 
-            let modifier = SPONGE.rpgMakerName === "MV" ? "./www" : null;
-            window.location.href = path.join(modifier === null ? "" : modifier, `./js/libs/sponge/error.html?${params.toString()}`);
+            let url = `./js/libs/sponge/error.html?${params.toString()}`;
+            fs.stat(url, function (err, stats) {
+                if (err && SPONGE.rpgMakerName === "MV") {
+                    url = path.join("./www", url);
+                }
+                window.location.href = url;
+            });
         } else {
             alert(`${type}\n${desc}`);
         }

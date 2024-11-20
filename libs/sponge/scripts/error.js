@@ -20,19 +20,19 @@ window.addEventListener("load", () => {
     if (urlParams.has("desc")) {
         descElement.innerText = decodeURIComponent(urlParams.get("desc"));
     } else {
-        descElement.innerText = "Unable to parse an error information."
+        descElement.innerText = "Unable to parse an error information.";
     }
 
     let stacktraceElement = document.getElementById("text-error-stacktrace");
     if (urlParams.has("stacktrace")) {
         stacktraceElement.innerText = decodeURIComponent(urlParams.get("stacktrace"));
     } else {
-        stacktraceElement.innerText = "NULL"
+        stacktraceElement.innerText = "An exception stack trace is not available.";
     }
 });
 
 window.addEventListener("keydown", (e) => {
     if (e.key == "F5") {
-        location.reload();
+        window.location.href("../../../index.html");
     }
 });
