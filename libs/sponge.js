@@ -132,7 +132,6 @@ let SPONGE = {
         if (Utils.RPGMAKER_NAME === "MV") {
             Bitmap.prototype._requestImage = SPONGE_OVERRIDES.MV.requestImage;
             Decrypter.decryptImg = SPONGE_OVERRIDES.MV.decryptImage;
-            //Scene_Boot.prototype.create = SPONGE_OVERRIDES.MV.create;
         } else if (Utils.RPGMAKER_NAME === "MZ") {
             Bitmap.prototype._startLoading = SPONGE_OVERRIDES.MZ.startLoading;
             Bitmap.prototype._startDecrypting = SPONGE_OVERRIDES.MZ.startDecrypting;
