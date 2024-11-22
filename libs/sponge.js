@@ -131,9 +131,11 @@ let SPONGE = {
         }
         
         if (Utils.RPGMAKER_NAME === "MV") {
+            Scene_Boot.prototype.create = SPONGE_OVERRIDES.MV.create;
             Bitmap.prototype._requestImage = SPONGE_OVERRIDES.MV.requestImage;
             Decrypter.decryptImg = SPONGE_OVERRIDES.MV.decryptImage;
         } else if (Utils.RPGMAKER_NAME === "MZ") {
+            Scene_Boot.prototype.create = SPONGE_OVERRIDES.MZ.create;
             Bitmap.prototype._startLoading = SPONGE_OVERRIDES.MZ.startLoading;
             Bitmap.prototype._startDecrypting = SPONGE_OVERRIDES.MZ.startDecrypting;
         } else {
@@ -214,6 +216,7 @@ let SPONGE_FUNCTIONS = {
     },
     isImage: (arrayBuffer) => {
         if (!arrayBuffer) return null;
+        if (arrayBuffer.byteLength < 12) return null;
 
         const avifSignature = "0.0.0.0.66.74.79.70.61.76.69.66";
         const jxlNcsSignature = "ff.a"; // JXL: Naked code-stream.
@@ -240,6 +243,7 @@ let SPONGE_FUNCTIONS = {
     },
     isSponge: (arrayBuffer) => {
         if (!arrayBuffer) return null;
+        if (arrayBuffer.byteLength < 4) return null;
 
         const signature = "53.58.20.a"; // SX<SP><LF>
 
@@ -290,10 +294,13 @@ let SPONGE_FUNCTIONS = {
         let body = new Uint8Array(outBuffer);
         body.set(new Uint8Array(arrayBuffer), 16);
 
+        arrayBuffer = null;
+
         return outBuffer;
     },
     isEncrypted: (arrayBuffer) => {
         if (!arrayBuffer) return null;
+        if (arrayBuffer.byteLength < 5) return null;
 
         const signature = "52.50.47.4d.56"; // RPGMV
 
@@ -316,6 +323,8 @@ let SPONGE_FUNCTIONS = {
             body.fill(body.at(i) ^ parseInt(key[i], 16), i, i+1);
         }
 
+        arrayBuffer = null;
+
         return outBuffer;
     },
     decrypt: (arrayBuffer, encryptionKey) => {
@@ -330,6 +339,9 @@ let SPONGE_FUNCTIONS = {
         for (let i = 0; i < 16; i++) {
             body.fill(body.at(i) ^ parseInt(key[i], 16), i, i+1);
         }
+
+        arrayBuffer = null;
+
         return outBuffer;
     },
     convert: (arrayBuffer, format, options) => {
@@ -340,6 +352,9 @@ let SPONGE_FUNCTIONS = {
                 
                 let image = vips.Image.newFromBuffer(arrayBuffer, "", { access: 1 /* Sequential */ });
                 let outBuffer = image.writeToBuffer(`.${format}`, options);
+                
+                image = null;
+
                 resolve(outBuffer);
             } catch (err) {
                 reject(err);
@@ -507,11 +522,30 @@ let SPONGE_FUNCTIONS = {
         }
 
         return options;
+    },
+    waitForDeps: () => {
+        return new Promise((resolve, reject) => {
+            const intervalId = setInterval(() => {
+                if (typeof vips !== "undefined" && vips !== null && SPONGE.isInitialized) {
+                    clearInterval(intervalId);
+                    resolve();
+                }
+            }, 100);
+        });
     }
 };
 
 let SPONGE_OVERRIDES = {
     MV: {
+        // Note: This function overrides 'Scene_Boot.prototype.create'.
+        create: function() {
+            SPONGE_FUNCTIONS.waitForDeps().then(() => {
+                Scene_Base.prototype.create.call(this);
+                DataManager.loadDatabase();
+                ConfigManager.load();
+                this.loadSystemWindowImage();
+            });
+        },
         // Note: This function overrides 'Bitmap.prototype._requestImage'.
         requestImage: function (url) {
             if(Bitmap._reuseImages.length !== 0){
@@ -587,6 +621,14 @@ let SPONGE_OVERRIDES = {
         }
     },
     MZ: {
+        // Note: This function overrides 'Scene_Boot.prototype.create'.
+        create: function() {
+            SPONGE_FUNCTIONS.waitForDeps().then(() => {
+                Scene_Base.prototype.create.call(this);
+                DataManager.loadDatabase();
+                StorageManager.updateForageKeys();
+            });
+        },
         // Note: This function overrides 'Bitmap.prototype._startLoading'.
         startLoading: function () {
             this._image = new Image();

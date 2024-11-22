@@ -633,24 +633,27 @@ let WORKBENCH = {
         buildPromise: (type, file) => {
             switch (type.toLowerCase()) {
                 case "encode":
-                    return new Promise((resolve) => {    
-                        if (WORKBENCH.tasks.abortController.signal.aborted) {
-                            resolve(WORKBENCH.tasks.createResult("failure", file.name, "OPERATION_ABORTED", "The operation has been aborted."));
-                        }
-
+                    return new Promise((resolve) => {
                         const t0 = performance.now();
+                        
+                        if (WORKBENCH.tasks.abortController.signal.aborted) {
+                            resolve(WORKBENCH.tasks.createResult("failure", file.name, "OPERATION_ABORTED", { elapsedTime: (performance.now()-t0), result: "The operation has been aborted." }));
+                        }
 
                         const parentPath = file.path ? file.path : file.parentPath;
                         const resolvedPath = path.resolve(path.join(parentPath, file.name));
+                        file = null;
 
-                        fs.readFile(resolvedPath, { encoding: null, flag: 'r', signal: WORKBENCH.tasks.abortController.signal }, function(err, buf) {
+                        fs.readFile(resolvedPath, { encoding: null, flag: 'r' }, function(err, buf) {
                             try {
                                 if (err) {
-                                    resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "READ_FILE_FAILED", err.message));
+                                    if (typeof buf !== "undefined" || buf !== null) buf = null;
+                                    resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "READ_FILE_FAILED", { elapsedTime: (performance.now()-t0), result: `${err.message}` }));
                                 }
 
                                 let data = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.length);
                                 let dataLength = data.byteLength;
+                                buf = null;
 
                                 if (SPONGE_FUNCTIONS.isSponge(data)) {
                                     data = SPONGE_FUNCTIONS.readSponge(data).body;
@@ -661,11 +664,13 @@ let WORKBENCH = {
                                 }
 
                                 if (SPONGE_FUNCTIONS.isImage(data) === null) {
-                                    resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "IMHDER_NOT_FOUND", "Failed to find an image header."));
+                                    data = null;
+                                    resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "IMHDER_NOT_FOUND", { elapsedTime: (performance.now()-t0), result: "Failed to find an image header." }));
                                 }
 
                                 if (WORKBENCH.props.ignoreAllExceptPng && SPONGE_FUNCTIONS.isImage(data) !== "png") {
-                                    resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "NON_TARGETED_FILE_IGNORED", "The file is not a PNG file."));
+                                    data = null;
+                                    resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "NON_TARGETED_FILE_IGNORED", { elapsedTime: (performance.now()-t0), result: "The file is not a PNG file." }));
                                 }
 
                                 let dataView = new Uint8Array(data, 0, data.byteLength);
@@ -675,7 +680,8 @@ let WORKBENCH = {
                                     dataView = null;
 
                                     if (WORKBENCH.props.excludeInferiorities && dataLength <= convertedData.byteLength) {
-                                        resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "INFERIOR_FILE_EXCLUDED", "The encoded file is larger than the original file."));
+                                        convertedData = null;
+                                        resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "INFERIOR_FILE_EXCLUDED", { elapsedTime: (performance.now()-t0), result: "The encoded file is larger than the original file." }));
                                     }
         
                                     if (WORKBENCH.props.encryptResources) {
@@ -683,45 +689,49 @@ let WORKBENCH = {
                                     }
     
                                     convertedData = SPONGE_FUNCTIONS.writeSponge(convertedData, WORKBENCH.props.conversionFormat);
-    
-                                    fs.writeFile(resolvedPath, Buffer.from(convertedData), {flag: 'w+', signal: WORKBENCH.tasks.abortController.signal}, function(err) {
+
+                                    fs.writeFile(resolvedPath, Buffer.from(convertedData), { flag: 'w+' }, function(err) {
                                         convertedData = null;
 
                                         if (err) {
-                                            resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "WRITE_FILE_FAILED", err.message));
+                                            resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "WRITE_FILE_FAILED", { elapsedTime: (performance.now()-t0), result: `${err.message}` }));
                                         }
 
-                                        const t1 = performance.now();
-
-                                        resolve(WORKBENCH.tasks.createResult("success", resolvedPath, "COMPLETED", { elapsedTime: (t1-t0), result: null }));
+                                        resolve(WORKBENCH.tasks.createResult("success", resolvedPath, "COMPLETED", { elapsedTime: (performance.now()-t0), result: null }));
                                     });
                                 }).catch((err) => {
-                                    data = null;
-                                    resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "FILE_CONVERSION_FAILED", err.message));
+                                    if (typeof data !== "undefined" || data !== null) data = null;
+                                    if (typeof dataView !== "undefined" || dataView !== null) dataView = null;
+                                    resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "FILE_CONVERSION_FAILED", { elapsedTime: (performance.now()-t0), result: `${err.message}` }));
                                 });
                             } catch (err) {
-                                resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "FILE_PROCESSING_FAILED", err.message));
+                                if (typeof data !== "undefined" || data !== null) data = null;
+                                if (typeof dataView !== "undefined" || dataView !== null) dataView = null;
+                                resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "FILE_PROCESSING_FAILED", { elapsedTime: (performance.now()-t0), result: `${err.message}` }));
                             }
                         });
                     });
                 case "decode":
                     return new Promise((resolve) => {    
-                        if (WORKBENCH.tasks.abortController.signal.aborted) {
-                            resolve(WORKBENCH.tasks.createResult("failure", file.name, "OPERATION_ABORTED", "The operation has been aborted."));
-                        }
-
                         const t0 = performance.now();
+
+                        if (WORKBENCH.tasks.abortController.signal.aborted) {
+                            resolve(WORKBENCH.tasks.createResult("failure", file.name, "OPERATION_ABORTED", { elapsedTime: (performance.now()-t0), result: "The operation has been aborted." }));
+                        }
 
                         const parentPath = file.path ? file.path : file.parentPath;
                         const resolvedPath = path.resolve(path.join(parentPath, file.name));
+                        file = null;
 
-                        fs.readFile(resolvedPath, { encoding: null, flag: 'r', signal: WORKBENCH.tasks.abortController.signal }, function(err, buf) {
+                        fs.readFile(resolvedPath, { encoding: null, flag: 'r' }, function(err, buf) {
                             try {
                                 if (err) {
-                                    resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "READ_FILE_FAILED", err.message));
+                                    if (typeof buf !== "undefined" || buf !== null) buf = null;
+                                    resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "READ_FILE_FAILED", { elapsedTime: (performance.now()-t0), result: `${err.message}` }));
                                 }
 
                                 let data = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.length);
+                                buf = null;
 
                                 if (SPONGE_FUNCTIONS.isSponge(data)) {
                                     data = SPONGE_FUNCTIONS.readSponge(data).body;
@@ -732,7 +742,8 @@ let WORKBENCH = {
                                 }
 
                                 if (SPONGE_FUNCTIONS.isImage(data) === null) {
-                                    resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "IMHDER_NOT_FOUND", "Failed to find an image header."));
+                                    data = null;
+                                    resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "IMHDER_NOT_FOUND", { elapsedTime: (performance.now()-t0), result: "Failed to find an image header." }));
                                 }
 
                                 let dataView = new Uint8Array(data, 0, data.byteLength);
@@ -745,39 +756,44 @@ let WORKBENCH = {
                                         convertedData = SPONGE_FUNCTIONS.encrypt(convertedData, SPONGE.encryptionKey);
                                     }
     
-                                    fs.writeFile(resolvedPath, Buffer.from(convertedData), {flag: 'w+', signal: WORKBENCH.tasks.abortController.signal}, function(err) {
-                                        if (err) {
-                                            resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "WRITE_FILE_FAILED", err.message));
-                                        }
-
-                                        const t1 = performance.now();
+                                    fs.writeFile(resolvedPath, Buffer.from(convertedData), { flag: 'w+' }, function(err) {
+                                        convertedData = null;
                                         
-                                        resolve(WORKBENCH.tasks.createResult("success", resolvedPath, "COMPLETED", { elapsedTime: t1-t0, result: null }));
+                                        if (err) {
+                                            resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "WRITE_FILE_FAILED", { elapsedTime: (performance.now()-t0), result: `${err.message}` }));
+                                        }
+   
+                                        resolve(WORKBENCH.tasks.createResult("success", resolvedPath, "COMPLETED", { elapsedTime: performance.now()-t0, result: null }));
                                     });
                                 }).catch((err) => {
-                                    data = null;
-                                    resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "FILE_CONVERSION_FAILED", err.message));
+                                    if (typeof data !== "undefined" || data !== null) data = null;
+                                    if (typeof dataView !== "undefined" || dataView !== null) dataView = null;
+                                    resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "FILE_CONVERSION_FAILED", { elapsedTime: (performance.now()-t0), result: `${err.message}` }));
                                 });
                             } catch (err) {
-                                resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "FILE_PROCESSING_FAILED", err.message));
+                                if (typeof data !== "undefined" || data !== null) data = null;
+                                if (typeof dataView !== "undefined" || dataView !== null) dataView = null;
+                                resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "FILE_PROCESSING_FAILED", { elapsedTime: (performance.now()-t0), result: `${err.message}` }));
                             }
                         });
                     });
                 case "inspect":
                     return new Promise((resolve) => {    
-                        if (WORKBENCH.tasks.abortController.signal.aborted) {
-                            resolve(WORKBENCH.tasks.createResult("failure", file.name, "OPERATION_ABORTED", "The operation has been aborted."));
-                        }
-
                         const t0 = performance.now();
+
+                        if (WORKBENCH.tasks.abortController.signal.aborted) {
+                            resolve(WORKBENCH.tasks.createResult("failure", file.name, "OPERATION_ABORTED", { elapsedTime: (performance.now()-t0), result: "The operation has been aborted." }));
+                        }
 
                         const parentPath = file.path ? file.path : file.parentPath;
                         const resolvedPath = path.resolve(path.join(parentPath, file.name));
+                        file = null;
 
                         fs.readFile(resolvedPath, { encoding: null, flag: 'r', signal: WORKBENCH.tasks.abortController.signal }, function(err, buf) {
                             try{
                                 if (err) {
-                                    resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "READ_FILE_FAILED", err.message));
+                                    if (typeof buf !== "undefined" || buf !== null) buf = null;
+                                    resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "READ_FILE_FAILED", { elapsedTime: (performance.now()-t0), result: `${err.message}` }));
                                 }
 
                                 let result = { isSponge: false, isEncrypted: false, filename: "", format: "" };
@@ -798,14 +814,17 @@ let WORKBENCH = {
     
                                 result.format = SPONGE_FUNCTIONS.isImage(data);
                                 if (result.format === null) {
-                                    resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "IMHDER_NOT_FOUND", "Failed to find an image header."));
+                                    if (typeof data !== "undefined" || data !== null) data = null;
+                                    if (typeof buf !== "undefined" || buf !== null) buf = null;
+                                    resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "IMHDER_NOT_FOUND", { elapsedTime: (performance.now()-t0), result: "Failed to find an image header." }));
                                 }
-
-                                const t1 = performance.now();
                                 
-                                resolve(WORKBENCH.tasks.createResult("success", resolvedPath, "COMPLETED", { elapsedTime: t1-t0, result: result }));
+                                if (typeof data !== "undefined" || data !== null) data = null;
+                                if (typeof buf !== "undefined" || buf !== null) buf = null;
+                                resolve(WORKBENCH.tasks.createResult("success", resolvedPath, "COMPLETED", { elapsedTime: performance.now()-t0, result: result }));
                             } catch (err) {
-                                resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "FILE_PROCESSING_FAILED", err.message));
+                                if (typeof data !== "undefined" || data !== null) data = null;
+                                resolve(WORKBENCH.tasks.createResult("failure", resolvedPath, "FILE_PROCESSING_FAILED", { elapsedTime: (performance.now()-t0), result: `${err.message}` }));
                             }
                         });
                     });
@@ -843,14 +862,14 @@ let WORKBENCH = {
                     let codingResult = { files: { total: 0, success: 0, failure: 0 }, options: { avif: SPONGE_FUNCTIONS.options.avif, jxl: SPONGE_FUNCTIONS.options.jxl, png: SPONGE_FUNCTIONS.options.png, webp: SPONGE_FUNCTIONS.options.webp }, errors: [] };
                     let inspectionResult = { files: { total: 0, success: 0, failure: 0, sponge: 0, crypto: 0 }, formats: { avif:0, jxl: 0, png: 0, webp: 0 }, options: { avif: SPONGE_FUNCTIONS.options.avif, jxl: SPONGE_FUNCTIONS.options.jxl, png: SPONGE_FUNCTIONS.options.png, webp: SPONGE_FUNCTIONS.options.webp }, errors: [] };
 
-                    let processingTimes = 10;
-                    let processingCount = 1;
+                    let processingTimes = 0;
+                    let processingCount = 0;
 
                     const concurrency = 4;
                     const pool = new PromisePool(producer, concurrency);
 
                     pool.addEventListener('fulfilled', function (event) {
-                        const resultData = event.data.result;
+                        let resultData = event.data.result;
 
                         if (resultData.type === "success") {
                             if (WORKBENCH.props.operationMode === "encode" || WORKBENCH.props.operationMode === "decode") {
@@ -898,16 +917,15 @@ let WORKBENCH = {
                         // Calculate the remaining time.
                         if (resultData.type === "success") {
                             if (typeof resultData.data.elapsedTime !== "undefined" && resultData.data.elapsedTime !== null &&!isNaN(resultData.data.elapsedTime)) {
-                                processingTimes += resultData.data.elapsedTime;
-                                processingCount++;
-                            } else {
-                                processingTimes += 1;
+                                processingTimes += Math.round(resultData.data.elapsedTime);
                                 processingCount++;
                             }
                         }
                         
                         const remainingTime = Math.round(processingTimes / (processingCount === 0 ? 1 : processingCount) * (files.length - producerCount));
                         WORKBENCH.status.setProgress(Math.round(producerCount / files.length * 100), `[${producerCount}/${files.length}]Processing... (Remaining: ${WORKBENCH.utils.humanMilliseconds(remainingTime)})`);
+                        
+                        resultData = null;
                     });
                     
                     pool.addEventListener('rejected', function (event) {
@@ -918,9 +936,9 @@ let WORKBENCH = {
                         let result = null;
                         
                         if (WORKBENCH.props.operationMode === "encode" || WORKBENCH.props.operationMode === "decode") {
-                            result = JSON.stringify(codingResult);
+                            result = WORKBENCH.utils.stringifyJSON(codingResult);
                         } else if (WORKBENCH.props.operationMode === "inspect") {
-                            result = JSON.stringify(inspectionResult);
+                            result = WORKBENCH.utils.stringifyJSON(inspectionResult);
                         }
 
                         WORKBENCH.tasks.stopTask(false);
@@ -1031,16 +1049,21 @@ let WORKBENCH = {
           
             return humanized;
         },
-        toArrayBuffer: (buffer) => {
-            return buffer.buffer.slice(0, buffer.length);
-        },
-        toBuffer: (arrayBuffer) => {
-            const buffer = Buffer.alloc(arrayBuffer.byteLength);
-            const view = new Uint8Array(arrayBuffer);
-            for (let i = 0; i < arrayBuffer.byteLength; ++i) {
-              buffer[i] = view[i];
-            }
-            return buffer;
+        stringifyJSON: (t) => {
+            if (t === undefined) return undefined
+            else if (t === null) return 'null'
+            else if (typeof t == 'bigint') throw TypeError('stringifyJSON cannot serialize BigInt')
+            else if (typeof t == 'number') return String(t)
+            else if (typeof t == 'boolean') return t ? 'true' : 'false'
+            else if (typeof t == 'string') return '"' + t.replace(/"/g, '\\"') + '"'
+            else if (typeof t == 'object') return Array.isArray(t) 
+                ? '[' + Array.from(t, v => WORKBENCH.utils.stringifyJSON(v) ?? 'null').join(',') + ']'
+                : '{' + Object.entries(t)
+                          .map(([k,v]) => [WORKBENCH.utils.stringifyJSON(k), WORKBENCH.utils.stringifyJSON(v)])
+                          .filter(([k,v]) => v !== undefined)
+                          .map(entry => entry.join(':'))
+                          .join(',') + '}'
+            else return undefined
         }
     },
     misc: {
