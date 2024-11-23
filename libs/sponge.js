@@ -13,6 +13,7 @@ const { Buffer } = require('buffer');
 let vips = null;
 (async () => {
     vips = await Vips();
+    vips.Cache.max(0);
 })();
 
 window.addEventListener("load", () => {
@@ -294,8 +295,6 @@ let SPONGE_FUNCTIONS = {
         let body = new Uint8Array(outBuffer);
         body.set(new Uint8Array(arrayBuffer), 16);
 
-        arrayBuffer = null;
-
         return outBuffer;
     },
     isEncrypted: (arrayBuffer) => {
@@ -323,8 +322,6 @@ let SPONGE_FUNCTIONS = {
             body.fill(body.at(i) ^ parseInt(key[i], 16), i, i+1);
         }
 
-        arrayBuffer = null;
-
         return outBuffer;
     },
     decrypt: (arrayBuffer, encryptionKey) => {
@@ -340,19 +337,17 @@ let SPONGE_FUNCTIONS = {
             body.fill(body.at(i) ^ parseInt(key[i], 16), i, i+1);
         }
 
-        arrayBuffer = null;
-
         return outBuffer;
     },
     convert: (arrayBuffer, format, options) => {
         return new Promise((resolve, reject) => {
             try {
-                format = format.toLowerCase();
                 if (format !== "avif" && format !== "png" && format !== "jxl" && format !== "webp") reject();
                 
                 let image = vips.Image.newFromBuffer(arrayBuffer, "", { access: 1 /* Sequential */ });
                 let outBuffer = image.writeToBuffer(`.${format}`, options);
-                
+                image.delete();
+
                 image = null;
 
                 resolve(outBuffer);
@@ -362,7 +357,6 @@ let SPONGE_FUNCTIONS = {
         });
     },
     interpret: (format, optionsString) => {
-        format = format.toLowerCase();
         if (format !== "avif" && format !== "png" && format !== "jxl" && format !== "webp") return null;
 
         let options = {};
