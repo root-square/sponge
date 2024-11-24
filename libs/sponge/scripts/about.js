@@ -30,16 +30,16 @@ window.addEventListener("load", () => {
 
     switch (mode.toLowerCase()) {
         case "development":
-            changeStatus("danger", "activity animate-flicker", "Sponge System", `Version ${version} (Development Build)`);
+            changeStatus("danger", "activity animate-flicker", "Sponge System", `Version ${version} (Development Mode)`);
             break;
         case "pre-release":
-            changeStatus("warning", "lightning-charge-fill", "Sponge System", `Version ${version} (Pre-release Build)`);
+            changeStatus("warning", "lightning-charge-fill", "Sponge System", `Version ${version} (Pre-release Mode)`);
             break;
         case "release":
-            changeStatus("primary", "check-lg", "Sponge System", `Version ${version} (Release Build)`);
+            changeStatus("primary", "check-lg", "Sponge System", `Version ${version} (Release Mode)`);
             break;
         default:
-            changeStatus("danger", "question-lg", "Sponge System", `Version ${version} (Unknown Build)`);
+            changeStatus("danger", "question-lg", "Sponge System", `Version ${version} (Unknown Mode)`);
     }
 });
 

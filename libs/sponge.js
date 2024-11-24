@@ -33,7 +33,7 @@ window.addEventListener("keydown", (e) => {
         return;
     }
 
-    if (e.key === "Pause" || (e.ctrlKey && e.key === "F7")) {
+    if (SPONGE.spongeMode.toLowerCase() === "development" && (e.key === "Pause" || (e.ctrlKey && e.key === "F7"))) {
         SPONGE_WORKBENCH.main();
     }
 });
@@ -42,10 +42,12 @@ let SPONGE = {
     isNwjs: false,
     isWorkbench: false,
     isInitialized: false,
-    workDirectory: null,
-    rpgMakerName: null,
-    rpgMakerVersion: null,
-    encryptionKey: null,
+    workDirectory: "",
+    spongeMode: "",
+    spongeVersion: "",
+    rpgMakerName: "",
+    rpgMakerVersion: "",
+    encryptionKey: "",
     init: () => {
         try {
             SPONGE.isNwjs = (typeof require('nw.gui') !== "undefined");
@@ -103,7 +105,7 @@ let SPONGE = {
             }
         }
 
-        // Parse the options.
+        // Parse the sponge metadata.
         const formats = ["avif", "jxl", "png", "webp"];
         const settingsPath = path.resolve(SPONGE.workDirectory, "js/libs/sponge.json");
         let settingsJson = null;
@@ -117,6 +119,9 @@ let SPONGE = {
                 SPONGE_WORKBENCH.error("SPONGE_SETTINGS_NOT_AVAILABLE", "Failed to read the settings data and write a new data.", err.stack);
             }
         }
+
+        SPONGE.spongeMode = settingsJson.mode;
+        SPONGE.spongeVersion = settingsJson.version;
 
         for (let format of formats) {
             if (Object.hasOwn(settingsJson.options, format)) {
