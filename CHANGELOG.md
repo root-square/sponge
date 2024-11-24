@@ -15,7 +15,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (desc)
 -->
 
+## [0.7.0] - 2024-11-24
+
+### Added
+- Add the mode seperation logic.
+- Add a waiter function to wait for dependencies.
+- Add additional default ignores for MV.
+
+### Fixed
+- Fix the createObjectURL error.
+- Fix the Workbench HTML path mismathcing.
+- Fix memory leaks in the wasm-vips.
+
 ## [0.6.0] - 2024-11-19
+
 ### Added
 - Add options loader to SPONGE.
 - Add core tasks(encode, decode, inspect).

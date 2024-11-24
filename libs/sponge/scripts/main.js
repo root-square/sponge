@@ -1,6 +1,6 @@
 /*!-----------------------------------------------------------------------------
  * Copyright (c) handbros(root-square). All rights reserved.
- * Version: 0.6.0(dev)
+ * Version: 0.7.0(dev)
  * Released under the MIT license
  * https://github.com/root-square/sponge/blob/main/LICENSE
  *-----------------------------------------------------------------------------*/
