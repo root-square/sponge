@@ -627,10 +627,10 @@ let WORKBENCH = {
                 try {
                     let ignores = [];
                     for (let i = 0 ; i < WORKBENCH.files.ignoreList.length; i++) {
-                        ignores.push(path.resolve(WORKBENCH.files.ignoreList[i].fullname));
+                        ignores.push(path.normalize(WORKBENCH.files.ignoreList[i].fullname));
                     }
                     
-                    let filteredFiles = files.filter(item => !item.isDirectory() && extensions.includes(path.extname(item.name).toLowerCase()) && !ignores.includes(path.resolve(path.join(item.path ? item.path : item.parentPath, item.name)))).slice();
+                    let filteredFiles = files.filter(item => !item.isDirectory() && extensions.includes(path.extname(item.name).toLowerCase()) && !ignores.includes(path.normalize(path.join(item.path ? item.path : item.parentPath, item.name)))).slice();
                     ignores = null;
                     files = null;
                     
