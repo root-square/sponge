@@ -82,8 +82,12 @@ let WORKBENCH = {
         init: () => {
             // Preset: Add ignores for RMMV.
             if (SPONGE.rpgMakerName === "MV") {
-                let item = { isSelected: false, isDirectory: false, name: "Window.png", fullname: "www\\img\\system\\Window.png" };
-                WORKBENCH.files.ignoreList.push(item);
+                let item = [
+                    { isSelected: false, isDirectory: false, name: "Loading.png", fullname: "www\\img\\system\\Loading.png" },
+                    { isSelected: false, isDirectory: false, name: "Loading.rpgmvp", fullname: "www\\img\\system\\Loading.rpgmvp" },
+                    { isSelected: false, isDirectory: false, name: "Window.png", fullname: "www\\img\\system\\Window.png" }
+                ];
+                WORKBENCH.files.ignoreList = WORKBENCH.files.ignoreList.concat(item);
             }
 
             // To make scrolling area, add a placeholder to the list element.
@@ -857,11 +861,10 @@ let WORKBENCH = {
                     WORKBENCH.tasks.result = { files: { total: 0, success: 0, failure: 0, sponge: 0, crypto: 0 }, formats: { avif:0, jxl: 0, png: 0, webp: 0 }, options: { avif: SPONGE_FUNCTIONS.options.avif, jxl: SPONGE_FUNCTIONS.options.jxl, png: SPONGE_FUNCTIONS.options.png, webp: SPONGE_FUNCTIONS.options.webp }, errors: [] };
                 }
 
-                // Index files and create promise pools by chunks.
+                // Index files and create a promise pool.
                 WORKBENCH.tasks.indexFiles(targetPath, [".png", ".rpgmvp", ".png_"], (err, files) => {
                     if (err) throw err;
 
-                    // Create a promise pool.
                     let processedTime = 0;
                     let processedCount = 0;
 
