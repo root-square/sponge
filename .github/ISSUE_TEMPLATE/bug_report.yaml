@@ -1,0 +1,55 @@
+name: Bug report
+description: Create a report to help us improve
+title: "Bug Report Title"
+labels: [bug]
+body:
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Describe the Bug
+      description: A clear and concise description of what the bug is
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: To Reproduce
+      description: Steps to reproduce the behavior
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Expected Behavior
+      description: A clear and concise description of what you expected to happen
+  - type: textarea
+    attributes:
+      label: Screenshots
+      description: If applicable, add screenshots to help explain your problem
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: OS Version
+      description: Which OS versions did you see the issue on?
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: NW.js Version
+      description: Which NW.js versions did you see the issue on?
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: RPG MAKER Version
+      description: Which RPG MAKER versions (ex - MV/1.6.0) did you see the issue on?
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Sponge Version
+      description: Which Sponge versions did you see the issue on?
+  - type: textarea
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here

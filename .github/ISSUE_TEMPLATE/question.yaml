@@ -1,0 +1,11 @@
+name: Question
+description: Ask anything about Sponge project.
+title: "Question Title"
+labels: [bug]
+body:
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Write what do you want to ask
+      description: A question about Sponge project
