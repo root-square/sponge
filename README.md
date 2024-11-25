@@ -8,20 +8,10 @@ A dynamic image format extension library for RPG Maker MV/MZ.
 | NW.js     | v0.64.1         |
 | wasm-vips | v0.0.10         |
 
-## Installation
-### Auto
-Download the [Sponge Patch Assistant](https://github.com/root-square/sponge/blob/main/tools/sponge.ps1) and run it in the directory where the game executable file (Game.exe) is located.
-```pwsh
-Set-ExecutionPolicy Unrestricted
-
-./sponge.ps1 -m [install/uninstall] -v [version] -s [version]
-# or
-./sponge.ps1 -mode [install/uninstall] -vipsVersion [version] -spongeVersion [version]
-```
-
-### Manual
-
-
 ## Usage
-> [!WARNING]
-> This library brings irreversible changes to your game resources. Make sure you back up the original files before using it.
+Read instructions [here](https://github.com/root-square/sponge/wiki) on how to use the Sponge.
+
+## License
+This software is freely available under the [MIT License](http://opensource.org/licenses/MIT).
+
+The licenses of third-party softwares can be found [here](https://github.com/root-square/sponge/blob/main/THIRD_PARTY_NOTICES.md).
