@@ -174,7 +174,7 @@ let SPONGE_WORKBENCH = {
 
         if (SPONGE_WORKBENCH.isInitialized) {
             let url = "./js/libs/sponge/main.html";
-            if (!fs.existsSync(url) && SPONGE.rpgMakerName === "MV") {
+            if (!(window.location.href).includes("www") && SPONGE.rpgMakerName === "MV") {
                 url = path.join("./www", url);
             }
             url += `?workbench=true`;
@@ -201,7 +201,7 @@ let SPONGE_WORKBENCH = {
             }
 
             let url = "./js/libs/sponge/error.html";
-            if (!fs.existsSync(url) && SPONGE.rpgMakerName === "MV") {
+            if (!(window.location.href).includes("www") && SPONGE.rpgMakerName === "MV") {
                 url = path.join("./www", url);
             }
             url += `?${params.toString()}`;
