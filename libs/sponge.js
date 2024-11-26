@@ -177,7 +177,7 @@ let SPONGE_WORKBENCH = {
             if (!fs.existsSync(url) && SPONGE.rpgMakerName === "MV") {
                 url = path.join("./www", url);
             }
-            url += `?workbench=true"`;
+            url += `?workbench=true`;
             
             window.location.href = url;
         } else {
