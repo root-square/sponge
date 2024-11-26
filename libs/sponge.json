@@ -1,6 +1,6 @@
 {
     "mode": "development",
-    "version": "0.7.2",
+    "version": "0.7.3",
     "options": {
       "avif": "Q=80;effort=4;bitdepth=8;encoder=aom;lossless=false;subsample_mode=auto",
       "jxl": "Q=100;effort=5;tier=4;lossless=false",
