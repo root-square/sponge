@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (desc)
 -->
 
+## [0.7.1] - 2024-11-26
+### Fixed
+- Fix path mismatches.
+- Fix a typo on page reloader.
+
 ## [0.7.0] - 2024-11-24
 
 ### Added
