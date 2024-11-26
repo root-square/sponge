@@ -33,6 +33,6 @@ window.addEventListener("load", () => {
 
 window.addEventListener("keydown", (e) => {
     if (e.key == "F5") {
-        window.location.href("../../../index.html");
+        window.location.href = "../../../index.html";
     }
 });
